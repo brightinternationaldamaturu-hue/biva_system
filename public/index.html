@@ -1,0 +1,2608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BIVA - Premium Virtual Assistance & Internet Services</title>
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+
+
+
+  <style>
+/* ===== GLOBAL UI LAYER SYSTEM ===== */
+:root {
+  --z-base: 1;
+  --z-nav: 1000;
+  --z-dropdown: 5000;
+  --z-modal: 100000;
+  --z-loader: 500000;
+  --z-alert: 9999999; /* ALWAYS TOP */
+}
+
+
+
+
+.email-box{
+  display:inline-block;
+  background:#fff;
+  border:2px solid teal;
+  padding:8px 14px;
+  border-radius:10px;
+  font-size:18px;        /* bigger text */
+  font-weight:600;
+  color:teal;
+  width:auto;            /* auto resize */
+  max-width:100%;
+  white-space:nowrap;    /* keep in one line */
+  overflow:hidden;
+  text-overflow:ellipsis;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+
+
+
+.wallet-card{
+  display:inline-block;
+  background:#ffffff;
+  border:2px solid teal;
+  color:teal;
+  font-weight:bold;
+  font-size:28px;
+  padding:6px 14px;
+  border-radius:20px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  transition:0.3s;
+  width:auto;              /* auto size */
+  white-space:nowrap;     /* prevent wrapping */
+}
+
+.wallet-card:hover{
+  transform:scale(1.05);
+}
+
+
+
+.loader-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 999999;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-box {
+  background: #111;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 90%;
+  max-width: 320px;
+  color: #fff;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  animation: fadeIn 0.4s ease;
+}
+
+/* LOGO PULSE */
+.logo-pulse {
+  width: 60px;
+  height: 60px;
+  margin: auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff1a1a, #8B0000);
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* PROGRESS BAR */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 10px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ff1a1a, #ff4d4d);
+  transition: width 0.4s ease;
+}
+
+/* TEXT */
+.loader-box h3 {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+.loader-box p {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.main-header {
+  background: radial-gradient(circle at top, #ff1a1a, #8B0000);
+  color: #fff;
+  text-align: center;
+  padding: 8px 10px 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle glow effect */
+.main-header::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 100px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  top: -100px;
+  right: -100px;
+  filter: blur(80px);
+}
+
+.logo {
+  width: 90px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.main-header h1 {
+  font-size: 1.8rem;
+  margin: 3px 0;
+  letter-spacing: 0px;
+}
+
+.tagline {
+  opacity: 0.9;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+
+
+
+
+
+
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255,255,255,0.2);
+  border-top: 5px solid #ff1a1a;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+
+
+.menu-container {
+  position: relative;
+}
+
+.menu-icon {
+  font-size: 26px;
+  font-weight: bold;  
+  color: Red;          
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Optional hover effect */
+.menu-icon:hover {
+  background: #ffe6e6;
+  color: #b30000;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  font-size: 22px;
+  top: 35px;
+  left: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  overflow: hidden;
+  min-width: 400px;
+  z-index: 9999;
+}
+
+.dropdown a {
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+  color: Teal;          
+  font-weight: bold;  
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown a:hover {
+  background: #fff2f2;
+  color: #b30000; /* darker red on hover (optional) */
+}
+
+
+
+
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+
+
+
+
+.download-btn {
+  background: #25D366; /* green to stand out */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.download-btn:hover {
+  background: #1ea952;
+  transform: scale(1.05);
+}
+
+
+
+
+@media (max-width: 768px) {
+  .download-btn {
+    width: 100%;
+    text-align: center;
+    margin-top: 5px;
+  }
+}
+
+
+
+
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin:0;
+      background:#fff5f5;
+      color:#333;
+      scroll-behavior:smooth;
+      animation:fadeDown 1.4s ease;
+    }
+
+
+
+
+ #about {
+      animation:aboutPop 1.8s ease;
+      background:#fff;
+      border:2px solid #ffe6e6;
+      border-radius:15px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.05);
+      margin-top:30px;
+      animation:fadeDown 1.4s ease;
+    }
+
+    h2 {
+      color:#8B0000;
+      border-left:5px solid #ff1a1a;
+      padding-left:10px;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:25px;
+    }
+
+    .card {
+      background:#fff;
+      padding:15px;
+      border-radius:15px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.05);
+      text-align:center;
+      border:2px solid #ffe6e6;
+      transition:0.3s;
+    }
+
+    .card:hover {border-color:#ff1a1a; transform:translateY(-5px);}
+
+    .media-img {
+      width:100%;
+      height:260px;
+      object-fit:cover;
+      border-radius:10px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .media-img:hover {transform:scale(1.05);} 
+
+    .btn {
+      display:inline-block;
+      padding:10px 18px;
+      background:#ff1a1a;
+      color:#fff;
+      border-radius:8px;
+      text-decoration:none;
+      margin-top:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+    }
+
+    .btn:hover {background:#b30000;}
+
+    footer {
+      background:#8B0000;
+      color:#fff;
+      text-align:center;
+      padding:20px;
+      border-top:4px solid #ff1a1a;
+    }
+
+    .chat-btn {
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      background:#25D366;
+      color:white;
+      padding:15px;
+      border-radius:50%;
+      font-size:20px;
+      text-decoration:none;
+      box-shadow:0 5px 10px rgba(0,0,0,0.2);
+    }
+
+    .group-title{
+      margin-top:40px;
+      font-size:1.4rem;
+      color:#b30000;
+      font-weight:600;
+      border-bottom:2px solid #ffcccc;
+      padding-bottom:5px;
+    }
+
+
+    @keyframes pageLoad {
+      from {opacity:0; transform:scale(1.03);} 
+      to {opacity:1; transform:scale(1);} 
+    }
+
+    @keyframes fadeUp {
+      from {opacity:0; transform:translateY(40px);} 
+      to {opacity:1; transform:translateY(0);} 
+    }
+
+    @keyframes fadeDown {
+      from {opacity:0; transform:translateY(-40px);} 
+      to {opacity:1; transform:translateY(0);} 
+    }
+
+    @keyframes aboutPop {
+      0% {opacity:0; transform:scale(0.92) translateY(40px);} 
+      100% {opacity:1; transform:scale(1) translateY(0);} 
+    }
+
+    /* ANNOUNCEMENT FIXED */
+    .announcement {
+      margin-top:10px;
+      width:100%;
+      overflow:hidden;
+      background:rgba(0,0,0,0.25);
+      border-radius:25px;
+      padding:4px 0;
+
+    }
+
+    @keyframes scrollText {
+      0% { transform:translateX(100%); }
+      100% { transform:translateX(-100%); }
+    }
+
+
+    /* =======================
+   MOBILE FIXES
+======================= */
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+}
+
+/* NAV FIX */
+nav {
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+nav div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.right-nav {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+/* MAKE BUTTONS STACK BETTER */
+.btn {
+  font-size: 18px;
+  padding: 10px 10px;
+
+}
+
+/* GRID FIX FOR SMALL SCREENS */
+@media (max-width: 768px) {
+
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 5px 5px 0 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+    gap: 10px;
+  }
+
+  section {
+    padding: 25px 15px;
+  }
+
+  .card {
+    width: 100%;
+  }
+
+  .media-img {
+    height: 180px;
+  }
+
+  .modal-content {
+    width: 90%;
+  }
+
+  .right-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #walletBalance {
+    font-size: 18px;
+  }
+}
+
+
+.wallet-float {
+  position: fixed;
+  top: 100px; /* adjust if needed */
+  right: 15px; /* move to right */
+  
+  background: Teal;
+  color: #fff;
+
+  padding: 8px 14px; /* auto size */
+  border-radius: 30px; /* pill shape */
+
+  font-weight: bold;
+  font-size: 22px;
+
+  display: inline-block;
+  width: auto; /* 🔥 IMPORTANT */
+  max-width: auto; /* prevent too long stretch */
+
+  text-align: center;
+
+  z-index: 9998;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+  transition: all 0.3s ease;
+}
+
+
+body {
+  padding-top: 160px;
+}
+
+.wallet-float{
+  transition: all 0.3s ease;
+}
+
+.wallet-float:active{
+  transform: scale(1.05);
+}
+
+.wallet-float:hover {
+  background: #b30000;
+}
+
+
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  z-index: 9999;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+nav div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.right-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+
+
+
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav div,
+  .Right-nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 5px 5px 0 0;
+  }
+}
+
+
+
+
+
+
+
+    .btn{background:#ff1a1a;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+
+    .wallet-box{font-weight:1;color:white;}
+
+    section{padding:50px 20px;max-width:1200px;margin:auto;}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+
+    .card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);text-align:center;}
+
+    /* FIXED IMAGE SCALE */
+    .media-img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      border-radius:10px;
+    }
+
+    .announcement{margin-top:20px;overflow:hidden;background:rgba(0,0,0,0.3);padding:5px;border-radius:25px;}
+    .announcement p{white-space:nowrap;color:white;animation:scroll 25s linear infinite;}
+
+    @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* =========================
+   WORLD CLASS MODAL SYSTEM
+========================= */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 92%;
+  max-width: 420px;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+  transform: translateY(20px) scale(0.98);
+  animation: popUp 0.25s ease forwards;
+  font-family: 'Poppins', sans-serif;
+}
+
+@keyframes popUp {
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: #8B0000;
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 14px;
+  color: #444;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Inputs */
+.modal-content input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: 0.2s;
+}
+
+.modal-content input:focus {
+  border-color: #ff1a1a;
+  box-shadow: 0 0 0 3px rgba(255,26,26,0.15);
+}
+
+/* Buttons */
+.modal-content .btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.modal-content .btn:hover {
+  transform: translateY(-2px);
+}
+
+
+
+
+
+
+
+
+
+
+#receiptPrint {
+  display: none;
+}
+
+
+
+@media print {
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+
+  /* hide everything */
+  body * {
+    display: none !important;
+  }
+
+  /* only show receipt */
+  #receiptPrint,
+  #receiptPrint * {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  #receiptPrint {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: auto;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.0;
+  }
+
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+}
+
+
+#transactionTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+#transactionTable th,
+#transactionTable td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+#transactionTable th {
+  background: #8B0000;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+#transactionTable tr:hover {
+  background: #fff2f2;
+}
+
+@media (max-width: 768px) {
+  #transactionTable {
+    font-size: 12px;
+  }
+}
+
+
+
+
+html, body {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+
+
+.toast-container{
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999999; /* higher than everything */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+
+  </style>
+</head>
+
+
+
+<body>
+
+<div id="walletFloat" class="wallet-float" onclick="scrollToWallet()">
+  ₦0
+</div>
+
+
+
+
+
+
+<nav>
+
+<div class="menu-container">
+  <span class="menu-icon" onclick="toggleMenu()">☰ Menu</span>
+
+<div id="dropdownMenu" class="dropdown">
+	<a href="#" onclick="showPage('about'); closeMenu()">Home</a>
+	<a href="#" onclick="showPage('User'); closeMenu()">Profile</a>
+	<a href="#" onclick="showPage('services'); closeMenu()">Services</a>
+	<a href="#" onclick="showPage('voucher'); closeMenu()">Buy Voucher</a>
+	<a href="#" onclick="showPage('airtime')">Buy Airtime</a>
+	<a href="#" onclick="showPage('data')">Buy Data</a>
+	<a href="#" onclick="showPage('bills')">Pay Bills</a>
+        <a href="#" onclick="showPage('partnership'); closeMenu()">Partnership</a>
+        <a href="#" onclick="fundWallet(); closeMenu()">Fund Wallet</a>
+	<a href="#" onclick="showPage('transactions'); closeMenu()">Transactions</a>
+        <a href="#" id="activateBtn" style="display:block;" onclick="openBalance(); closeMenu()">
+      Activate Voucher
+    </a>
+
+</div>
+</div>
+
+
+
+
+<div class="right-nav">
+
+
+
+
+
+
+</a>
+    <button class="btn" id="loginBtn" onclick="openModal()">Login</button>
+</div>
+
+
+
+</nav>
+
+
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>Login / Signup</h3>
+    <input id="email" placeholder="Email">
+    <div style="position:relative;">
+  <input id="password" type="password" placeholder="Password" style="padding-right:40px;">
+  
+  <span onclick="togglePassword()" 
+        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+    👁️
+  </span>
+</div>
+    <button class="btn" id="signupBtn" onclick="signup()">Signup</button>
+    <button class="btn" id="loginBtnModal" onclick="login()">Login</button>
+    <button class="btn" onclick="closeModal()" style="background:gray">Close</button>
+</div>
+</div>
+
+
+
+<header id="mainHeader" class="main-header">
+  <img src="https://res.cloudinary.com/djcnsgbzr/image/upload/v1774348546/3_jauepg.jpg" class="logo">
+
+  <h1>BIVA</h1>
+
+  <p class="tagline">
+    Premium Virtual Assistance & Internet Services
+  </p>
+
+  <div class="announcement">
+    <p>
+      🔔 Welcome to Bright International Virtual Assistance • Fast Internet • Reliable & Secure • Instant Wallet Deposit • 24/7 Support 📞08037807558
+    </p>
+  </div>
+</header>
+
+
+
+<section id="about" class="page active">
+
+  <h2>About Us</h2>
+  <p><strong>Bright International Virtual Assistance (BIVA)</strong> is a fully registered digital service and internet solutions company committed to delivering reliable, affordable, and high-quality virtual assistance and internet services across Nigeria and beyond.</p>
+  <p>We specialize in providing seamless connectivity solutions, internet voucher services, and professional virtual support for individuals, small businesses, and corporate organizations. Our goal is to help clients stay connected, productive, and efficient in today’s fast-paced digital world.</p>
+  <p>At BIVA, we believe that access to the internet and professional support services should be simple, fast, and affordable. That is why we continuously improve our infrastructure, customer service, and service delivery to ensure maximum satisfaction for all our users.</p>
+  <p>We are also deeply committed to customer satisfaction, offering 24/7 support and ensuring that every client receives timely assistance whenever needed. Whether you are purchasing data vouchers, managing online tasks, or seeking technical support, BIVA is your trusted digital partner.</p>
+  <p><em>Our vision is to become one of the leading virtual assistance and internet service providers in Africa, empowering individuals and businesses through reliable digital connectivity and support solutions.</em></p>
+
+
+<footer>
+  <p>© 2026 BIVA. All Rights Reserved.</p>
+  <p>Email: brightinternationaldamaturu@gmail.com</p>
+  <p>Phone: +234 080 3780 7558</p>
+<a href="https://drive.google.com/uc?export=download&id=1xE1sZylAidG84YJkoOvCE031RG9E4gXH"
+   class="btn download-btn"
+   target="_blank"
+   download>
+   ⬇ Download Our New App
+</a>
+
+</footer>
+
+</section>
+
+
+<section>
+  <section id="why" class="page">
+  <div class="grid">
+    <div class="card"><h3>⚡ Fast Internet</h3><p>Reliable high-speed connectivity.</p></div>
+    <div class="card"><h3>💰 Affordable</h3><p>Flexible plans for everyone.</p></div>
+    <div class="card"><h3>📞 24/7 Support</h3><p>Always available to assist you.</p></div>
+  </div>
+</section>
+
+
+<section id="services" class="page">
+  <h2>Our Services</h2>
+  <div class="grid">
+    <div class="card"><h3>Administrative Support</h3></div>
+    <div class="card"><h3>Customer Support</h3></div>
+    <div class="card"><h3>Social Media Management</h3></div>
+    <div class="card"><h3>Data Entry</h3></div>
+    <div class="card"><h3>Voucher Sales</h3></div>
+    <div class="card"><h3>Network Support</h3></div>
+  </div>
+</section>
+
+
+<section id="media" class="page">
+  <h2>Highlights</h2>
+  <div class="grid">
+    <div class="card"><img class="media-img" src="https://res.cloudinary.com/djcnsgbzr/image/upload/v1775820063/1_u1x1if.png"></div>
+    <div class="card"><img class="media-img" src="https://res.cloudinary.com/djcnsgbzr/image/upload/v1775820063/4_mjckpu.png"></div>
+    <div class="card"><img class="media-img" src="https://res.cloudinary.com/djcnsgbzr/image/upload/v1775820066/6_ho3ubp.png"></div>
+  </div>
+</section>
+
+<section id="voucher" class="page">
+  <h2>Buy Data</h2>
+  <div id="voucherPlans"></div>
+</section>
+
+<section id="transactions" class="page">
+  <h2>Transaction History</h2>
+  <div class="card" style="overflow:auto;max-height:1024px;">
+  <table id="transactionTable">
+    <thead>
+      <tr>
+        <th>Plan</th>
+        <th>Amount</th>
+        <th>Voucher</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="transactionBody"></tbody>
+  </table>
+</div>
+</section>
+
+
+
+
+
+
+
+<section id="partnership" class="page">
+  <h2>Partnership Program</h2>
+  <div class="card" style="text-align:left;padding:20px;">
+    <p>Join the BIVA Partnership Program and earn income by reselling internet vouchers.</p>
+    <a class="btn" href="https://form.jotform.com/260963343803054" target="_blank">Apply for Partnership</a>
+    <button class="btn" onclick="openInvoice()">Submit Invoice</button>
+  </div>
+
+</section>
+
+
+
+<section id="User" class="page">
+  <h2>User:</h2>
+ <div class="email-box">
+  <span id="userEmail"></span>
+</div>
+
+
+
+     <h2>Wallet Balance :</h2>
+     <div id="walletCard" class="wallet-card">
+     <span id="wallet">0</span>
+     </div>
+
+
+     <button class="btn" id="logoutBtn" onclick="openLogoutBox()" style="display:none">Logout</button>
+
+
+
+</section>
+
+
+
+<section id="airtime" class="page">
+  <h2>Buy Airtime</h2>
+
+  <div class="card">
+    <input id="airtimePhone" placeholder="Phone Number" class="input">
+    
+    <select id="airtimeNetwork" class="input">
+      <option>MTN</option>
+      <option>AIRTEL</option>
+      <option>GLO</option>
+      <option>9MOBILE</option>
+    </select>
+
+    <input id="airtimeAmount" placeholder="Amount" class="input">
+
+    <button class="btn" onclick="buyAirtime()">Buy Airtime</button>
+  </div>
+</section>
+
+
+<section id="data" class="page">
+  <h2>Buy Data</h2>
+
+  <div class="card">
+
+    <!-- PHONE -->
+    <input id="dataPhone" placeholder="Phone Number" class="input">
+
+    <!-- NETWORK -->
+    <select id="dataNetwork" class="input" onchange="loadDataPlans(this.value)">
+      <option value="">Select Network</option>
+      <option value="mtn">MTN</option>
+      <option value="airtel">AIRTEL</option>
+      <option value="glo">GLO</option>
+      <option value="9mobile">9MOBILE</option>
+    </select>
+
+    <!-- DATA PLANS WILL LOAD HERE -->
+    <div id="dataPlans" class="grid" style="margin-top:15px;"></div>
+
+  </div>
+</section>
+
+
+
+
+
+<section id="bills" class="page">
+  <h2>Pay Electricity Bill</h2>
+
+  <div class="card">
+    <input id="meterNumber" placeholder="Meter Number" class="input">
+
+    <select id="disco" class="input">
+      <option>IKEDC</option>
+      <option>EKEDC</option>
+      <option>AEDC</option>
+      <option>PHED</option>
+    </select>
+
+    <input id="billAmount" placeholder="Amount" class="input">
+
+    <button class="btn" onclick="payBill()">Pay Bill</button>
+  </div>
+</section>
+
+
+
+
+
+<a class="chat-btn" href="https://wa.me/2348037807558" target="_blank">💬</a>
+
+
+<div id="customAlert" class="toast-container"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+let loaderInterval;
+
+function showLoader(title = "Processing...", text = "Please wait...") {
+  const loader = document.getElementById("globalLoader");
+
+  document.getElementById("loaderTitle").innerText = title;
+  document.getElementById("loaderText").innerText = text;
+
+  loader.style.display = "flex";
+
+  // animate fake progress
+  let progress = 0;
+  const bar = document.getElementById("progressFill");
+
+  clearInterval(loaderInterval);
+
+  loaderInterval = setInterval(() => {
+    if (progress < 90) {
+      progress += Math.random() * 15;
+      bar.style.width = progress + "%";
+    }
+  }, 400);
+}
+
+function hideLoader() {
+  const bar = document.getElementById("progressFill");
+
+  bar.style.width = "100%";
+
+  setTimeout(() => {
+    document.getElementById("globalLoader").style.display = "none";
+    bar.style.width = "0%";
+    clearInterval(loaderInterval);
+  }, 500);
+}
+
+function hideLoader() {
+  document.getElementById("globalLoader").style.display = "none";
+}
+
+
+
+
+
+
+function showPage(pageId) {
+  // hide all pages
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+  });
+
+  // show selected page
+  document.getElementById(pageId).classList.add('active');
+
+  // ✅ CONTROL HEADER VISIBILITY
+  const header = document.getElementById("mainHeader");
+
+  if (pageId === "about") {
+    header.style.display = "block";
+  } else {
+    header.style.display = "none";
+  }
+
+  // close menu
+  closeMenu();
+
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+
+
+
+
+
+
+function closeMenu() {
+  document.getElementById("dropdownMenu").style.display = "none";
+}
+
+
+
+
+
+
+function saveOmadaSession(user){
+  const params = new URLSearchParams(window.location.search);
+
+  const data = {
+    uid: user.uid,
+    email: user.email,
+    clientMac: params.get("clientMac"),
+    apMac: params.get("apMac"),
+    ssid: params.get("ssid"),
+    cliToken: params.get("cliToken"),
+    timestamp: new Date().toISOString()
+  };
+
+  db.collection("users")
+    .doc(user.uid)
+    .collection("omada_sessions")
+    .add(data)
+    .then(() => {
+      console.log("✅ Omada session saved");
+    })
+    .catch(err => {
+      console.error("❌ Error saving Omada session:", err);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+let walletFloat = null;
+
+window.addEventListener("DOMContentLoaded", () => {
+  walletFloat = document.getElementById('walletFloat');
+});
+
+if (walletFloat) walletFloat.innerText = '₦' + balance;
+
+
+function showAlert(message, type="success"){
+  const alertBox = document.createElement("div");
+
+  let bg = "#28a745";
+  if(type === "error") bg = "#dc3545";
+  if(type === "warning") bg = "#ffc107";
+
+  alertBox.style.background = bg;
+  alertBox.style.color = "#fff";
+  alertBox.style.padding = "12px 18px";
+  alertBox.style.borderRadius = "10px";
+  alertBox.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+  alertBox.style.fontWeight = "600";
+  alertBox.style.minWidth = "250px";
+  alertBox.style.textAlign = "center";
+  alertBox.style.pointerEvents = "auto";
+  alertBox.style.animation = "fadeDown 0.3s ease";
+  
+  alertBox.innerText = message;
+
+  document.getElementById("customAlert").appendChild(alertBox);
+
+  setTimeout(()=>{
+    alertBox.style.opacity = "0";
+    alertBox.style.transform = "translateY(-10px)";
+    setTimeout(()=>alertBox.remove(), 300);
+  }, 3500);
+}
+
+
+
+const firebaseConfig={
+apiKey:"AIzaSyDaZH5kn_mmxap3jOyw3Yhq55d936Jhl0g",
+authDomain:"biva-system.firebaseapp.com",
+projectId:"biva-system"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+function openModal(id = "modal") {
+  const el = document.getElementById(id);
+  el.style.display = "flex";
+  el.style.opacity = "0";
+
+  setTimeout(() => {
+    el.style.opacity = "1";
+  }, 10);
+}
+
+function closeModal(id = "modal") {
+  const el = document.getElementById(id);
+  el.style.opacity = "0";
+
+  setTimeout(() => {
+    el.style.display = "none";
+  }, 200);
+}
+
+
+
+async function signup(){
+  showLoader("Creating account...");
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const user = cred.user;
+
+    await db.collection("users").doc(user.uid).set({
+      email: user.email,
+      wallet: 0,
+      blocked: false,
+      createdAt: new Date()
+    });
+
+    showAlert("✅ Account created successfully!");
+    closeModal();
+
+  }catch(err){
+    showAlert(err.message, "error");
+
+  }finally{
+    hideLoader();
+  }
+}
+
+
+
+
+    // ✅Bonus Calculator
+function calculateBonus(amount){
+  let bonus = 0;
+
+  if(amount >= 10000){
+    bonus = amount * 0.15;
+  } else if(amount >= 5000){
+    bonus = amount * 0.10;
+  } else if(amount >= 1000){
+    bonus = amount * 0.05;
+  }
+
+  return bonus;
+}
+
+
+
+function fundWallet() {
+
+  if (!currentUser) {
+    showAlert("Please login first", "error");
+    return;
+  }
+
+  let amount = prompt("Enter amount to fund (₦):");
+
+  if (!amount) {
+    showAlert("Amount is required", "error");
+    return;
+  }
+
+  // clean input
+  amount = Number(amount.toString().replace(/[^0-9]/g, ""));
+
+  if (!amount || amount <= 0) {
+    showAlert("Invalid amount", "error");
+    return;
+  }
+
+  FlutterwaveCheckout({
+    public_key: "FLWPUBK-28666bd71e66a7e62eff4c94a16b83fb-X",
+    tx_ref: "BIVA_" + Date.now(),
+    amount: amount,
+    currency: "NGN",
+
+    customer: {
+      email: currentUser.email,
+    },
+
+    callback: async function (response) {
+
+      await fetch("/api/payment/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          transaction_id: response.transaction_id,
+          userId: currentUser.uid
+        })
+      });
+
+      showAlert("Payment processing completed");
+      await getWallet();
+    }
+  });
+}
+
+
+async function login(){
+  showLoader("Signing you in...");
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  try{
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    await user.reload();
+
+    document.getElementById("userEmail").innerText = user.email;
+
+    const ref = db.collection("users").doc(user.uid);
+    const doc = await ref.get();
+
+    if(!doc.exists){
+      await ref.set({
+        email: user.email,
+        wallet: 0,
+        blocked: false,
+        createdAt: new Date()
+      });
+    }
+
+    closeModal();
+
+  }catch(err){
+    showAlert(err.message, "error");
+
+  }finally{
+    hideLoader();
+  }
+}
+
+
+
+
+async function logout(){
+  showLoader("Signing you out...");
+
+  try {
+    await auth.signOut();
+
+    // optional cleanup UI
+    document.getElementById("userEmail").innerText = "";
+    showAlert("👋 Logged out successfully");
+
+  } catch (err) {
+    showAlert("Error: " + err.message, "error");
+
+  } finally {
+    hideLoader();
+  }
+}
+
+
+// WALLET LIVE UPDATE
+let currentUser = null;
+
+// ADD HERE
+async function getWallet() {
+  const res = await fetch(`/api/wallet/${currentUser.uid}`);
+  const data = await res.json();
+
+  document.getElementById("wallet").innerText = "₦" + data.wallet;
+  walletFloat.innerText = "₦" + data.wallet;
+}
+
+// AUTH LISTENER
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+
+  if (user) {
+    getWallet(); // 🔥 CALL HERE
+  }
+
+  if (user) {
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    document.getElementById("userEmail").innerText = user.email;
+
+    loadTransactions(user.uid);
+
+    db.collection('users').doc(user.uid).onSnapshot(doc => {
+      const voucherEl = document.getElementById("lastVoucher");
+
+      if (doc.exists) {
+        const balance = doc.data().wallet || 0;
+
+
+const userRef = db.collection("users").doc(user.uid);
+
+userRef.get().then(doc => {
+if (doc.exists && doc.data().blocked === true) {
+  auth.signOut();
+  showAlert("❌ Your account has been blocked", "error");
+  return;
+}
+});
+
+
+        wallet.innerText = '₦' + balance;
+        walletFloat.innerText = '₦' + balance;
+
+        voucherEl.innerText = doc.data().lastVoucher
+          ? "Last Purchased Voucher: " + doc.data().lastVoucher
+          : "";
+      } else {
+        wallet.innerText = '₦0';
+        walletFloat.innerText = '₦0';
+        document.getElementById("userEmail").innerText = "";
+      }
+    });
+
+  } else {
+    currentUser = null;
+    wallet.innerText = '₦0';
+    walletFloat.innerText = '₦0';
+
+    loginBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+
+    document.getElementById("userEmail").innerText = "";
+    document.getElementById("transactionBody").innerHTML = "";
+  }
+});
+
+
+
+
+
+// BUY WITH WALLET
+async function buy(price, plan) {
+  if (!currentUser) {
+    showAlert("Login first");
+    return;
+  }
+
+  const userId = currentUser.uid;
+  const userRef = db.collection("users").doc(userId);
+  const lockRef = db.collection("purchaseLocks").doc(userId);
+
+  const txId = "TX_" + userId + "_" + Date.now();
+
+  try {
+    // 🔒 STEP 1: Acquire lock (prevents double click / parallel execution)
+    const lockSnap = await lockRef.get();
+
+    if (lockSnap.exists && lockSnap.data().locked) {
+      showAlert("⏳ Please wait, transaction already in progress", "warning");
+      return;
+    }
+
+    await lockRef.set({
+      locked: true,
+      txId: txId,
+      createdAt: new Date()
+    });
+
+    // 🔄 STEP 2: Run atomic wallet transaction
+    const voucherData = await db.runTransaction(async (transaction) => {
+
+      const userDoc = await transaction.get(userRef);
+
+      if (!userDoc.exists) {
+        throw new Error("User wallet not found");
+      }
+
+      const wallet = userDoc.data().wallet || 0;
+
+      if (wallet < price) {
+        throw new Error("Insufficient balance");
+      }
+
+
+
+      // Deduct wallet atomically
+      transaction.update(userRef, {
+        wallet: wallet - price
+      });
+
+      return { walletAfter: wallet - price };
+    });
+                                      showLoader("Generating Voucher", "Please wait while we fetch your data...");
+
+    // 🌐 STEP 3: Call webhook ONLY ONCE (after successful deduction)
+    const res = await fetch("https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan,
+        price,
+        email: currentUser.email,
+        txId: txId
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("Voucher server error");
+    }
+
+    const data = await res.json();
+    const voucher = data.voucher;
+
+
+
+
+await db.collection("vouchers").doc(voucher).set({
+  code: voucher,
+  plan: plan,
+  price: price,
+  used: false,
+  createdAt: new Date()
+});
+
+
+
+
+
+    if (!voucher) {
+      throw new Error("Voucher not received");
+    }
+
+    // 🧾 STEP 4: Idempotency check (prevents duplicate voucher writing)
+    const txRef = db.collection("transactions").doc(txId);
+    const txSnap = await txRef.get();
+
+    if (txSnap.exists) {
+      throw new Error("Duplicate transaction blocked");
+    }
+
+    // 💾 STEP 5: Save transaction safely
+    await txRef.set({
+      userId,
+      email: currentUser.email,
+      plan,
+      price,
+      voucher,
+      type: "purchase",
+      txId,
+      createdAt: new Date()
+    });
+
+    // 🧠 STEP 6: Update last voucher
+    await userRef.update({
+      lastVoucher: voucher
+    });
+                                                          showLoader("Finalizing", "Almost done...");
+    // 🎉 SUCCESS
+    showAlert("✅ Purchase successful!");
+	// ✅ Show Activate button
+	document.getElementById("activateBtn").style.display = "block";
+
+    printVoucher({
+      email: currentUser.email,
+      plan,
+      price,
+      voucher
+    });
+
+  } catch (err) {
+    showAlert("❌ " + err.message, "error");
+    console.error(err);
+
+  } finally {
+    // 🔓 STEP 7: ALWAYS release lock (critical)
+    await lockRef.set({ locked: false });
+                      showLoader("Processing Purchase", "Securing payment & generating voucher...");
+                                                                          hideLoader();
+  }
+}
+
+
+
+
+
+function loadTransactions(uid){
+  const body = document.getElementById("transactionBody");
+
+  db.collection("transactions")
+    .where("userId", "==", uid)
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+
+      body.innerHTML = "";
+
+      if(snapshot.empty){
+        body.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center;">No transaction history yet</td>
+          </tr>
+        `;
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const t = doc.data();
+
+        const date = t.createdAt?.toDate
+          ? t.createdAt.toDate().toLocaleString()
+          : "Just now";
+
+        // Default styling
+        let typeLabel = "UNKNOWN";
+        let color = "#333";
+
+        if(t.type === "fund"){
+          typeLabel = "FUND";
+          color = "green";
+        }
+        else if(t.type === "purchase"){
+          typeLabel = "DEBIT";
+          color = "red";
+        }
+        else if(t.type === "bonus"){
+          typeLabel = "BONUS";
+          color = "blue";
+        }
+
+        body.innerHTML += `
+          <tr>
+            <td>
+              <span style="color:${color};font-weight:600;">
+                ${typeLabel}
+              </span>
+              <br>
+              ${t.plan || "-"}
+            </td>
+
+            <td>
+              ₦${t.amount || t.price || 0}
+
+              ${t.bonus ? `<br><small style="color:green;font-weight:600;">+ ₦${t.bonus} bonus</small>` : ""}
+
+              ${t.total ? `<br><small style="color:#555;">Total: ₦${t.total}</small>` : ""}
+            </td>
+
+            <td>${t.voucher || "—"}</td>
+
+            <td>${date}</td>
+
+            <td>
+              <button class="btn" style="padding:5px 8px;font-size:12px;"
+                onclick='printVoucher(${JSON.stringify(t)})'>
+                View
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+    });
+}
+
+let selectedPlan = null;
+let selectedPrice = null;
+
+function openConfirm(price, plan){
+  selectedPlan = plan;
+  selectedPrice = price;
+
+  document.getElementById("confirmText").innerText =
+    `Do you want to buy ${plan} for ₦${price}?`;
+
+  document.getElementById("confirmBox").style.display = "flex";
+}
+
+function closeConfirm(){
+  document.getElementById("confirmBox").style.display = "none";
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("confirmYes").addEventListener("click", function () {
+    closeConfirm();
+    buy(selectedPrice, selectedPlan);
+  });
+});
+
+
+
+
+function scrollToWallet(){
+  document.getElementById("User").scrollIntoView({behavior:"smooth"});
+}
+
+function togglePassword(){
+  const passwordInput = document.getElementById("password");
+
+  if(passwordInput.type === "password"){
+    passwordInput.type = "text";
+  } else {
+    passwordInput.type = "password";
+  }
+}
+
+
+
+
+function setLoading(btnId, loading=true){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+
+  btn.disabled = loading;
+  btn.innerText = loading ? "Please wait..." : btn.getAttribute("data-text");
+}
+
+// store original text
+document.getElementById("signupBtn")?.setAttribute("data-text","Signup");
+document.getElementById("loginBtnModal")?.setAttribute("data-text","Login");
+
+
+
+
+
+function printVoucher(data){
+  document.getElementById("r_email").innerText = data.email;
+  document.getElementById("r_plan").innerText = data.plan;
+  document.getElementById("r_price").innerText = data.price;
+  document.getElementById("r_voucher").innerText = data.voucher;
+  document.getElementById("r_date").innerText = new Date().toLocaleString();
+
+  document.getElementById("receiptOverlay").style.display = "flex";
+}
+
+
+
+function closeReceipt(){
+  document.getElementById("receiptOverlay").style.display = "none";
+}
+
+
+
+function printReceipt(){
+
+  const receipt = document.getElementById("receiptPrint");
+
+  // fill values
+  document.getElementById("p_email").innerText = document.getElementById("r_email").innerText;
+  document.getElementById("p_plan").innerText = document.getElementById("r_plan").innerText;
+  document.getElementById("p_price").innerText = document.getElementById("r_price").innerText;
+  document.getElementById("p_voucher").innerText = document.getElementById("r_voucher").innerText;
+  document.getElementById("p_date").innerText = document.getElementById("r_date").innerText;
+
+  // FORCE visible BEFORE print
+  receipt.style.display = "block";
+
+  // wait for DOM paint
+  setTimeout(() => {
+    window.print();
+
+    // hide again after print
+    setTimeout(() => {
+      receipt.style.display = "none";
+    }, 500);
+
+  }, 300);
+}
+
+
+
+
+function downloadReceipt(){
+  const content = document.querySelector("#receiptOverlay").innerText;
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = "BIVA-Receipt.txt";
+  link.click();
+
+}
+
+
+
+
+
+
+
+
+
+function openBalance(){
+window.open("http://neverssl.com", "_self");
+}
+
+
+
+
+
+
+
+
+function openChatBox(){
+  document.getElementById("chatBox").style.display = "block";
+  loadMessages();
+}
+
+function closeChatBox(){
+  document.getElementById("chatBox").style.display = "none";
+}
+
+
+
+
+
+
+
+async function sendMessage(){
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+
+  if(!text || !currentUser){
+    showAlert("Login first to chat", "warning");
+    return;
+  }
+
+  const ref = db.collection("supportChats").doc(currentUser.uid);
+
+  await ref.set({
+    email: currentUser.email,
+    updatedAt: new Date(),
+    lastMessage: text,
+    unreadAdmin: true
+  }, { merge: true });
+
+  await ref.collection("messages").add({
+    text: text,
+    sender: "user",
+    createdAt: new Date()
+  });
+
+  input.value = "";
+}
+
+
+
+
+
+function loadMessages(){
+  const box = document.getElementById("chatMessages");
+
+db.collection("supportChats")
+  .doc(currentUser.uid)
+  .collection("messages")
+  .orderBy("createdAt")
+  .onSnapshot(snapshot => {
+
+      box.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const m = doc.data();
+
+        box.innerHTML += `
+          <div style="
+            text-align:${m.sender === 'user' ? 'right' : 'left'};
+            margin:5px 0;
+          ">
+            <span style="
+              display:inline-block;
+              padding:8px;
+              border-radius:10px;
+              background:${m.sender === 'user' ? '#ff1a1a' : '#eee'};
+              color:${m.sender === 'user' ? '#fff' : '#000'};
+              max-width:80%;
+            ">
+              ${m.text}
+            </span>
+          </div>
+        `;
+      });
+
+      box.scrollTop = box.scrollHeight;
+    });
+}
+
+
+
+
+async function sendSupportMessage(text){
+
+  const ref = db.collection("supportChats").doc(currentUser.uid);
+
+  await ref.set({
+    email: currentUser.email,
+    updatedAt: new Date(),
+    lastMessage: text,
+    unreadAdmin: true
+  }, { merge:true });
+
+  await ref.collection("messages").add({
+    text: text,
+    sender: "user",
+    createdAt: new Date()
+  });
+
+}
+
+
+
+window.addEventListener("load", () => {
+  const nav = document.querySelector("nav");
+  const wallet = document.querySelector(".wallet-float");
+
+  const navHeight = nav.offsetHeight;
+
+  wallet.style.top = navHeight + "px";
+});
+
+
+
+//Avoid creating New tab when opening a links
+document.querySelectorAll("a").forEach(link => {
+  link.removeAttribute("target");
+});
+
+
+
+
+
+
+
+
+
+
+
+
+function openInvoice(){
+  window.location.href = "https://brightinternationaldamaturu-hue.github.io/staffs/";
+}
+
+
+
+
+
+
+function toggleMenu() {
+  const menu = document.getElementById("dropdownMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// Optional: close menu when clicking outside
+document.addEventListener("click", function(e) {
+  const menu = document.getElementById("dropdownMenu");
+  const icon = document.querySelector(".menu-icon");
+
+  if (!menu.contains(e.target) && e.target !== icon) {
+    menu.style.display = "none";
+  }
+});
+
+
+
+
+
+
+
+
+
+function openLogoutBox(){
+  document.getElementById("logoutBox").style.display = "flex";
+}
+
+function closeLogoutBox(){
+  document.getElementById("logoutBox").style.display = "none";
+}
+
+async function confirmLogout(){
+  closeLogoutBox();
+  showLoader("Logging you out...");
+
+  try {
+    await auth.signOut();
+
+    document.getElementById("userEmail").innerText = "";
+
+    showAlert("👋 You have been logged out");
+
+  } catch (err) {
+    showAlert(err.message, "error");
+
+  } finally {
+    hideLoader();
+  }
+}
+
+
+
+async function buyAirtime() {
+  try {
+    showLoader("Processing Airtime...");
+
+    const phone = document.getElementById("airtimePhone").value.trim();
+    const network = document.getElementById("airtimeNetwork").value;
+    const amount = Number(document.getElementById("airtimeAmount").value);
+
+    if (!currentUser) {
+      showAlert("Please login first", "error");
+      return;
+    }
+
+    if (!phone || !network || !amount) {
+      showAlert("Fill all fields", "error");
+      return;
+    }
+
+    const res = await fetch("http://localhost:4000/api/buy-airtime", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        phone,
+        network,
+        amount,
+        email: currentUser.email
+      })
+    });
+
+    // 🔥 SAFE JSON HANDLING (prevents <!DOCTYPE html> crash)
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error("Server error: Invalid JSON response");
+    }
+
+    if (!res.ok || !data.success) {
+      showAlert(data.error || "Airtime failed", "error");
+      return;
+    }
+
+    showAlert("✅ Airtime sent successfully");
+
+    await getWallet();
+
+  } catch (err) {
+    showAlert(err.message, "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+
+
+
+
+
+async function buyData(plan) {
+  try {
+    showLoader("Processing Data...");
+
+    const phoneEl = document.querySelector("#dataPhone");
+    const networkEl = document.querySelector("#dataNetwork");
+
+    if (!phoneEl || !networkEl) {
+      throw new Error("Missing form elements");
+    }
+
+    const phone = phoneEl.value.trim();
+    const service_id = networkEl.value;
+    const variation_id = plan.variation_id;
+
+    if (!currentUser) {
+      showAlert("Please login first", "error");
+      return;
+    }
+
+    if (!phone || !service_id || !variation_id) {
+      showAlert("Fill all fields", "error");
+      return;
+    }
+
+    const res = await fetch("http://localhost:4000/api/vtu/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: currentUser.uid,
+        phone,
+        service_id,
+        variation_id
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      showAlert(data.error || "Data purchase failed", "error");
+      return;
+    }
+
+    showAlert("✅ Data purchased successfully");
+    await getWallet();
+
+  } catch (err) {
+    showAlert(err.message, "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+
+
+
+function getNetworkId(network) {
+  const map = {
+    mtn: 1,
+    glo: 2,
+    "9mobile": 3,
+    airtel: 4
+  };
+
+  return map[network?.toLowerCase()];
+}
+
+
+
+
+
+
+async function loadDataPlans(network) {
+
+  if (!network) return;
+
+  try {
+
+    showLoader("Loading Data Plans...");
+
+const res = await fetch(`/api/data/plans/${network}`);
+const data = await res.json();
+
+if (!data || !data.data) {
+  showAlert("Failed to load plans", "error");
+  return;
+}
+
+    const plansDiv = document.getElementById("dataPlans");
+
+    plansDiv.innerHTML = "";
+
+data.data.forEach(plan => {
+
+  const name =
+    plan.name ||
+    plan.data_plan ||
+    plan.size ||
+    "Data Plan";
+
+  const price =
+    plan.price ||
+    plan.amount ||
+    plan.selling_price ||
+    0;
+
+  const validity =
+    plan.validity ||
+    plan.duration ||
+    "N/A";
+
+  const volume =
+    plan.data_amount ||
+    plan.volume ||
+    plan.size ||
+    "";
+
+  const variationId =
+    plan.variation_id ||
+    plan.variation_code ||
+    plan.id;
+
+  plansDiv.innerHTML += `
+    <div class="card">
+      <h3>${name}</h3>
+      <p>${volume} • ${validity}</p>
+      <p>₦${price}</p>
+
+<button class="btn" onclick='buyData({ variation_id: "${variationId}" })'>
+  Buy Now
+</button>
+
+    </div>
+  `;
+});
+
+  } catch (err) {
+
+    console.error(err);
+
+    showAlert("Error loading plans", "error");
+
+  } finally {
+
+    hideLoader();
+  }
+}
+
+
+
+
+
+
+async function payBill(){
+  const meter = document.getElementById("meterNumber").value;
+  const disco = document.getElementById("disco").value;
+  const amount = document.getElementById("billAmount").value;
+
+  const res = await fetch("http://localhost:4000/pay-bill", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({meter, disco, amount})
+  });
+
+  const data = await res.json();
+  alert(JSON.stringify(data));
+}
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="confirmBox" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Confirm Purchase</h3>
+
+    <p id="confirmText"></p>
+
+    <button class="btn" id="confirmYes">Yes, Buy</button>
+    <button class="btn" onclick="closeConfirm()" style="background:gray">Cancel</button>
+  </div>
+</div>
+
+
+
+<!-- FULL SCREEN RECEIPT OVERLAY -->
+<div id="receiptOverlay" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.85);
+  z-index:999999;
+  justify-content:center;
+  align-items:center;
+">
+
+  <div style="
+    background:#fff;
+    width:100%;
+    max-width:400px;
+    border-radius:10px;
+    padding:20px;
+    text-align:left;
+  ">
+
+    <h2 style="color:#8B0000;text-align:center;">
+  ✅ Purchase Successful
+</h2>
+
+    <p><strong>Email:</strong> <span id="r_email"></span></p>
+    <p><strong>Plan:</strong> <span id="r_plan"></span></p>
+    <p><strong>Amount:</strong> ₦<span id="r_price"></span></p>
+    <p><strong>Voucher:</strong> <span id="r_voucher"></span></p>
+    <p><strong>Date:</strong> <span id="r_date"></span></p>
+
+<div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+
+  <button class="btn" onclick="openBalance()">⚡ Activate</button>
+
+  <button class="btn" onclick="downloadReceipt()">⬇ Download</button>
+
+  <button class="btn" onclick="printReceipt()">🖨 Print</button>
+
+</div>
+
+    <button class="btn" style="background:gray;width:100%;margin-top:10px;" onclick="closeReceipt()">Close</button>
+
+  </div>
+</div>
+
+
+
+
+
+<div id="chatSupportBtn" onclick="openChatBox()" style="
+  position:fixed;
+  bottom:90px;
+  right:20px;
+  background:#8B0000;
+  color:white;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  cursor:pointer;
+  z-index:99999;
+">
+💬
+</div>
+
+
+
+
+<div id="chatBox" style="
+  display:none;
+  position:fixed;
+  bottom:150px;
+  right:20px;
+  width:300px;
+  height:400px;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  z-index:99999;
+  overflow:hidden;
+">
+
+  <div style="background:#8B0000;color:#fff;padding:10px;">
+    Live Support
+    <span onclick="closeChatBox()" style="float:right;cursor:pointer;">❌</span>
+  </div>
+
+  <div id="chatMessages" style="height:300px;overflow:auto;padding:10px;font-size:14px;"></div>
+
+  <div style="display:flex;">
+    <input id="chatInput" placeholder="Type message..." style="flex:1;padding:10px;border:none;">
+    <button onclick="sendMessage()" style="background:#8B0000;color:#fff;border:none;padding:10px;">Send</button>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+<div id="receiptPrint">
+
+  <h3 style="text-align:center;">BIVA RECEIPT</h3>
+  <hr>
+
+  <p>Email: <span id="p_email"></span></p>
+  <p>Plan: <span id="p_plan"></span></p>
+  <p>Amount: ₦<span id="p_price"></span></p>
+  <p>Voucher: <span id="p_voucher"></span></p>
+  <p>Date: <span id="p_date"></span></p>
+
+  <hr>
+  <p style="text-align:center;">Thank you</p>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- GLOBAL LOADING OVERLAY -->
+<div id="globalLoader" class="loader-overlay">
+
+  <div class="loader-box">
+
+    <!-- Animated Logo Pulse -->
+    <div class="logo-pulse"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Text -->
+    <h3 id="loaderTitle">Processing...</h3>
+    <p id="loaderText">Please wait while we complete your request</p>
+
+  </div>
+
+</div>
+
+
+
+
+
+<div id="logoutBox" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to log out?</p>
+
+    <button class="btn" onclick="confirmLogout()">Yes, Logout</button>
+    <button class="btn" onclick="closeLogoutBox()" style="background:gray;">Cancel</button>
+  </div>
+</div>
+</body>
+</html>
