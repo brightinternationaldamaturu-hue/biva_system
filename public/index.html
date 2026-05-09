@@ -2171,7 +2171,7 @@ async function buyAirtime() {
       return;
     }
 
-    const res = await fetch("http://localhost:4000/api/buy-airtime", {
+    const res = await fetch("https://biva-backend-ezvu.onrender.com/api/buy-airtime", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -2240,7 +2240,7 @@ async function buyData(plan) {
       return;
     }
 
-    const res = await fetch("http://localhost:4000/api/vtu/data", {
+    const res = await fetch("fetch("https://biva-backend-ezvu.onrender.com/api/data/buy")", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2373,7 +2373,7 @@ async function payBill(){
   const disco = document.getElementById("disco").value;
   const amount = document.getElementById("billAmount").value;
 
-  const res = await fetch("http://localhost:4000/pay-bill", {
+  const res = await fetch("https://biva-backend-ezvu.onrender.com/pay-bill", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({meter, disco, amount})
