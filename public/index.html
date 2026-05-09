@@ -217,47 +217,54 @@
   position: relative;
 }
 
-.menu-icon {
-  font-size: 26px;
-  font-weight: bold;  
-  color: Red;          
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
+.menu-icon{
+  background:#fff5f5;
+  color:#8B0000;
+  padding:10px 14px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+  border:1px solid #ffd6d6;
 }
 
-/* Optional hover effect */
-.menu-icon:hover {
-  background: #ffe6e6;
-  color: #b30000;
+.menu-icon:hover{
+  background:#8B0000;
+  color:#fff;
 }
 
-.dropdown {
-  display: none;
-  position: absolute;
-  font-size: 22px;
-  top: 35px;
-  left: 0;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  overflow: hidden;
-  min-width: 400px;
-  z-index: 9999;
+.dropdown{
+  display:none;
+  position:absolute;
+  top:45px;
+  left:0;
+  width:260px;
+  max-width:90vw;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 10px 35px rgba(0,0,0,0.12);
+  overflow:hidden;
+  z-index:9999;
+  animation:fadeMenu 0.25s ease;
 }
 
-.dropdown a {
-  display: block;
-  padding: 10px;
-  text-decoration: none;
-  color: Teal;          
-  font-weight: bold;  
-  border-bottom: 1px solid #eee;
+.dropdown a{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 16px;
+  text-decoration:none;
+  color:#333;
+  font-weight:500;
+  transition:0.25s;
+  border-bottom:1px solid #f4f4f4;
 }
 
-.dropdown a:hover {
-  background: #fff2f2;
-  color: #b30000; /* darker red on hover (optional) */
+.dropdown a:hover{
+  background:#fff5f5;
+  color:#8B0000;
+  padding-left:22px;
 }
 
 
@@ -335,12 +342,11 @@
       padding-left:10px;
     }
 
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-      gap:25px;
-    }
-
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:15px;
+}
     .card {
       background:#fff;
       padding:15px;
@@ -639,7 +645,25 @@ nav div {
 
 
 
-    .btn{background:#ff1a1a;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+.btn{
+  background:linear-gradient(135deg,#ff1a1a,#8B0000);
+  color:#fff;
+  padding:12px 18px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.3s;
+  width:100%;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  opacity:0.95;
+}
+
+
+
 
     .wallet-box{font-weight:1;color:white;}
 
@@ -647,7 +671,22 @@ nav div {
 
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
 
-    .card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);text-align:center;}
+
+
+.card{
+  background:#fff;
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.06);
+  border:1px solid #f1f1f1;
+  transition:0.3s ease;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.1);
+}
+
 
     /* FIXED IMAGE SCALE */
     .media-img{
@@ -853,6 +892,87 @@ html, body {
 }
 
 
+
+
+/* =========================
+   PROFESSIONAL BOTTOM NAV
+========================= */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#fff;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:10px 5px;
+  box-shadow:0 -2px 15px rgba(0,0,0,0.08);
+  z-index:99999;
+  border-top:1px solid #eee;
+}
+
+.bottom-nav button{
+  background:none;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#666;
+  font-size:12px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.bottom-nav button span{
+  font-size:22px;
+  margin-bottom:4px;
+}
+
+.bottom-nav button:hover{
+  color:#8B0000;
+  transform:translateY(-2px);
+}
+
+/* Space so content doesn't hide behind nav */
+body{
+  padding-bottom:90px;
+}
+
+
+
+.input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  margin-bottom:12px;
+  font-size:15px;
+  outline:none;
+  transition:0.3s;
+}
+
+.input:focus{
+  border-color:#8B0000;
+  box-shadow:0 0 0 4px rgba(139,0,0,0.08);
+}
+
+
+/* MENU SECTION TITLES */
+
+.menu-title{
+  padding:10px 14px;
+  font-size:12px;
+  font-weight:700;
+  color:#999;
+  background:#f8f8f8;
+  letter-spacing:1px;
+  border-bottom:1px solid #eee;
+}
+
+
   </style>
 </head>
 
@@ -875,19 +995,74 @@ html, body {
   <span class="menu-icon" onclick="toggleMenu()">☰ Menu</span>
 
 <div id="dropdownMenu" class="dropdown">
-	<a href="#" onclick="showPage('about'); closeMenu()">Home</a>
-	<a href="#" onclick="showPage('User'); closeMenu()">Profile</a>
-	<a href="#" onclick="showPage('services'); closeMenu()">Services</a>
-	<a href="#" onclick="showPage('voucher'); closeMenu()">Buy Voucher</a>
-	<a href="#" onclick="showPage('airtime')">Buy Airtime</a>
-	<a href="#" onclick="showPage('data')">Buy Data</a>
-	<a href="#" onclick="showPage('bills')">Pay Bills</a>
-        <a href="#" onclick="showPage('partnership'); closeMenu()">Partnership</a>
-        <a href="#" onclick="fundWallet(); closeMenu()">Fund Wallet</a>
-	<a href="#" onclick="showPage('transactions'); closeMenu()">Transactions</a>
-        <a href="#" id="activateBtn" style="display:block;" onclick="openBalance(); closeMenu()">
-      Activate Voucher
-    </a>
+
+  <!-- MAIN -->
+  <div class="menu-title">MAIN</div>
+
+  <a href="#" onclick="showPage('about'); closeMenu()">
+    🏠 Home
+  </a>
+
+  <a href="#" onclick="showPage('User'); closeMenu()">
+    👤 Profile
+  </a>
+
+  <a href="#" onclick="showPage('transactions'); closeMenu()">
+    📜 Transactions
+  </a>
+
+
+  <!-- SERVICES -->
+  <div class="menu-title">SERVICES</div>
+
+  <a href="#" onclick="showPage('voucher'); closeMenu()">
+    📶 WiFi Voucher
+  </a>
+
+  <a href="#" onclick="showPage('data'); closeMenu()">
+    📡 Buy Data
+  </a>
+
+  <a href="#" onclick="showPage('airtime'); closeMenu()">
+    📱 Buy Airtime
+  </a>
+
+  <a href="#" onclick="showPage('bills'); closeMenu()">
+    💡 Pay Bills
+  </a>
+
+
+  <!-- ACCOUNT -->
+  <div class="menu-title">ACCOUNT</div>
+
+  <a href="#" onclick="fundWallet(); closeMenu()">
+    💰 Fund Wallet
+  </a>
+
+  <a href="#" id="activateBtn"
+     onclick="openBalance(); closeMenu()">
+     ⚡ Activate Voucher
+  </a>
+
+
+  <!-- SUPPORT -->
+<!-- SUPPORT -->
+<div class="menu-title">SUPPORT</div>
+<a href="https://wa.me/2348037807558" target="_blank">
+  💬 WhatsApp Support
+</a>
+
+<a href="#" onclick="openChatBox(); closeMenu()">
+  🛟 Live Chat Support
+</a>
+
+
+<a href="#" onclick="showPage('partnership'); closeMenu()">
+  🤝 Partnership
+</a>
+<a href="#" onclick="showPage('services'); closeMenu()">
+  🛠 Services
+</a>
 
 </div>
 </div>
@@ -1010,7 +1185,7 @@ html, body {
 </section>
 
 <section id="voucher" class="page">
-  <h2>Buy Data</h2>
+  <h2>Wi_Fi Voucher</h2>
   <div id="voucherPlans"></div>
 </section>
 
@@ -1142,7 +1317,7 @@ html, body {
 
 
 
-<a class="chat-btn" href="https://wa.me/2348037807558" target="_blank">💬</a>
+
 
 
 <div id="customAlert" class="toast-container"></div>
@@ -1207,10 +1382,6 @@ function hideLoader() {
     bar.style.width = "0%";
     clearInterval(loaderInterval);
   }, 500);
-}
-
-function hideLoader() {
-  document.getElementById("globalLoader").style.display = "none";
 }
 
 
@@ -2216,54 +2387,58 @@ async function buyAirtime() {
 
 
 async function buyData(plan) {
+
   try {
+
     showLoader("Processing Data...");
 
-    const phoneEl = document.querySelector("#dataPhone");
-    const networkEl = document.querySelector("#dataNetwork");
-
-    if (!phoneEl || !networkEl) {
-      throw new Error("Missing form elements");
-    }
-
-    const phone = phoneEl.value.trim();
-    const service_id = networkEl.value;
-    const variation_id = plan.variation_id;
+    const phone = document
+      .getElementById("dataPhone")
+      .value
+      .trim();
 
     if (!currentUser) {
       showAlert("Please login first", "error");
       return;
     }
 
-    if (!phone || !service_id || !variation_id) {
-      showAlert("Fill all fields", "error");
+    if (!phone) {
+      showAlert("Enter phone number", "error");
       return;
     }
 
-    const res = await fetch("fetch("https://biva-backend-ezvu.onrender.com/api/data/buy")", {
+    const res = await fetch("/api/data/buy", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         userId: currentUser.uid,
         phone,
-        service_id,
-        variation_id
+        data_plan: plan.data_plan,
+        network_id: plan.network_id
       })
     });
 
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      showAlert(data.error || "Data purchase failed", "error");
+      showAlert(data.error || "Purchase failed", "error");
       return;
     }
 
     showAlert("✅ Data purchased successfully");
+
     await getWallet();
 
   } catch (err) {
+
+    console.error(err);
+
     showAlert(err.message, "error");
+
   } finally {
+
     hideLoader();
   }
 }
@@ -2295,57 +2470,66 @@ async function loadDataPlans(network) {
 
     showLoader("Loading Data Plans...");
 
-const res = await fetch(`/api/data/plans/${network}`);
-const data = await res.json();
+    const networkMap = {
+      mtn: 1,
+      glo: 2,
+      "9mobile": 3,
+      airtel: 4
+    };
 
-if (!data || !data.data) {
-  showAlert("Failed to load plans", "error");
-  return;
-}
+    const network_id =
+      networkMap[network.toLowerCase()];
 
-    const plansDiv = document.getElementById("dataPlans");
+    const res = await fetch(
+      `/api/data/plans/${network_id}`
+    );
+
+    const data = await res.json();
+
+    console.log("PLANS RESPONSE:", data);
+
+    if (!data.success) {
+
+      showAlert(
+        "Failed to load plans",
+        "error"
+      );
+
+      return;
+    }
+
+    const plansDiv =
+      document.getElementById("dataPlans");
 
     plansDiv.innerHTML = "";
 
-data.data.forEach(plan => {
+    /**
+     * IMPORTANT FIX:
+     * data.data is already the array
+     */
+    const plans = data.data || [];
 
-  const name =
-    plan.name ||
-    plan.data_plan ||
-    plan.size ||
-    "Data Plan";
-
-  const price =
-    plan.price ||
-    plan.amount ||
-    plan.selling_price ||
-    0;
-
-  const validity =
-    plan.validity ||
-    plan.duration ||
-    "N/A";
-
-  const volume =
-    plan.data_amount ||
-    plan.volume ||
-    plan.size ||
-    "";
-
-  const variationId =
-    plan.variation_id ||
-    plan.variation_code ||
-    plan.id;
+plans.forEach(plan => {
 
   plansDiv.innerHTML += `
     <div class="card">
-      <h3>${name}</h3>
-      <p>${volume} • ${validity}</p>
-      <p>₦${price}</p>
 
-<button class="btn" onclick='buyData({ variation_id: "${variationId}" })'>
-  Buy Now
-</button>
+      <h3>${plan.name || plan.data_plan}</h3>
+
+      <p>${plan.validity || ""}</p>
+
+      <p>₦${plan.selling_price}</p>
+
+      <button
+        class="btn"
+        onclick='buyData({
+          data_plan: "${plan.data_plan}",
+          network_id: "${network_id}"
+        })'>
+
+        Buy Now
+
+      </button>
 
     </div>
   `;
@@ -2355,16 +2539,16 @@ data.data.forEach(plan => {
 
     console.error(err);
 
-    showAlert("Error loading plans", "error");
+    showAlert(
+      "Error loading plans",
+      "error"
+    );
 
   } finally {
 
     hideLoader();
   }
 }
-
-
-
 
 
 
@@ -2382,6 +2566,79 @@ async function payBill(){
   const data = await res.json();
   alert(JSON.stringify(data));
 }
+
+
+
+
+
+
+// ===============================
+// VOUCHER DATA PLANS
+// ===============================
+
+const voucherPlans = [
+
+  {price:300, desc:'2GB'},
+  {price:450, desc:'3GB'},
+  {price:600, desc:'4GB'},
+  {price:900, desc:'6GB'},
+  {price:1050, desc:'7GB'},
+  {price:1200, desc:'8GB'},
+  {price:1500, desc:'10GB'},
+  {price:2250, desc:'15GB'},
+  {price:3000, desc:'20GB'},
+  {price:3750, desc:'25GB'},
+  {price:5400, desc:'36GB'},
+  {price:9750, desc:'65GB'},
+  {price:15000, desc:'100GB'},
+  {price:16500, desc:'120GB'},
+  {price:17500, desc:'150GB'},
+  {price:25000, desc:'200GB'},
+  {price:30000, desc:'Unlimited'}
+
+];
+
+function loadVoucherPlans(){
+
+  const plansDiv = document.getElementById("voucherPlans");
+
+  plansDiv.innerHTML = "";
+
+  plansDiv.classList.add("grid");
+
+  voucherPlans.forEach(p => {
+
+    plansDiv.innerHTML += `
+
+      <div class="card">
+
+        <h3>₦${p.price}</h3>
+
+        <p>${p.desc}</p>
+
+        <button
+          class="btn"
+          onclick="openConfirm(${p.price}, '${p.desc}')">
+
+          Buy
+
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+// LOAD ON PAGE START
+window.addEventListener(
+  "DOMContentLoaded",
+  loadVoucherPlans
+);
+
+
 
 
 </script>
@@ -2424,12 +2681,63 @@ async function payBill(){
 
 <div id="confirmBox" class="modal" style="display:none;">
   <div class="modal-content">
-    <h3>Confirm Purchase</h3>
 
-    <p id="confirmText"></p>
+    <h3 style="color:#b30000;">⚠ Important Notice</h3>
 
-    <button class="btn" id="confirmYes">Yes, Buy</button>
-    <button class="btn" onclick="closeConfirm()" style="background:gray">Cancel</button>
+    <p id="confirmText" style="font-weight:600;"></p>
+
+    <div style="
+      background:#fff5f5;
+      border:2px solid #ffcccc;
+      padding:12px;
+      border-radius:10px;
+      margin:15px 0;
+      text-align:left;
+      font-size:14px;
+      line-height:1.6;
+      color:#8B0000;
+    ">
+
+      <strong>PLEASE READ CAREFULLY:</strong><br><br>
+
+      • This voucher works ONLY within selected areas of Damaturu, Yobe State.<br><br>
+
+      • Ensure you are within coverage location before purchase.<br><br>
+
+      • All voucher purchases are FINAL and NON-REFUNDABLE.<br><br>
+
+      • By proceeding, you confirm that you understand and accept these terms.
+
+    </div>
+
+    <!-- AGREEMENT CHECKBOX -->
+    <label style="
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:15px;
+      font-size:14px;
+      cursor:pointer;
+    ">
+
+      <input type="checkbox" id="agreementCheck" style="margin-top:4px;">
+
+      <span>
+        I understand that this voucher only works in some parts of Damaturu, Yobe State, and I agree that this purchase cannot be refunded.
+      </span>
+
+    </label>
+
+    <button class="btn" id="confirmYes">
+      Yes, I Agree & Buy
+    </button>
+
+    <button class="btn"
+      onclick="closeConfirm()"
+      style="background:gray">
+      Cancel
+    </button>
+
   </div>
 </div>
 
@@ -2484,27 +2792,6 @@ async function payBill(){
 </div>
 
 
-
-
-
-<div id="chatSupportBtn" onclick="openChatBox()" style="
-  position:fixed;
-  bottom:90px;
-  right:20px;
-  background:#8B0000;
-  color:white;
-  width:55px;
-  height:55px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  cursor:pointer;
-  z-index:99999;
-">
-💬
-</div>
 
 
 
@@ -2603,6 +2890,47 @@ async function payBill(){
     <button class="btn" onclick="confirmLogout()">Yes, Logout</button>
     <button class="btn" onclick="closeLogoutBox()" style="background:gray;">Cancel</button>
   </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="bottom-nav">
+
+  <button onclick="showPage('voucher')">
+    <span>📶</span>
+    <small>Voucher</small>
+  </button>
+
+  <button onclick="showPage('data')">
+    <span>📡</span>
+    <small>Data</small>
+  </button>
+
+  <button onclick="showPage('airtime')">
+    <span>📱</span>
+    <small>Airtime</small>
+  </button>
+
+  <button onclick="showPage('bills')">
+    <span>💡</span>
+    <small>Bills</small>
+  </button>
+
+  <button onclick="showPage('User')">
+    <span>👤</span>
+    <small>Profile</small>
+  </button>
+
 </div>
 </body>
 </html>

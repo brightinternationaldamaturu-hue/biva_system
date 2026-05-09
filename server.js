@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ROUTES (clean & structured)
+// ROUTES
 app.use("/api", require("./routes/airtime.routes"));
 app.use("/api/wallet", require("./routes/wallet.routes"));
 app.use("/api/payment", require("./routes/payment.routes"));
@@ -32,8 +32,14 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-
 console.log("ENV LOADED:", {
-  clubUser: process.env.CLUBKONNECT_USER ? "SET" : "MISSING",
-  flutterwave: process.env.FLW_SECRET_KEY ? "SET" : "MISSING"
+  iacafe:
+    process.env.IACAFE_API_KEY
+      ? "SET"
+      : "MISSING",
+
+  flutterwave:
+    process.env.FLW_SECRET_KEY
+      ? "SET"
+      : "MISSING"
 });
