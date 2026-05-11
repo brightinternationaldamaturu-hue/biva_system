@@ -46,16 +46,34 @@ exports.getPlans = async (req, res) => {
       let profit = 0;
 
       // SMALL PLANS
-      if (basePrice <= 1000) {
+      if (basePrice <= 300) {
+        profit = 13;
+      }
+
+
+      // MEDIUM PLANS
+      else if (basePrice <= 1000) {
         profit = 50;
       }
 
-      // MEDIUM PLANS
-      else if (basePrice <= 5000) {
+
+      // AVERAGE PLANS
+      else if (basePrice <= 2000) {
+        profit = 65;
+      }
+
+      // AVERAGE PLANS
+      else if (basePrice <= 3500) {
         profit = 100;
       }
 
+
       // BIG PLANS
+      else if (basePrice <= 5000) {
+        profit = 150;
+      }
+
+      // PREMIUM PLANS
       else {
         profit = 200;
       }
