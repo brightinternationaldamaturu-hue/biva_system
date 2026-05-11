@@ -52,13 +52,13 @@
 
 .wallet-card{
   display:inline-block;
-  background:#ffffff;
-  border:2px solid teal;
+  background:white;
+  border:3px white;
   color:teal;
   font-weight:bold;
-  font-size:28px;
+  font-size:22px;
   padding:6px 14px;
-  border-radius:20px;
+  border-radius:45px;
   box-shadow:0 3px 10px rgba(0,0,0,0.1);
   transition:0.3s;
   width:auto;              /* auto size */
@@ -134,7 +134,7 @@
 }
 
 .loader-box p {
-  font-size: 13px;
+  font-size: 14px;
   opacity: 0.8;
 }
 
@@ -150,12 +150,14 @@
 
 
 .main-header {
-  background: radial-gradient(circle at top, #ff1a1a, #8B0000);
+  background: radial-gradient(circle at top, green, teal);
   color: #fff;
   text-align: center;
-  padding: 8px 10px 6px;
+  padding: 4px 2px 3px;
   position: relative;
   overflow: hidden;
+  margin-top: 80px;
+  padding-top: 10px;
 }
 
 /* subtle glow effect */
@@ -163,7 +165,7 @@
   content: "";
   position: absolute;
   width: 300px;
-  height: 100px;
+  height: 65px;
   background: rgba(255,255,255,0.1);
   border-radius: 50%;
   top: -100px;
@@ -213,15 +215,23 @@
 
 
 
-.menu-container {
-  position: relative;
+.menu-container{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+
+  margin-left:0;
+  margin-right:0;
+
+  flex:none;
 }
+
 
 .menu-icon{
   background:#fff5f5;
   color:#8B0000;
   padding:10px 14px;
-  border-radius:12px;
+  border-radius:25px;
   font-size:16px;
   font-weight:600;
   cursor:pointer;
@@ -230,7 +240,7 @@
 }
 
 .menu-icon:hover{
-  background:#8B0000;
+  background:green;
   color:#fff;
 }
 
@@ -373,8 +383,8 @@
     .btn {
       display:inline-block;
       padding:10px 18px;
-      background:#ff1a1a;
-      color:#fff;
+      background:green;
+      color:green;
       border-radius:8px;
       text-decoration:none;
       margin-top:10px;
@@ -383,10 +393,10 @@
       font-weight:600;
     }
 
-    .btn:hover {background:#b30000;}
+    .btn:hover {background:green;}
 
     footer {
-      background:#8B0000;
+      background:green;
       color:#fff;
       text-align:center;
       padding:20px;
@@ -471,22 +481,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* NAV FIX */
-nav {
-  flex-wrap: wrap;
-  gap: 5px;
-}
 
-nav div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.right-nav {
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
 
 /* MAKE BUTTONS STACK BETTER */
 .btn {
@@ -499,17 +494,19 @@ nav div {
 @media (max-width: 768px) {
 
   header h1 {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   nav {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  nav a {
-    display: inline-block;
-    margin: 5px 5px 0 0;
+
+  .right-nav {
+    width: auto;
+    justify-content: flex-end;
   }
 
   .grid {
@@ -533,110 +530,112 @@ nav div {
     width: 90%;
   }
 
-  .right-nav {
-    width: 100%;
-    justify-content: space-between;
-  }
-
   #walletBalance {
     font-size: 18px;
   }
 }
 
 
-.wallet-float {
-  position: fixed;
-  top: 100px; /* adjust if needed */
-  right: 15px; /* move to right */
-  
-  background: Teal;
-  color: #fff;
 
-  padding: 8px 14px; /* auto size */
-  border-radius: 30px; /* pill shape */
 
-  font-weight: bold;
-  font-size: 22px;
 
-  display: inline-block;
-  width: auto; /* 🔥 IMPORTANT */
-  max-width: auto; /* prevent too long stretch */
+/* =========================
+   TOP NAVBAR LAYOUT
+========================= */
 
-  text-align: center;
+nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-  z-index: 9998;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-
-  transition: all 0.3s ease;
+  width:100%;
 }
 
+.menu-container{
+  position:relative;
 
-body {
-  padding-top: 160px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+
+  margin-right:auto;
 }
 
-.wallet-float{
-  transition: all 0.3s ease;
-}
+.right-nav{
+  margin-left:auto;
 
-.wallet-float:active{
-  transform: scale(1.05);
-}
-
-.wallet-float:hover {
-  background: #b30000;
+  display:flex;
+  align-items:center;
 }
 
 
 
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  z-index: 9999;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+/* =========================
+   TOP NAVBAR LAYOUT
+========================= */
 
-nav div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+nav{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
 
-.right-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:12px 15px;
+
+  background:#00a86b;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+
+  z-index:9999;
+  box-sizing:border-box;
 }
 
 
 
 
+/* MENU LEFT */
+.menu-container{
+  display:flex;
+  align-items:left;
+}
 
-@media (max-width: 768px) {
-  nav {
-    flex-direction: column;
-    align-items: flex-start;
+
+
+/* WALLET CARD */
+.nav-wallet{
+  background:#8B0000;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:30px;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+/* MENU ICON */
+.menu-icon{
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  color:#111;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+  nav{
+    padding:10px 12px;
   }
 
-  nav div,
-  .Right-nav {
-    width: 100%;
-    justify-content: flex-start;
+  .nav-wallet{
+    font-size:13px;
+    padding:7px 12px;
   }
 
-  nav a {
-    display: inline-block;
-    margin: 5px 5px 0 0;
-  }
 }
 
 
@@ -646,7 +645,7 @@ nav div {
 
 
 .btn{
-  background:linear-gradient(135deg,#ff1a1a,#8B0000);
+  background:linear-gradient(135deg,green,#8B0000);
   color:#fff;
   padding:12px 18px;
   border:none;
@@ -674,7 +673,7 @@ nav div {
 
 
 .card{
-  background:#fff;
+  background:white;
   padding:18px;
   border-radius:20px;
   box-shadow:0 8px 25px rgba(0,0,0,0.06);
@@ -723,7 +722,7 @@ nav div {
 }
 
 .modal-content {
-  background: #ffffff;
+  background: #00a86b;
   width: 92%;
   max-width: 420px;
   border-radius: 18px;
@@ -838,35 +837,57 @@ nav div {
 }
 
 
-#transactionTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+/* =========================
+   TRANSACTION TABLE
+========================= */
+
+.transaction-wrapper{
+  width:100%;
+  overflow:hidden;
+  border-radius:16px;
 }
 
-#transactionTable th,
-#transactionTable td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
+#transactionTable{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  table-layout:fixed;
 }
 
-#transactionTable th {
-  background: #8B0000;
-  color: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+#transactionTable th{
+  background:#8B0000;
+  color:#fff;
+  padding:12px;
+  font-size:14px;
+  text-align:center;
 }
 
-#transactionTable tr:hover {
-  background: #fff2f2;
+#transactionTable td{
+  padding:12px;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+  text-align:center;
+  word-wrap:break-word;
 }
 
-@media (max-width: 768px) {
-  #transactionTable {
-    font-size: 12px;
+#transactionTable tr:hover{
+  background:#fafafa;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+  #transactionTable th,
+  #transactionTable td{
+    padding:10px 6px;
+    font-size:12px;
   }
+
+  .btn{
+    font-size:11px !important;
+    padding:6px 8px !important;
+  }
+
 }
 
 
@@ -903,25 +924,25 @@ html, body {
   bottom:0;
   left:0;
   width:100%;
-  background:#fff;
+  background:white;
   display:flex;
   justify-content:space-around;
   align-items:center;
-  padding:10px 5px;
+  padding:4px 3px;
   box-shadow:0 -2px 15px rgba(0,0,0,0.08);
   z-index:99999;
   border-top:1px solid #eee;
 }
 
 .bottom-nav button{
-  background:none;
+  background:white;
   border:none;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  color:#666;
-  font-size:12px;
+  color:Black;
+  font-size:16px;
   cursor:pointer;
   transition:0.3s;
 }
@@ -932,7 +953,7 @@ html, body {
 }
 
 .bottom-nav button:hover{
-  color:#8B0000;
+  color:white;
   transform:translateY(-2px);
 }
 
@@ -944,11 +965,11 @@ body{
 
 
 .input{
-  width:100%;
+  width:auto%;
   padding:14px;
-  border-radius:12px;
+  border-radius:15px;
   border:1px solid #ddd;
-  margin-bottom:12px;
+  margin-bottom:15px;
   font-size:15px;
   outline:none;
   transition:0.3s;
@@ -973,76 +994,524 @@ body{
 }
 
 
-  </style>
+/* =========================
+   RED BOTTOM NAV
+========================= */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+
+  padding:5px 3px;
+
+  box-shadow:0 -2px 15px rgba(0,0,0,0.15);
+
+  z-index:99999;
+
+  border-top:2px solid white;
+}
+
+
+
+
+/* ICON CIRCLE */
+.bottom-nav button span{
+  font-size:22px;
+  background:green;   
+  color:green;    width:45px;
+  height:45px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  margin-bottom:2px;
+
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+
+  transition:0.3s;
+}
+
+/* HOVER EFFECT */
+.bottom-nav button:hover span{
+  transform:scale(1.08);
+  background:none;
+}
+
+/* LABEL */
+.bottom-nav button small{
+  font-weight:100;
+}
+
+
+
+
+.nav-wallet{
+  background:linear-gradient(135deg,#008080,#006666);
+  color:#fff;
+  padding:10px 16px;
+  border-radius:25px;
+  font-weight:700;
+  font-size:16px;
+  display:flex;
+  align-items:right;
+  justify-content:center;
+  min-width:auto;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  transition:0.3s;
+}
+
+.nav-wallet:hover{
+  transform:translateY(-2px);
+  opacity:0.95;
+}
+
+
+
+
+/* =========================
+   MODERN DASHBOARD
+========================= */
+
+#dashboard{
+  padding-top:110px;
+}
+
+.dashboard-header{
+  margin-bottom:25px;
+}
+
+.dashboard-header h2{
+  font-size:28px;
+  color:green;
+  margin-bottom:5px;
+  border:none;
+  padding:0;
+}
+
+.dashboard-header p{
+  color:#666;
+  font-size:14px;
+}
+
+/* GRID */
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+  gap:16px;
+}
+
+/* CARD */
+.service-card{
+  background:white;
+  border-radius:20px;
+  padding:10px 8px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+
+  box-shadow:0 6px 20px rgba(0,0,0,0.06);
+
+  transition:0.25s ease;
+
+  border:1px solid #f3f3f3;
+}
+
+.service-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+
+/* ICON */
+.service-icon{
+  width:50px;
+  height:50px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:18px;
+
+  background:linear-gradient(135deg,green,Teal);
+
+  color:Teal;
+
+  font-size:28px;
+
+  margin-bottom:12px;
+
+  box-shadow:0 6px 15px rgba(255,26,26,0.25);
+}
+
+/* TEXT */
+.service-card span{
+  font-size:16px;
+  font-weight:600;
+  color:#333;
+  text-align:center;
+}
+
+/* =========================
+   MOBILE NAV FIX
+========================= */
+
+@media(max-width:768px){
+
+  nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    overflow:visible;
+  }
+
+.bottom-nav{
+  font-size:11px;
+  font-weight:700;
+  color:#7b7b7b;
+  transition:.3s ease;
+}
+
+  .menu-container{
+    position:relative;
+    flex:0 0 auto;
+    justify-content:flex-start;
+    align-items:center;
+  }
+
+.right-nav{
+  display:flex;
+  align-items:right;
+
+  margin-left:right;
+}
+
+  .dropdown{
+    position:absolute;
+    top:48px;
+    left:0;
+    right:auto;
+
+    width:230px;
+    max-width:85vw;
+
+    z-index:99999;
+  }
+
+}
+
+
+
+
+/* =========================
+   SUCCESS OVERLAY
+========================= */
+
+.success-card{
+  position:fixed;
+  inset:0;
+
+  display:none; /* HIDDEN BY DEFAULT */
+
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(8px);
+
+  z-index:999999;
+  padding:20px;
+
+  animation:fadeSuccess 0.3s ease;
+}
+
+/* SUCCESS BOX */
+.success-box{
+  width:100%;
+  max-width:360px;
+
+  background:rgba(255,255,255,0.96);
+
+  border-radius:28px;
+
+  padding:35px 25px;
+
+  text-align:center;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.18),
+    0 0 25px rgba(0,184,107,0.08);
+
+  animation:successPop 0.45s ease;
+
+  position:relative;
+
+  overflow:hidden;
+}
+
+/* TOP GLOW */
+.success-box::before{
+  content:"";
+
+  position:absolute;
+  top:-120px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  width:220px;
+  height:220px;
+
+  background:radial-gradient(
+    circle,
+    rgba(0,184,107,0.18),
+    transparent 70%
+  );
+
+  z-index:0;
+}
+
+/* ICON HOLDER */
+.success-icon{
+  width:95px;
+  height:95px;
+
+  margin:auto auto 22px;
+
+  border-radius:50%;
+
+  background:linear-gradient(
+    135deg,
+    #00d47e,
+    #00a86b
+  );
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  position:relative;
+
+  z-index:1;
+
+  animation:
+    iconPop 0.5s ease,
+    pulseGlow 2s infinite;
+}
+
+/* WHITE CHECK */
+.success-icon::before{
+  content:"✓";
+
+  color:#fff;
+
+  font-size:52px;
+  font-weight:900;
+
+  animation:checkBounce 0.6s ease;
+}
+
+/* SUCCESS TEXT */
+.success-box h2{
+  font-size:24px;
+  color:#111;
+  margin-bottom:10px;
+  position:relative;
+  z-index:1;
+}
+
+.success-box p{
+  color:#666;
+  font-size:15px;
+  line-height:1.5;
+  margin-bottom:25px;
+  position:relative;
+  z-index:1;
+}
+
+/* BUTTON */
+.success-box button{
+  width:100%;
+
+  border:none;
+
+  background:linear-gradient(
+    135deg,
+    #00c774,
+    #00995f
+  );
+
+  color:#fff;
+
+  padding:14px;
+
+  border-radius:14px;
+
+  font-size:15px;
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:0.3s;
+
+  position:relative;
+  z-index:1;
+}
+
+.success-box button:hover{
+  transform:translateY(-2px);
+  opacity:0.95;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes fadeSuccess{
+  from{
+    opacity:0;
+  }
+
+  to{
+    opacity:1;
+  }
+}
+
+@keyframes successPop{
+  0%{
+    transform:scale(0.7) translateY(30px);
+    opacity:0;
+  }
+
+  100%{
+    transform:scale(1) translateY(0);
+    opacity:1;
+  }
+}
+
+@keyframes iconPop{
+  0%{
+    transform:scale(0.2) rotate(-20deg);
+    opacity:0;
+  }
+
+  70%{
+    transform:scale(1.15) rotate(5deg);
+    opacity:1;
+  }
+
+  100%{
+    transform:scale(1);
+  }
+}
+
+@keyframes checkBounce{
+  0%{
+    transform:scale(0);
+  }
+
+  60%{
+    transform:scale(1.3);
+  }
+
+  100%{
+    transform:scale(1);
+  }
+}
+
+@keyframes pulseGlow{
+  0%{
+    box-shadow:
+      0 0 0 rgba(0,212,126,0.4);
+  }
+
+  50%{
+    box-shadow:
+      0 0 30px rgba(0,212,126,0.45),
+      0 0 60px rgba(0,212,126,0.2);
+  }
+
+  100%{
+    box-shadow:
+      0 0 0 rgba(0,212,126,0.4);
+  }
+}
+</style>
 </head>
 
 
 
-<body>
+<nav>
+  <!-- LEFT -->
+  <div class="menu-container">
 
-<div id="walletFloat" class="wallet-float" onclick="scrollToWallet()">
-  ₦0
+    <span class="menu-icon" onclick="toggleMenu()">
+      ☰ Menu
+    </span>
 </div>
 
 
+     <div id="walletCard" class="wallet-card">
+     ₦<span id="navWallet">0</span>
+     </div>
+</nav>
+
+<body>
 
 
 
 
-<nav>
+    <div id="dropdownMenu" class="dropdown">
 
-<div class="menu-container">
-  <span class="menu-icon" onclick="toggleMenu()">☰ Menu</span>
 
-<div id="dropdownMenu" class="dropdown">
+
+
+
 
   <!-- MAIN -->
   <div class="menu-title">MAIN</div>
-
-  <a href="#" onclick="showPage('about'); closeMenu()">
-    🏠 Home
-  </a>
 
   <a href="#" onclick="showPage('User'); closeMenu()">
     👤 Profile
   </a>
 
-  <a href="#" onclick="showPage('transactions'); closeMenu()">
-    📜 Transactions
-  </a>
+<!-- ACCOUNT -->
+<div class="menu-title">ACCOUNT</div>
 
+<a href="#" onclick="fundWallet(); closeMenu()">
+  💰 Fund Wallet
+</a>
 
-  <!-- SERVICES -->
-  <div class="menu-title">SERVICES</div>
+<a href="#" id="activateBtn"
+   onclick="openBalance(); closeMenu()">
+   ⚡ Activate Voucher
+</a>
 
-  <a href="#" onclick="showPage('voucher'); closeMenu()">
-    📶 WiFi Voucher
-  </a>
+<a href="#" id="menuLoginBtn"
+   onclick="openModal(); closeMenu()">
+   🔐 Login
+</a>
 
-  <a href="#" onclick="showPage('data'); closeMenu()">
-    📡 Buy Data
-  </a>
-
-  <a href="#" onclick="showPage('airtime'); closeMenu()">
-    📱 Buy Airtime
-  </a>
-
-  <a href="#" onclick="showPage('bills'); closeMenu()">
-    💡 Pay Bills
-  </a>
-
-
-  <!-- ACCOUNT -->
-  <div class="menu-title">ACCOUNT</div>
-
-  <a href="#" onclick="fundWallet(); closeMenu()">
-    💰 Fund Wallet
-  </a>
-
-  <a href="#" id="activateBtn"
-     onclick="openBalance(); closeMenu()">
-     ⚡ Activate Voucher
-  </a>
+<a href="#" id="menuLogoutBtn"
+   onclick="openLogoutBox(); closeMenu()"
+   style="display:none;">
+   🚪 Logout
+</a>
 
 
   <!-- SUPPORT -->
@@ -1060,28 +1529,13 @@ body{
 <a href="#" onclick="showPage('partnership'); closeMenu()">
   🤝 Partnership
 </a>
+
 <a href="#" onclick="showPage('services'); closeMenu()">
-  🛠 Services
+  🏗️ Services
 </a>
 
 </div>
 </div>
-
-
-
-
-<div class="right-nav">
-
-
-
-
-
-
-</a>
-    <button class="btn" id="loginBtn" onclick="openModal()">Login</button>
-</div>
-
-
 
 </nav>
 
@@ -1126,7 +1580,112 @@ body{
 
 
 
-<section id="about" class="page active">
+
+
+<section id="dashboard" class="page active">
+
+
+  <div class="dashboard-header">
+    <h2>Welcome to BIVA</h2>
+    <p>Premium Virtual Assistance & Internet Services</p>
+<div id="dashboardLoginBox" style="margin-top:15px;">
+
+  <button
+    class="btn"
+    onclick="openModal()"
+    style="
+      max-width:220px;
+      border-radius:18px;
+      font-size:15px;
+      padding:12px;
+    ">
+
+    🔐 Login / Signup
+
+  </button>
+</div>
+</div>
+
+
+
+
+
+
+
+  <div class="dashboard-grid">
+
+
+    <div class="service-card" onclick="showPage('voucher')">
+      <div class="service-icon">🛜</div>
+      <span>Voucher</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('data')">
+      <div class="service-icon">🌐</div>
+      <span>Buy Data</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('airtime')">
+      <div class="service-icon">📞</div>
+      <span>Airtime</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('bills')">
+      <div class="service-icon">💡</div>
+      <span>Pay Bills</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('transactions')">
+      <div class="service-icon">📜</div>
+      <span>Transactions</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('User')">
+      <div class="service-icon">👤</div>
+      <span>Profile</span>
+    </div>
+
+    <div class="service-card" onclick="fundWallet()">
+      <div class="service-icon">💰</div>
+      <span>Fund Wallet</span>
+    </div>
+
+    <div class="service-card" onclick="openBalance()">
+      <div class="service-icon">⚡</div>
+      <span>Activate</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('services')">
+      <div class="service-icon">🛠</div>
+      <span>Services</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('partnership')">
+      <div class="service-icon">🤝</div>
+      <span>Partnership</span>
+    </div>
+
+    <div class="service-card" onclick="openChatBox()">
+      <div class="service-icon">💬</div>
+      <span>Support</span>
+    </div>
+
+    <div class="service-card" onclick="showPage('about')">
+      <div class="service-icon">🏠</div>
+      <span>About</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+
+
+
+
+
+<section id="about" class="page">
 
   <h2>About Us</h2>
   <p><strong>Bright International Virtual Assistance (BIVA)</strong> is a fully registered digital service and internet solutions company committed to delivering reliable, affordable, and high-quality virtual assistance and internet services across Nigeria and beyond.</p>
@@ -1190,22 +1749,31 @@ body{
 </section>
 
 <section id="transactions" class="page">
+
   <h2>Transaction History</h2>
-  <div class="card" style="overflow:auto;max-height:1024px;">
-  <table id="transactionTable">
-    <thead>
-      <tr>
-        <th>Plan</th>
-        <th>Amount</th>
-        <th>Voucher</th>
-        <th>Date</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="transactionBody"></tbody>
-  </table>
-</div>
+
+  <div class="transaction-wrapper">
+
+    <table id="transactionTable">
+
+<thead>
+  <tr>
+    <th>Type</th>
+    <th>Amount</th>
+    <th>Action</th>
+  </tr>
+</thead>
+
+<tbody id="transactionBody"></tbody>
+
+    </table>
+
+  </div>
+
 </section>
+
+
+
 
 
 
@@ -1237,12 +1805,6 @@ body{
      <div id="walletCard" class="wallet-card">
      <span id="wallet">0</span>
      </div>
-
-
-     <button class="btn" id="logoutBtn" onclick="openLogoutBox()" style="display:none">Logout</button>
-
-
-
 </section>
 
 
@@ -1390,30 +1952,67 @@ function hideLoader() {
 
 
 function showPage(pageId) {
+
   // hide all pages
-  document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
   });
 
   // show selected page
-  document.getElementById(pageId).classList.add('active');
+  const selectedPage = document.getElementById(pageId);
 
-  // ✅ CONTROL HEADER VISIBILITY
+  if (selectedPage) {
+    selectedPage.classList.add("active");
+  }
+
+  // HEADER CONTROL
   const header = document.getElementById("mainHeader");
 
+  // only show header on About page
   if (pageId === "about") {
     header.style.display = "block";
   } else {
     header.style.display = "none";
   }
 
-  // close menu
+  // close dropdown menu
   closeMenu();
 
-  // scroll to top
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // smooth scroll to top
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
 }
 
+
+
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  // hide all pages first
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  // show dashboard only
+  document.getElementById("dashboard").classList.add("active");
+
+  // hide header on refresh
+  document.getElementById("mainHeader").style.display = "none";
+
+  // close menu if open
+  const menu = document.getElementById("dropdownMenu");
+
+  if(menu){
+    menu.style.display = "none";
+  }
+
+  // reset scroll
+  window.scrollTo(0, 0);
+
+});
 
 
 
@@ -1428,50 +2027,6 @@ function closeMenu() {
 
 
 
-
-
-function saveOmadaSession(user){
-  const params = new URLSearchParams(window.location.search);
-
-  const data = {
-    uid: user.uid,
-    email: user.email,
-    clientMac: params.get("clientMac"),
-    apMac: params.get("apMac"),
-    ssid: params.get("ssid"),
-    cliToken: params.get("cliToken"),
-    timestamp: new Date().toISOString()
-  };
-
-  db.collection("users")
-    .doc(user.uid)
-    .collection("omada_sessions")
-    .add(data)
-    .then(() => {
-      console.log("✅ Omada session saved");
-    })
-    .catch(err => {
-      console.error("❌ Error saving Omada session:", err);
-    });
-}
-
-
-
-
-
-
-
-
-
-
-
-let walletFloat = null;
-
-window.addEventListener("DOMContentLoaded", () => {
-  walletFloat = document.getElementById('walletFloat');
-});
-
-if (walletFloat) walletFloat.innerText = '₦' + balance;
 
 
 function showAlert(message, type="success"){
@@ -1551,7 +2106,7 @@ async function signup(){
       createdAt: new Date()
     });
 
-    showAlert("✅ Account created successfully!");
+    showSuccessCard("Account Created Successfuly");
     closeModal();
 
   }catch(err){
@@ -1582,7 +2137,7 @@ function calculateBonus(amount){
 
 
 
-function fundWallet() {
+async function fundWallet() {
 
   if (!currentUser) {
     showAlert("Please login first", "error");
@@ -1596,7 +2151,6 @@ function fundWallet() {
     return;
   }
 
-  // clean input
   amount = Number(amount.toString().replace(/[^0-9]/g, ""));
 
   if (!amount || amount <= 0) {
@@ -1605,33 +2159,77 @@ function fundWallet() {
   }
 
   FlutterwaveCheckout({
+
     public_key: "FLWPUBK-28666bd71e66a7e62eff4c94a16b83fb-X",
+
     tx_ref: "BIVA_" + Date.now(),
+
     amount: amount,
+
     currency: "NGN",
 
     customer: {
       email: currentUser.email,
     },
 
-    callback: async function (response) {
+    callback: async function(response) {
 
-      await fetch("/api/payment/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          transaction_id: response.transaction_id,
-          userId: currentUser.uid
-        })
-      });
+      try {
 
-      showAlert("Payment processing completed");
-      await getWallet();
+        showLoader("Verifying Payment...");
+
+        const res = await fetch(
+          "https://biva-backend-ezvu.onrender.com/api/payment/verify",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              transaction_id: response.transaction_id,
+              userId: currentUser.uid
+            })
+          }
+        );
+
+        const text = await res.text();
+
+        let data;
+
+        try {
+          data = JSON.parse(text);
+        } catch(e) {
+          console.error(text);
+          throw new Error("Invalid server response");
+        }
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Wallet funding failed");
+        }
+
+       showSuccessCard("Wallet funded successful");
+
+        await getWallet();
+
+      } catch(err) {
+
+        console.error(err);
+
+        showAlert(err.message, "error");
+
+      } finally {
+
+        hideLoader();
+
+      }
     }
   });
 }
+
+
+
 
 
 async function login(){
@@ -1673,6 +2271,33 @@ async function login(){
 
 
 
+auth.onAuthStateChanged(user => {
+
+  const loginBox = document.getElementById("dashboardLoginBox");
+
+  if(user){
+
+    // hide login button
+    if(loginBox){
+      loginBox.style.display = "none";
+    }
+
+  } else {
+
+    // show login button
+    if(loginBox){
+      loginBox.style.display = "block";
+    }
+
+  }
+
+});
+
+
+
+
+
+
 async function logout(){
   showLoader("Signing you out...");
 
@@ -1681,7 +2306,7 @@ async function logout(){
 
     // optional cleanup UI
     document.getElementById("userEmail").innerText = "";
-    showAlert("👋 Logged out successfully");
+    showSuccessCard("You Successfuly Logged Out");
 
   } catch (err) {
     showAlert("Error: " + err.message, "error");
@@ -1700,8 +2325,8 @@ async function getWallet() {
   const res = await fetch(`/api/wallet/${currentUser.uid}`);
   const data = await res.json();
 
-  document.getElementById("wallet").innerText = "₦" + data.wallet;
-  walletFloat.innerText = "₦" + data.wallet;
+document.getElementById("wallet").innerText = "₦" + data.wallet;
+document.getElementById("navWallet").innerText = data.wallet;
 }
 
 // AUTH LISTENER
@@ -1713,8 +2338,8 @@ auth.onAuthStateChanged(user => {
   }
 
   if (user) {
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display = 'block';
+document.getElementById("menuLoginBtn").style.display = "none";
+document.getElementById("menuLogoutBtn").style.display = "flex";
     document.getElementById("userEmail").innerText = user.email;
 
     loadTransactions(user.uid);
@@ -1738,14 +2363,14 @@ if (doc.exists && doc.data().blocked === true) {
 
 
         wallet.innerText = '₦' + balance;
-        walletFloat.innerText = '₦' + balance;
+        document.getElementById("navWallet").innerText = balance;
 
         voucherEl.innerText = doc.data().lastVoucher
           ? "Last Purchased Voucher: " + doc.data().lastVoucher
           : "";
       } else {
         wallet.innerText = '₦0';
-        walletFloat.innerText = '₦0';
+        document.getElementById("navWallet").innerText = "0";
         document.getElementById("userEmail").innerText = "";
       }
     });
@@ -1753,10 +2378,10 @@ if (doc.exists && doc.data().blocked === true) {
   } else {
     currentUser = null;
     wallet.innerText = '₦0';
-    walletFloat.innerText = '₦0';
+    document.getElementById("navWallet").innerText = "0";
 
-    loginBtn.style.display = 'block';
-    logoutBtn.style.display = 'none';
+document.getElementById("menuLoginBtn").style.display = "flex";
+document.getElementById("menuLogoutBtn").style.display = "none";
 
     document.getElementById("userEmail").innerText = "";
     document.getElementById("transactionBody").innerHTML = "";
@@ -1913,82 +2538,135 @@ await db.collection("vouchers").doc(voucher).set({
 
 
 function loadTransactions(uid){
+
   const body = document.getElementById("transactionBody");
 
   db.collection("transactions")
     .where("userId", "==", uid)
     .orderBy("createdAt", "desc")
+
     .onSnapshot(snapshot => {
 
       body.innerHTML = "";
 
       if(snapshot.empty){
+
         body.innerHTML = `
           <tr>
-            <td colspan="5" style="text-align:center;">No transaction history yet</td>
+            <td colspan="6" style="text-align:center;">
+              No transaction history yet
+            </td>
           </tr>
         `;
+
         return;
       }
 
       snapshot.forEach(doc => {
+
         const t = doc.data();
+        const id = doc.id;
 
         const date = t.createdAt?.toDate
           ? t.createdAt.toDate().toLocaleString()
           : "Just now";
 
-        // Default styling
-        let typeLabel = "UNKNOWN";
-        let color = "#333";
+        let badge = "";
+        let details = "";
+        let ref = t.voucher || t.reference || "—";
 
+        // =========================
+        // FUND WALLET
+        // =========================
         if(t.type === "fund"){
-          typeLabel = "FUND";
-          color = "green";
+
+          badge = `<span class="tx-badge tx-fund">FUND</span>`;
+
+          details = `
+            Wallet Funding
+          `;
         }
+
+        // =========================
+        // WIFI VOUCHER
+        // =========================
         else if(t.type === "purchase"){
-          typeLabel = "DEBIT";
-          color = "red";
+
+          badge = `<span class="tx-badge tx-debit">VOUCHER</span>`;
+
+          details = `
+            ${t.plan || "-"}
+          `;
         }
-        else if(t.type === "bonus"){
-          typeLabel = "BONUS";
-          color = "blue";
+
+        // =========================
+        // DATA
+        // =========================
+        else if(t.type === "data"){
+
+          badge = `<span class="tx-badge tx-data">DATA</span>`;
+
+          details = `
+            ${t.network || ""}<br>
+            ${t.plan || ""}
+          `;
         }
 
-        body.innerHTML += `
-          <tr>
-            <td>
-              <span style="color:${color};font-weight:600;">
-                ${typeLabel}
-              </span>
-              <br>
-              ${t.plan || "-"}
-            </td>
+        // =========================
+        // AIRTIME
+        // =========================
+        else if(t.type === "airtime"){
 
-            <td>
-              ₦${t.amount || t.price || 0}
+          badge = `<span class="tx-badge tx-airtime">AIRTIME</span>`;
 
-              ${t.bonus ? `<br><small style="color:green;font-weight:600;">+ ₦${t.bonus} bonus</small>` : ""}
+          details = `
+            ${t.network || ""}<br>
+            ${t.phone || ""}
+          `;
+        }
 
-              ${t.total ? `<br><small style="color:#555;">Total: ₦${t.total}</small>` : ""}
-            </td>
+        // =========================
+        // BILL PAYMENT
+        // =========================
+        else if(t.type === "bill"){
 
-            <td>${t.voucher || "—"}</td>
+          badge = `<span class="tx-badge tx-bill">BILL</span>`;
 
-            <td>${date}</td>
+          details = `
+            ${t.disco || ""}<br>
+            Meter: ${t.meter || ""}
+          `;
+        }
 
-            <td>
-              <button class="btn" style="padding:5px 8px;font-size:12px;"
-                onclick='printVoucher(${JSON.stringify(t)})'>
-                View
-              </button>
-            </td>
-          </tr>
-        `;
+body.innerHTML += `
+
+  <tr>
+
+    <td>${badge}</td>
+
+    <td>
+      ₦${Number(t.amount || t.price || 0).toLocaleString()}
+    </td>
+
+    <td>
+
+<button
+  class="btn"
+  style="padding:6px 10px;font-size:12px;"
+  onclick="viewTransaction('${id}')">
+
+  View
+
+</button>
+
+    </td>
+
+  </tr>
+`;
       });
-
     });
 }
+
 
 let selectedPlan = null;
 let selectedPrice = null;
@@ -2014,6 +2692,41 @@ document.addEventListener("DOMContentLoaded", function () {
     buy(selectedPrice, selectedPlan);
   });
 });
+
+
+
+
+
+
+async function viewTransaction(id){
+
+  try{
+
+    const doc = await db.collection("transactions").doc(id).get();
+
+    if(!doc.exists){
+      showAlert("Transaction not found", "error");
+      return;
+    }
+
+    const t = doc.data();
+
+    printVoucher({
+      email: t.email || currentUser.email,
+      plan: t.plan || t.network || t.disco || "Transaction",
+      price: t.amount || t.price || 0,
+      voucher: t.voucher || t.reference || t.phone || t.meter || "N/A"
+    });
+
+  }catch(err){
+
+    console.error(err);
+    showAlert("Failed to load transaction", "error");
+
+  }
+}
+
+
 
 
 
@@ -2236,14 +2949,6 @@ async function sendSupportMessage(text){
 
 
 
-window.addEventListener("load", () => {
-  const nav = document.querySelector("nav");
-  const wallet = document.querySelector(".wallet-float");
-
-  const navHeight = nav.offsetHeight;
-
-  wallet.style.top = navHeight + "px";
-});
 
 
 
@@ -2312,7 +3017,7 @@ async function confirmLogout(){
 
     document.getElementById("userEmail").innerText = "";
 
-    showAlert("👋 You have been logged out");
+    showSuccessCard("You Successfuly Logged Out");
 
   } catch (err) {
     showAlert(err.message, "error");
@@ -2370,7 +3075,22 @@ async function buyAirtime() {
       return;
     }
 
-    showAlert("✅ Airtime sent successfully");
+    showSuccessCard("Airtime Purchase Successful");
+await db.collection("transactions").add({
+
+  userId: currentUser.uid,
+  email: currentUser.email,
+
+  type: "airtime",
+
+  network,
+  phone,
+
+  amount,
+
+  createdAt: new Date()
+
+});
 
     await getWallet();
 
@@ -2407,29 +3127,60 @@ async function buyData(plan) {
       return;
     }
 
-    const res = await fetch("/api/data/buy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userId: currentUser.uid,
-        phone,
-        data_plan: plan.data_plan,
-        network_id: plan.network_id
-      })
-    });
+    const res = await fetch(
+      "https://biva-backend-ezvu.onrender.com/api/data/buy",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          phone,
+          data_plan: plan.data_plan,
+          network_id: plan.network_id
+        })
+      }
+    );
 
-    const data = await res.json();
+    const text = await res.text();
 
-    if (!res.ok || !data.success) {
-      showAlert(data.error || "Purchase failed", "error");
-      return;
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON:", text);
+      throw new Error("Server returned invalid response");
     }
 
-    showAlert("✅ Data purchased successfully");
+if (!res.ok || !data.success) {
+  showAlert(data.error || "Purchase failed", "error");
+  return;
+}
 
-    await getWallet();
+// SAVE DATA TRANSACTION
+await db.collection("transactions").add({
+
+  userId: currentUser.uid,
+  email: currentUser.email,
+
+  type: "data",
+
+  network: plan.network_id,
+  plan: plan.data_plan,
+
+  amount: Number(plan.amount),
+
+  phone,
+
+  createdAt: new Date()
+
+});
+
+showSuccessCard("Data Purchase Successful");
+
+await getWallet();
 
   } catch (err) {
 
@@ -2477,24 +3228,31 @@ async function loadDataPlans(network) {
       airtel: 4
     };
 
-    const network_id =
-      networkMap[network.toLowerCase()];
+    const network_id = networkMap[network.toLowerCase()];
 
     const res = await fetch(
-      `/api/data/plans/${network_id}`
+      `https://biva-backend-ezvu.onrender.com/api/data/plans/${network_id}`
     );
 
-    const data = await res.json();
+    // READ AS TEXT FIRST
+    const text = await res.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON:", text);
+      throw new Error("Server returned invalid response");
+    }
 
     console.log("PLANS RESPONSE:", data);
 
-    if (!data.success) {
-
+    if (!res.ok || !data.success) {
       showAlert(
-        "Failed to load plans",
+        data.error || "Failed to load plans",
         "error"
       );
-
       return;
     }
 
@@ -2503,44 +3261,41 @@ async function loadDataPlans(network) {
 
     plansDiv.innerHTML = "";
 
-    /**
-     * IMPORTANT FIX:
-     * data.data is already the array
-     */
     const plans = data.data || [];
 
-plans.forEach(plan => {
+    plans.forEach(plan => {
 
-  plansDiv.innerHTML += `
-    <div class="card">
+      plansDiv.innerHTML += `
+        <div class="card">
 
-      <h3>${plan.name || plan.data_plan}</h3>
+          <h3>${plan.name || plan.data_plan}</h3>
 
-      <p>${plan.validity || ""}</p>
+          <p>${plan.validity || ""}</p>
 
-      <p>₦${plan.selling_price}</p>
+          <p>₦${plan.selling_price}</p>
 
-      <button
-        class="btn"
-        onclick='buyData({
-          data_plan: "${plan.data_plan}",
-          network_id: "${network_id}"
-        })'>
+          <button
+  class="btn"
+  onclick='buyData({
+    data_plan: "${plan.data_plan}",
+    network_id: "${network_id}",
+    amount: "${plan.selling_price}"
+  })'>
 
-        Buy Now
+            Buy Now
 
-      </button>
+          </button>
 
-    </div>
-  `;
-});
+        </div>
+      `;
+    });
 
   } catch (err) {
 
     console.error(err);
 
     showAlert(
-      "Error loading plans",
+      err.message || "Error loading plans",
       "error"
     );
 
@@ -2553,18 +3308,81 @@ plans.forEach(plan => {
 
 
 async function payBill(){
-  const meter = document.getElementById("meterNumber").value;
-  const disco = document.getElementById("disco").value;
-  const amount = document.getElementById("billAmount").value;
 
-  const res = await fetch("https://biva-backend-ezvu.onrender.com/pay-bill", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({meter, disco, amount})
-  });
+  try{
 
-  const data = await res.json();
-  alert(JSON.stringify(data));
+    showLoader("Processing Bill Payment...");
+
+    const meter = document.getElementById("meterNumber").value.trim();
+
+    const disco = document.getElementById("disco").value;
+
+    const amount = Number(
+      document.getElementById("billAmount").value
+    );
+
+    if(!currentUser){
+      showAlert("Please login first","error");
+      return;
+    }
+
+    const res = await fetch(
+      "https://biva-backend-ezvu.onrender.com/pay-bill",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          meter,
+          disco,
+          amount,
+          email: currentUser.email
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(!res.ok){
+      showAlert(data.error || "Payment failed","error");
+      return;
+    }
+
+    // SAVE TRANSACTION
+    await db.collection("transactions").add({
+
+      userId: currentUser.uid,
+      email: currentUser.email,
+
+      type: "bill",
+
+      disco,
+      meter,
+
+      amount,
+
+      reference: data.reference || "Electricity Payment",
+
+      createdAt: new Date()
+
+    });
+
+    showSuccessCard("Bill Payment Successful");
+
+    await getWallet();
+
+  }catch(err){
+
+    showAlert(err.message,"error");
+
+  }finally{
+
+    hideLoader();
+
+  }
 }
 
 
@@ -2577,7 +3395,7 @@ async function payBill(){
 // ===============================
 
 const voucherPlans = [
-
+  {price:150, desc:'1GB'},
   {price:300, desc:'2GB'},
   {price:450, desc:'3GB'},
   {price:600, desc:'4GB'},
@@ -2639,6 +3457,28 @@ window.addEventListener(
 );
 
 
+
+
+
+function showSuccessCard(message = "Your Purchase is Successful"){
+
+  document.querySelector(
+    "#successCard h2"
+  ).innerText = message;
+
+  document.getElementById(
+    "successCard"
+  ).style.display = "flex";
+
+}
+
+function closeSuccessCard(){
+
+  document.getElementById(
+    "successCard"
+  ).style.display = "none";
+
+}
 
 
 </script>
@@ -2903,34 +3743,39 @@ window.addEventListener(
 
 
 
+
+
+
 <!-- MOBILE BOTTOM NAV -->
 <div class="bottom-nav">
 
-  <button onclick="showPage('voucher')">
-    <span>📶</span>
-    <small>Voucher</small>
+  <button onclick="showPage('dashboard')">
+    <span>🏠</span>
+    <small>Home</small>
   </button>
+</div>
 
-  <button onclick="showPage('data')">
-    <span>📡</span>
-    <small>Data</small>
-  </button>
 
-  <button onclick="showPage('airtime')">
-    <span>📱</span>
-    <small>Airtime</small>
-  </button>
 
-  <button onclick="showPage('bills')">
-    <span>💡</span>
-    <small>Bills</small>
-  </button>
+<div id="successCard" class="success-card">
 
-  <button onclick="showPage('User')">
-    <span>👤</span>
-    <small>Profile</small>
-  </button>
+  <div class="success-box">
+
+    <div class="success-icon"></div>
+
+    <h2>Your Purchase is Successful</h2>
+
+    <p>Thank you for using BIVA</p>
+
+    <button onclick="closeSuccessCard()">
+      Continue
+    </button>
+
+  </div>
 
 </div>
+
+
+
 </body>
 </html>
