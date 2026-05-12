@@ -1,7 +1,13 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
+// ===============================
+// BUY AIRTIME
+// ===============================
+
 exports.buyAirtime = async (req, res) => {
+
+  let walletDeducted = false;
 
   try {
 
@@ -9,73 +15,94 @@ exports.buyAirtime = async (req, res) => {
       phone,
       network,
       amount,
-      email,
-      requestId
+      email
     } = req.body;
+
+    // ===============================
+    // VALIDATION
+    // ===============================
 
     if (
       !phone ||
       !network ||
       !amount ||
-      !email ||
-      !requestId
+      !email
     ) {
+
       return res.status(400).json({
-        error: "Missing fields"
+
+        success: false,
+
+        error: "Missing required fields"
+
       });
     }
 
-    // =====================================
+    // ===============================
+    // BLOCK INVALID LOW VALUES
+    // ===============================
+
+    if (Number(amount) < 50) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error: "Minimum airtime is ₦50"
+
+      });
+    }
+
+    // ===============================
     // NETWORK MAP
-    // =====================================
+    // ===============================
 
     const networkMap = {
+
       MTN: "mtn",
+
       GLO: "glo",
+
       AIRTEL: "airtel",
+
       "9MOBILE": "9mobile"
+
     };
 
     const networkCode =
-      networkMap[network.toUpperCase()];
+      networkMap[
+        network.toUpperCase()
+      ];
 
     if (!networkCode) {
+
       return res.status(400).json({
+
+        success: false,
+
         error: "Invalid network"
+
       });
     }
 
-    // =====================================
-    // DUPLICATE BLOCKER
-    // =====================================
-
-    const txRef =
-      db.collection("transactions")
-        .doc(requestId);
-
-    const existing =
-      await txRef.get();
-
-    if (existing.exists) {
-
-      return res.json({
-        success: true,
-        message: "Already processed"
-      });
-    }
-
-    // =====================================
-    // GET USER
-    // =====================================
+    // ===============================
+    // FIND USER
+    // ===============================
 
     const snapshot =
       await db.collection("users")
       .where("email", "==", email)
+      .limit(1)
       .get();
 
     if (snapshot.empty) {
+
       return res.status(404).json({
+
+        success: false,
+
         error: "User not found"
+
       });
     }
 
@@ -85,71 +112,76 @@ exports.buyAirtime = async (req, res) => {
     const userRef =
       userDoc.ref;
 
-    // =====================================
-    // FIRESTORE TRANSACTION
-    // =====================================
+    // ===============================
+    // UNIQUE TRANSACTION ID
+    // ===============================
+
+    const txId =
+      "AIRTIME_" + Date.now();
+
+    // ===============================
+    // SAFE WALLET DEDUCTION
+    // ===============================
 
     await db.runTransaction(
+
       async (transaction) => {
 
-      const freshUser =
-        await transaction.get(userRef);
+        const freshUser =
+          await transaction.get(userRef);
 
-      const wallet =
-        freshUser.data().wallet || 0;
+        const wallet =
+          Number(
+            freshUser.data().wallet || 0
+          );
 
-      if (wallet < amount) {
-        throw new Error(
-          "Insufficient balance"
-        );
+        if (wallet < amount) {
+
+          throw new Error(
+            "Insufficient balance"
+          );
+        }
+
+        transaction.update(userRef, {
+
+          wallet:
+          admin.firestore
+          .FieldValue
+          .increment(-amount)
+
+        });
+
+        walletDeducted = true;
       }
+    );
 
-      // deduct safely
-      transaction.update(userRef, {
-        wallet: wallet - amount
-      });
+    // ===============================
+    // CALL IACAFE API
+    // ===============================
 
-      // create transaction FIRST
-      transaction.create(txRef, {
+    const response = await axios.post(
 
-        txId: requestId,
-
-        email,
-        phone,
-        network,
-        amount,
-
-        type: "airtime",
-
-        status: "processing",
-
-        createdAt: new Date()
-      });
-
-    });
-
-    // =====================================
-    // CALL PROVIDER
-    // =====================================
-
-    const response =
-      await axios.post(
       "https://iacafe.com.ng/devapi/v1/airtime",
+
       {
+
         username:
-          process.env.IACAFE_USERNAME,
+        process.env.IACAFE_USERNAME,
 
         api_key:
-          process.env.IACAFE_API_KEY,
+        process.env.IACAFE_API_KEY,
 
-        network: networkCode,
+        network:
+        networkCode,
 
         phone,
 
         amount,
 
-        ref: requestId
+        ref: txId
+
       }
+
     );
 
     console.log(
@@ -157,92 +189,186 @@ exports.buyAirtime = async (req, res) => {
       response.data
     );
 
-    const success =
-      response.data?.code === "success" ||
+    // ===============================
+    // STRICT SUCCESS CHECK
+    // ===============================
+
+    const providerSuccess =
+
+      response.data?.code ===
+      "success" &&
+
       response.data?.data?.status ===
       "completed-api";
 
-    if (!success) {
+    if (!providerSuccess) {
+
       throw new Error(
-        "Provider failed"
+        "Provider rejected transaction"
       );
     }
 
-    // =====================================
-    // UPDATE SUCCESS
-    // =====================================
+    // ===============================
+    // SAVE SUCCESS TRANSACTION
+    // ===============================
 
-    await txRef.update({
-      status: "success"
+    await db.collection("transactions")
+    .doc(txId)
+    .set({
+
+      txId,
+
+      email,
+
+      phone,
+
+      network,
+
+      amount,
+
+      type: "airtime",
+
+      status: "success",
+
+      providerResponse:
+      response.data,
+
+      createdAt:
+
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
     });
 
+    // ===============================
+    // SUCCESS RESPONSE
+    // ===============================
+
     return res.json({
+
       success: true,
+
       message:
-        "Airtime sent successfully"
+      "Airtime purchase successful"
+
     });
 
   } catch (err) {
 
     console.error(
-      "🔥 SERVER ERROR:",
+
+      "🔥 AIRTIME ERROR:",
+
+      err.response?.data ||
       err.message
+
     );
 
-    // refund logic
+    // ===============================
+    // AUTO REFUND
+    // ===============================
+
     try {
 
-      const {
-        email,
-        amount,
-        requestId
-      } = req.body;
+      if (walletDeducted) {
 
-      const txRef =
-        db.collection("transactions")
-        .doc(requestId);
-
-      const txDoc =
-        await txRef.get();
-
-      // only refund if tx exists
-      if (txDoc.exists) {
+        const {
+          email,
+          amount
+        } = req.body;
 
         const snapshot =
           await db.collection("users")
           .where("email", "==", email)
+          .limit(1)
           .get();
 
         if (!snapshot.empty) {
 
-          const userRef =
-            snapshot.docs[0].ref;
+          await snapshot.docs[0]
+          .ref
+          .update({
 
-          await userRef.update({
             wallet:
-              admin.firestore
-              .FieldValue
-              .increment(amount)
-          });
-        }
+            admin.firestore
+            .FieldValue
+            .increment(amount)
 
-        await txRef.update({
-          status: "failed",
-          error: err.message
-        });
+          });
+
+          console.log(
+            "✅ Wallet refunded"
+          );
+        }
       }
 
-    } catch(refundErr) {
+    } catch (refundErr) {
 
       console.error(
-        "REFUND ERROR:",
+
+        "❌ REFUND FAILED:",
+
         refundErr.message
+
       );
     }
 
+    // ===============================
+    // SAVE FAILED TRANSACTION
+    // ===============================
+
+    try {
+
+      await db.collection("transactions")
+      .add({
+
+        email:
+        req.body.email,
+
+        phone:
+        req.body.phone,
+
+        network:
+        req.body.network,
+
+        amount:
+        req.body.amount,
+
+        type: "airtime",
+
+        status: "failed",
+
+        error:
+        "Provider rejected transaction",
+
+        createdAt:
+
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
+      });
+
+    } catch(saveErr){
+
+      console.error(
+        "Failed to save failed transaction:",
+        saveErr.message
+      );
+    }
+
+    // ===============================
+    // RETURN CLEAN ERROR
+    // ===============================
+
     return res.status(500).json({
+
       success: false,
-      error: err.message
+
+      error:
+      "Transaction failed. Wallet refunded."
+
     });
   }
 };
