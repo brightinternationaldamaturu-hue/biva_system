@@ -2,12 +2,32 @@ const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
 exports.buyAirtime = async (req, res) => {
-  try {
-    const { phone, network, amount, email } = req.body;
 
-    if (!phone || !network || !amount || !email) {
-      return res.status(400).json({ error: "Missing fields" });
+  try {
+
+    const {
+      phone,
+      network,
+      amount,
+      email,
+      requestId
+    } = req.body;
+
+    if (
+      !phone ||
+      !network ||
+      !amount ||
+      !email ||
+      !requestId
+    ) {
+      return res.status(400).json({
+        error: "Missing fields"
+      });
     }
+
+    // =====================================
+    // NETWORK MAP
+    // =====================================
 
     const networkMap = {
       MTN: "mtn",
@@ -16,99 +36,213 @@ exports.buyAirtime = async (req, res) => {
       "9MOBILE": "9mobile"
     };
 
-    const networkCode = networkMap[network.toUpperCase()];
+    const networkCode =
+      networkMap[network.toUpperCase()];
+
     if (!networkCode) {
-      return res.status(400).json({ error: "Invalid network" });
+      return res.status(400).json({
+        error: "Invalid network"
+      });
     }
 
+    // =====================================
+    // DUPLICATE BLOCKER
+    // =====================================
+
+    const txRef =
+      db.collection("transactions")
+        .doc(requestId);
+
+    const existing =
+      await txRef.get();
+
+    if (existing.exists) {
+
+      return res.json({
+        success: true,
+        message: "Already processed"
+      });
+    }
+
+    // =====================================
     // GET USER
-    const snapshot = await db.collection("users")
+    // =====================================
+
+    const snapshot =
+      await db.collection("users")
       .where("email", "==", email)
       .get();
 
     if (snapshot.empty) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({
+        error: "User not found"
+      });
     }
 
-    const userDoc = snapshot.docs[0];
-    const userRef = userDoc.ref;
-    const userData = userDoc.data();
+    const userDoc =
+      snapshot.docs[0];
 
-    // CHECK BALANCE FIRST
-    if (userData.wallet < amount) {
-      return res.status(400).json({ error: "Insufficient balance" });
-    }
+    const userRef =
+      userDoc.ref;
 
-    const txId = "AIRTIME_" + Date.now();
+    // =====================================
+    // FIRESTORE TRANSACTION
+    // =====================================
 
-    // STEP 1: DEDUCT WALLET FIRST (SAFE STRATEGY)
-    await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(-amount)
-    });
+    await db.runTransaction(
+      async (transaction) => {
 
-    try {
-      // STEP 2: CALL IACAFE (IMPORTANT: USE POST, NOT GET)
-      const response = await axios.post(
-        "https://iacafe.com.ng/devapi/v1/airtime",
-        {
-          username: process.env.IACAFE_USERNAME,
-          api_key: process.env.IACAFE_API_KEY,
-          network: networkCode,
-          phone,
-          amount,
-          ref: txId
-        }
-      );
+      const freshUser =
+        await transaction.get(userRef);
 
-      console.log("IACAFE RESPONSE:", response.data);
+      const wallet =
+        freshUser.data().wallet || 0;
 
-      // STEP 3: SUCCESS CHECK (THIS FIXES YOUR ISSUE)
-      const success =
-        response.data?.code === "success" ||
-        response.data?.data?.status === "completed-api";
-
-      if (!success) {
-        throw new Error("Airtime failed at provider");
+      if (wallet < amount) {
+        throw new Error(
+          "Insufficient balance"
+        );
       }
 
-      // STEP 4: SAVE TRANSACTION
-      await db.collection("transactions").doc(txId).set({
+      // deduct safely
+      transaction.update(userRef, {
+        wallet: wallet - amount
+      });
+
+      // create transaction FIRST
+      transaction.create(txRef, {
+
+        txId: requestId,
+
         email,
         phone,
         network,
         amount,
+
         type: "airtime",
-        status: "success",
-        txId,
+
+        status: "processing",
+
         createdAt: new Date()
       });
 
-      return res.json({
-        success: true,
-        message: "Airtime sent successfully"
-      });
+    });
 
-    } catch (err) {
-      console.error("❌ PROVIDER ERROR:", err.response?.data || err.message);
+    // =====================================
+    // CALL PROVIDER
+    // =====================================
 
-      // STEP 5: REFUND AUTOMATICALLY ON FAILURE
-      await userRef.update({
-        wallet: admin.firestore.FieldValue.increment(amount)
-      });
+    const response =
+      await axios.post(
+      "https://iacafe.com.ng/devapi/v1/airtime",
+      {
+        username:
+          process.env.IACAFE_USERNAME,
 
-      return res.status(500).json({
-        success: false,
-        error: "Airtime failed",
-        details: err.response?.data || err.message
-      });
+        api_key:
+          process.env.IACAFE_API_KEY,
+
+        network: networkCode,
+
+        phone,
+
+        amount,
+
+        ref: requestId
+      }
+    );
+
+    console.log(
+      "IACAFE RESPONSE:",
+      response.data
+    );
+
+    const success =
+      response.data?.code === "success" ||
+      response.data?.data?.status ===
+      "completed-api";
+
+    if (!success) {
+      throw new Error(
+        "Provider failed"
+      );
     }
 
+    // =====================================
+    // UPDATE SUCCESS
+    // =====================================
+
+    await txRef.update({
+      status: "success"
+    });
+
+    return res.json({
+      success: true,
+      message:
+        "Airtime sent successfully"
+    });
+
   } catch (err) {
-    console.error("🔥 SERVER ERROR:", err.message);
+
+    console.error(
+      "🔥 SERVER ERROR:",
+      err.message
+    );
+
+    // refund logic
+    try {
+
+      const {
+        email,
+        amount,
+        requestId
+      } = req.body;
+
+      const txRef =
+        db.collection("transactions")
+        .doc(requestId);
+
+      const txDoc =
+        await txRef.get();
+
+      // only refund if tx exists
+      if (txDoc.exists) {
+
+        const snapshot =
+          await db.collection("users")
+          .where("email", "==", email)
+          .get();
+
+        if (!snapshot.empty) {
+
+          const userRef =
+            snapshot.docs[0].ref;
+
+          await userRef.update({
+            wallet:
+              admin.firestore
+              .FieldValue
+              .increment(amount)
+          });
+        }
+
+        await txRef.update({
+          status: "failed",
+          error: err.message
+        });
+      }
+
+    } catch(refundErr) {
+
+      console.error(
+        "REFUND ERROR:",
+        refundErr.message
+      );
+    }
 
     return res.status(500).json({
-      error: "Server error",
-      details: err.message
+      success: false,
+      error: err.message
     });
   }
 };
