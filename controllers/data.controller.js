@@ -309,31 +309,7 @@ exports.buyData = async (req, res) => {
         );
       }
 
-      /**
-       * SAVE TRANSACTION
-       */
-      await db.collection("transactions")
-        .doc(request_id)
-        .set({
 
-          userId,
-          phone,
-
-          type: "data",
-
-          network_id,
-          data_plan,
-
-          originalAmount,
-          profit,
-          amountCharged: sellingAmount,
-
-          status: "success",
-
-          response: result,
-
-          createdAt: new Date()
-        });
 
       return res.json({
 
