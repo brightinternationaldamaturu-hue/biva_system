@@ -100,26 +100,11 @@ if (!success) {
 }
 
 
-
-
-
-
-      // STEP 4: SAVE TRANSACTION
-      await db.collection("transactions").doc(txId).set({
-        email,
-        phone,
-        network,
-        amount,
-        type: "airtime",
-        status: "success",
-        txId,
-        createdAt: new Date()
-      });
-
       return res.json({
         success: true,
         message: "Airtime sent successfully"
       });
+
 
     } catch (err) {
       console.error("❌ PROVIDER ERROR:", err.response?.data || err.message);
