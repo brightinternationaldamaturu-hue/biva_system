@@ -294,8 +294,8 @@
 
 
 .download-btn {
-  background: #25D366; /* green to stand out */
-  color: #fff;
+  background: green; /* green to stand out */
+  color: green;
   font-weight: 600;
   border-radius: 8px;
   padding: 8px 12px;
@@ -305,7 +305,7 @@
 }
 
 .download-btn:hover {
-  background: #1ea952;
+  background: white;
   transform: scale(1.05);
 }
 
@@ -393,7 +393,7 @@
       font-weight:600;
     }
 
-    .btn:hover {background:green;}
+    .btn:hover {background:teal;}
 
     footer {
       background:green;
@@ -407,7 +407,7 @@
       position:fixed;
       bottom:20px;
       right:20px;
-      background:#25D366;
+      background:green;
       color:white;
       padding:15px;
       border-radius:50%;
@@ -645,8 +645,8 @@ nav{
 
 
 .btn{
-  background:linear-gradient(135deg,green,#8B0000);
-  color:#fff;
+  background:linear-gradient(135deg,green,green);
+  color:white;
   padding:12px 18px;
   border:none;
   border-radius:12px;
@@ -1451,10 +1451,322 @@ body{
       0 0 0 rgba(0,212,126,0.4);
   }
 }
+
+
+
+
+
+/* =========================
+CLASSIC CONFIRM MODAL
+========================= */
+
+.confirm-modal{
+
+  position:fixed;
+  inset:0;
+
+  background:rgba(0,0,0,.45);
+
+  backdrop-filter:blur(8px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  z-index:999999999;
+
+  opacity:0;
+  visibility:hidden;
+
+  transition:.35s ease;
+}
+
+.confirm-modal.active{
+
+  opacity:1;
+  visibility:visible;
+}
+
+.confirm-box{
+
+  width:100%;
+  max-width:420px;
+
+  background:white;
+
+  border-radius:32px;
+
+  padding:35px 28px;
+
+  text-align:center;
+
+  transform:translateY(40px) scale(.9);
+
+  transition:.35s ease;
+
+  box-shadow:
+  0 30px 80px rgba(0,0,0,.18);
+}
+
+.confirm-modal.active .confirm-box{
+
+  transform:translateY(0) scale(1);
+}
+
+.confirm-icon{
+
+  width:90px;
+  height:90px;
+
+  margin:auto auto 20px;
+
+  border-radius:50%;
+
+  background:linear-gradient(
+    135deg,
+    #e9fff5,
+    #d7ffec
+  );
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:42px;
+}
+
+.confirm-box h2{
+
+  font-size:28px;
+
+  color:#111827;
+
+  margin-bottom:14px;
+
+  font-weight:800;
+}
+
+.confirm-box p{
+
+  color:#666;
+
+  line-height:1.7;
+
+  font-size:15px;
+
+  margin-bottom:28px;
+
+  white-space:pre-line;
+}
+
+.confirm-actions{
+
+  display:flex;
+
+  gap:14px;
+}
+
+.confirm-btn{
+
+  flex:1;
+
+  border:none;
+
+  padding:16px;
+
+  border-radius:18px;
+
+  cursor:pointer;
+
+  font-size:15px;
+
+  font-weight:700;
+
+  transition:.3s;
+}
+
+.cancel-btn{
+
+  background:#f3f4f6;
+
+  color:#111827;
+}
+
+.cancel-btn:hover{
+
+  background:#e5e7eb;
+}
+
+.proceed-btn{
+
+  background:linear-gradient(
+    135deg,
+    #00a86b,
+    #008753
+  );
+
+  color:white;
+
+  box-shadow:
+  0 10px 25px rgba(0,168,107,.25);
+}
+
+.proceed-btn:hover{
+
+  transform:translateY(-2px);
+
+  box-shadow:
+  0 18px 35px rgba(0,168,107,.35);
+}
+
+@media(max-width:600px){
+
+  .confirm-box{
+
+    margin:20px;
+
+    padding:28px 22px;
+
+    border-radius:26px;
+  }
+
+  .confirm-actions{
+
+    flex-direction:column;
+  }
+}
+
+
+
+/* =========================
+ERROR MODAL
+========================= */
+
+.error-modal{
+  position:fixed;
+  inset:0;
+
+  background:rgba(0,0,0,.55);
+
+  backdrop-filter:blur(8px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  z-index:999999999;
+
+  opacity:0;
+  visibility:hidden;
+
+  transition:.3s ease;
+}
+
+.error-modal.active{
+  opacity:1;
+  visibility:visible;
+}
+
+.error-box{
+
+  width:100%;
+  max-width:400px;
+
+  background:white;
+
+  border-radius:30px;
+
+  padding:35px 28px;
+
+  text-align:center;
+
+  transform:translateY(30px) scale(.95);
+
+  transition:.35s ease;
+
+  box-shadow:
+  0 25px 70px rgba(0,0,0,.18);
+}
+
+.error-modal.active .error-box{
+  transform:translateY(0) scale(1);
+}
+
+.error-icon{
+
+  width:90px;
+  height:90px;
+
+  margin:auto auto 20px;
+
+  border-radius:50%;
+
+  background:#fff1f1;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:42px;
+}
+
+.error-box h2{
+  font-size:28px;
+  font-weight:800;
+  color:#111827;
+  margin-bottom:14px;
+}
+
+.error-box p{
+  color:#666;
+  line-height:1.7;
+  font-size:15px;
+  margin-bottom:25px;
+}
+
+.error-btn{
+
+  border:none;
+
+  background:linear-gradient(
+    135deg,
+    #ff4d4f,
+    #ff2d2f
+  );
+
+  color:white;
+
+  padding:15px 28px;
+
+  border-radius:18px;
+
+  cursor:pointer;
+
+  font-weight:700;
+
+  font-size:15px;
+
+  transition:.3s;
+}
+
+.error-btn:hover{
+  transform:translateY(-2px);
+}
+
+
 </style>
+
+
+
+
+
+
+
+
+
+
+
 </head>
-
-
 
 <nav>
   <!-- LEFT -->
@@ -2110,7 +2422,12 @@ async function signup(){
     closeModal();
 
   }catch(err){
-    showAlert(err.message, "error");
+    console.error(err);
+
+showErrorModal(
+  "Signup Failed",
+  "Please use differnt info or try again later."
+);
 
   }finally{
     hideLoader();
@@ -2139,24 +2456,41 @@ function calculateBonus(amount){
 
 async function fundWallet() {
 
-  if (!currentUser) {
-    showAlert("Please login first", "error");
-    return;
-  }
+if (!currentUser) {
 
-  let amount = prompt("Enter amount to fund (₦):");
+  showErrorModal(
+    "Please login first."
+  );
 
-  if (!amount) {
-    showAlert("Amount is required", "error");
-    return;
-  }
+  return;
+}
 
-  amount = Number(amount.toString().replace(/[^0-9]/g, ""));
+let amount = prompt(
+  "Enter amount to fund (₦):"
+);
 
-  if (!amount || amount <= 0) {
-    showAlert("Invalid amount", "error");
-    return;
-  }
+if (!amount) {
+
+  showErrorModal(
+    "Amount is required."
+  );
+
+  return;
+}
+
+amount = Number(
+  amount.toString()
+  .replace(/[^0-9]/g, "")
+);
+
+if (!amount || amount <= 0) {
+
+  showErrorModal(
+    "Please enter a valid amount."
+  );
+
+  return;
+}
 
   FlutterwaveCheckout({
 
@@ -2217,7 +2551,12 @@ async function fundWallet() {
 
         console.error(err);
 
-        showAlert(err.message, "error");
+        console.error(err);
+
+showErrorModal(
+  "Transaction Failed",
+  "Please try again later."
+);
 
       } finally {
 
@@ -2261,7 +2600,12 @@ async function login(){
     closeModal();
 
   }catch(err){
-    showAlert(err.message, "error");
+    console.error(err);
+
+showErrorModal(
+  "Login Failed",
+  "Please make sure your login details are correct before retrying."
+);
 
   }finally{
     hideLoader();
@@ -2354,11 +2698,21 @@ document.getElementById("menuLogoutBtn").style.display = "flex";
 const userRef = db.collection("users").doc(user.uid);
 
 userRef.get().then(doc => {
-if (doc.exists && doc.data().blocked === true) {
-  auth.signOut();
-  showAlert("❌ Your account has been blocked", "error");
-  return;
-}
+
+  if (
+    doc.exists &&
+    doc.data().blocked === true
+  ) {
+
+    auth.signOut();
+
+    showErrorModal(
+      "Your account has been blocked."
+    );
+
+    return;
+  }
+
 });
 
 
@@ -2394,10 +2748,14 @@ document.getElementById("menuLogoutBtn").style.display = "none";
 
 // BUY WITH WALLET
 async function buy(price, plan) {
-  if (!currentUser) {
-    showAlert("Login first");
-    return;
-  }
+if (!currentUser) {
+
+  showErrorModal(
+    "Please login first."
+  );
+
+  return;
+}
 
   const userId = currentUser.uid;
   const userRef = db.collection("users").doc(userId);
@@ -2508,9 +2866,31 @@ await db.collection("vouchers").doc(voucher).set({
     await userRef.update({
       lastVoucher: voucher
     });
-                                                          showLoader("Finalizing", "Almost done...");
+ showLoader("Finalizing", "Almost done...");
+
     // 🎉 SUCCESS
     showAlert("✅ Purchase successful!");
+
+
+
+// 🔔 ADMIN NOTIFICATION
+await db.collection("adminNotifications").add({
+
+  title: "Voucher Purchase",
+
+  message:
+  `${currentUser.email} bought ${plan} voucher for ₦${Number(price).toLocaleString('en-NG')}`,
+
+  type: "voucher",
+
+  read:false,
+
+  createdAt:
+  firebase.firestore.FieldValue.serverTimestamp()
+
+});
+
+
 	// ✅ Show Activate button
 	document.getElementById("activateBtn").style.display = "block";
 
@@ -2521,11 +2901,17 @@ await db.collection("vouchers").doc(voucher).set({
       voucher
     });
 
-  } catch (err) {
-    showAlert("❌ " + err.message, "error");
-    console.error(err);
+} catch (err) {
 
-  } finally {
+  // LOG REAL ERROR
+  console.error(err);
+
+  // SHOW CLEAN MODAL
+  showErrorModal(
+    "Something went wrong. Please try again later."
+  );
+
+} finally {
     // 🔓 STEP 7: ALWAYS release lock (critical)
     await lockRef.set({ locked: false });
                       showLoader("Processing Purchase", "Securing payment & generating voucher...");
@@ -2702,12 +3088,19 @@ async function viewTransaction(id){
 
   try{
 
-    const doc = await db.collection("transactions").doc(id).get();
+const doc = await db
+  .collection("transactions")
+  .doc(id)
+  .get();
 
-    if(!doc.exists){
-      showAlert("Transaction not found", "error");
-      return;
-    }
+if(!doc.exists){
+
+  showErrorModal(
+    "Transaction not found."
+  );
+
+  return;
+}
 
     const t = doc.data();
 
@@ -2861,10 +3254,14 @@ async function sendMessage(){
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
-  if(!text || !currentUser){
-    showAlert("Login first to chat", "warning");
-    return;
-  }
+if(!text || !currentUser){
+
+  showErrorModal(
+    "Please login first to chat."
+  );
+
+  return;
+}
 
   const ref = db.collection("supportChats").doc(currentUser.uid);
 
@@ -3020,7 +3417,12 @@ async function confirmLogout(){
     showSuccessCard("You Successfuly Logged Out");
 
   } catch (err) {
-    showAlert(err.message, "error");
+    console.error(err);
+
+showErrorModal(
+  "Logout Failed",
+  "Please try again later."
+);
 
   } finally {
     hideLoader();
@@ -3029,74 +3431,375 @@ async function confirmLogout(){
 
 
 
-async function buyAirtime() {
-  try {
-    showLoader("Processing Airtime...");
 
-    const phone = document.getElementById("airtimePhone").value.trim();
-    const network = document.getElementById("airtimeNetwork").value;
-    const amount = Number(document.getElementById("airtimeAmount").value);
+
+// ===============================
+// BUY AIRTIME WITH CONFIRMATION
+// ===============================
+
+let airtimeProcessing = false;
+
+async function buyAirtime() {
+
+  // ===============================
+  // PREVENT DOUBLE CLICK
+  // ===============================
+
+  if (airtimeProcessing) {
+
+    showAlert(
+      "Transaction already processing...",
+      "warning"
+    );
+
+    return;
+  }
+
+  let requestId = null;
+
+  try {
+
+    // ===============================
+    // VALIDATION
+    // ===============================
 
     if (!currentUser) {
-      showAlert("Please login first", "error");
+
+      throw new Error(
+        "Please login first"
+      );
+    }
+
+    const phone =
+      document.getElementById(
+        "airtimePhone"
+      ).value.trim();
+
+    const network =
+      document.getElementById(
+        "airtimeNetwork"
+      ).value;
+
+    const amount = Number(
+      document.getElementById(
+        "airtimeAmount"
+      ).value
+    );
+
+    if (
+      !phone ||
+      !network ||
+      !amount
+    ) {
+
+      throw new Error(
+        "Fill all fields"
+      );
+    }
+
+    // ===============================
+    // CONFIRM PURCHASE
+    // ===============================
+
+    const confirmBuy =
+      await showConfirmModal(
+
+        "Confirm Airtime Purchase",
+
+`Network: ${network}
+
+Phone: ${phone}
+
+Amount: ₦${amount.toLocaleString('en-NG')}
+
+Proceed with transaction?`
+
+      );
+
+    if (!confirmBuy) {
       return;
     }
 
-    if (!phone || !network || !amount) {
-      showAlert("Fill all fields", "error");
-      return;
+    // ===============================
+    // START PROCESSING
+    // ===============================
+
+    airtimeProcessing = true;
+
+    const btn =
+      document.getElementById(
+        "buyAirtimeBtn"
+      );
+
+    if (btn) {
+
+      btn.disabled = true;
+
+      btn.innerText =
+        "Processing...";
     }
 
-    const res = await fetch("https://biva-backend-ezvu.onrender.com/api/buy-airtime", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        phone,
-        network,
-        amount,
-        email: currentUser.email
-      })
+    showLoader(
+      "Processing Airtime..."
+    );
+
+    // ===============================
+    // UNIQUE TRANSACTION ID
+    // ===============================
+
+    requestId =
+
+      "AIRTIME_" +
+      currentUser.uid +
+      "_" +
+      Date.now();
+
+    // ===============================
+    // LOCK DOCUMENT
+    // ===============================
+
+    const lockRef =
+      db.collection("airtimeLocks")
+      .doc(requestId);
+
+    await lockRef.set({
+
+      createdAt:
+      firebase.firestore
+      .FieldValue
+      .serverTimestamp()
+
     });
 
-    // 🔥 SAFE JSON HANDLING (prevents <!DOCTYPE html> crash)
-    const text = await res.text();
+    // ===============================
+    // CALL BACKEND
+    // ===============================
+
+    const res = await fetch(
+
+      "https://biva-backend-ezvu.onrender.com/api/buy-airtime",
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+          "application/json"
+        },
+
+        body: JSON.stringify({
+
+          phone,
+          network,
+          amount,
+
+          email:
+          currentUser.email,
+
+          requestId
+
+        })
+      }
+    );
+
+    // ===============================
+    // PARSE RESPONSE
+    // ===============================
+
+    const text =
+      await res.text();
 
     let data;
+
     try {
+
       data = JSON.parse(text);
+
     } catch (e) {
-      throw new Error("Server error: Invalid JSON response");
+
+      console.error(
+        "Invalid JSON:",
+        text
+      );
+
+      throw new Error(
+        "Invalid server response"
+      );
     }
 
-    if (!res.ok || !data.success) {
-      showAlert(data.error || "Airtime failed", "error");
-      return;
+    // ===============================
+    // CHECK RESPONSE
+    // ===============================
+
+    if (
+      !res.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+
+        data.message ||
+
+        "Airtime purchase failed"
+
+      );
     }
 
-    showSuccessCard("Airtime Purchase Successful");
-await db.collection("transactions").add({
+    // ===============================
+    // SAVE TRANSACTION
+    // ===============================
 
-  userId: currentUser.uid,
-  email: currentUser.email,
+    const txRef =
+      db.collection("transactions")
+      .doc(requestId);
 
-  type: "airtime",
+    const txSnap =
+      await txRef.get();
 
-  network,
-  phone,
+    if (!txSnap.exists) {
 
-  amount,
+      await txRef.set({
 
-  createdAt: new Date()
+        txId: requestId,
 
-});
+        userId:
+        currentUser.uid,
+
+        email:
+        currentUser.email,
+
+        type: "airtime",
+
+        network,
+        phone,
+        amount,
+
+        status: "completed",
+
+        providerStatus:
+        data.status || "success",
+
+        response:
+        data,
+
+        createdAt:
+        firebase.firestore
+        .FieldValue
+        .serverTimestamp()
+
+      });
+    }
+
+    // ===============================
+    // SUCCESS
+    // ===============================
+
+    showSuccessCard(
+      "Airtime Purchase Successful"
+    );
+
+    // ===============================
+    // ADMIN NOTIFICATION
+    // ===============================
+
+    await db.collection(
+      "adminNotifications"
+    ).add({
+
+      title:
+      "Airtime Purchase",
+
+      message:
+
+`${currentUser.email} bought airtime worth ₦${amount.toLocaleString('en-NG')}`,
+
+      type: "airtime",
+
+      read: false,
+
+      createdAt:
+
+      firebase.firestore
+      .FieldValue
+      .serverTimestamp()
+
+    });
+
+    // ===============================
+    // REFRESH WALLET
+    // ===============================
 
     await getWallet();
 
   } catch (err) {
-    showAlert(err.message, "error");
-  } finally {
+
+    // ===============================
+    // ERROR HANDLER
+    // ===============================
+
+    console.error(
+      "AIRTIME ERROR:",
+      err
+    );
+
+    showErrorModal(
+
+      err.message ||
+
+      "Transaction Failed"
+
+    );
+
+  } 
+
+finally {
+
+    // ===============================
+    // RELEASE LOCK
+    // ===============================
+
+    try {
+
+      if (requestId) {
+
+        await db
+        .collection(
+          "airtimeLocks"
+        )
+        .doc(requestId)
+        .delete();
+
+      }
+
+    } catch (e) {
+
+      console.error(
+
+        "Failed to clear lock:",
+        e
+
+      );
+    }
+
+    // ===============================
+    // RESET BUTTON
+    // ===============================
+
+    airtimeProcessing = false;
+
+    const btn =
+      document.getElementById(
+        "buyAirtimeBtn"
+      );
+
+    if (btn) {
+
+      btn.disabled = false;
+
+      btn.innerText =
+        "Buy Airtime";
+    }
+
     hideLoader();
   }
 }
@@ -3105,90 +3808,243 @@ await db.collection("transactions").add({
 
 
 
+// ===============================
+// 💵 BUY DATA WITH CONFIRMATION
+// ===============================
+
+let dataProcessing = false;
 
 async function buyData(plan) {
 
+  // ===============================
+  // PREVENT DOUBLE CLICK
+  // ===============================
+
+  if (dataProcessing) {
+
+    showAlert(
+      "Transaction already processing...",
+      "warning"
+    );
+
+    return;
+  }
+
   try {
 
-    showLoader("Processing Data...");
+    // ===============================
+    // VALIDATION
+    // ===============================
+
+if (!currentUser) {
+
+  showErrorModal(
+    "Please login first."
+  );
+
+  return;
+}
 
     const phone = document
       .getElementById("dataPhone")
       .value
       .trim();
 
-    if (!currentUser) {
-      showAlert("Please login first", "error");
-      return;
+    if (!phone) {
+
+showErrorModal(
+  "Please enter phone number."
+);
+
+return;
     }
 
-    if (!phone) {
-      showAlert("Enter phone number", "error");
-      return;
-    }
+// ===============================
+// CONFIRM PURCHASE
+// ===============================
+
+const confirmBuy =
+await showConfirmModal(
+
+  "Confirm Data Purchase",
+
+`Plan: ${plan.data_plan}
+
+Network: ${plan.network_id}
+
+Phone: ${phone}
+
+Amount: ₦${Number(plan.amount).toLocaleString('en-NG')}
+
+Proceed with transaction?`
+
+);
+
+if(!confirmBuy){
+  return;
+}
+
+    // ===============================
+    // START PROCESSING
+    // ===============================
+
+    dataProcessing = true;
+
+    showLoader("Processing Data...");
+
+    // ===============================
+    // CALL BACKEND
+    // ===============================
 
     const res = await fetch(
+
       "https://biva-backend-ezvu.onrender.com/api/data/buy",
+
       {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+          "application/json"
         },
+
         body: JSON.stringify({
-          userId: currentUser.uid,
+
+          userId:
+          currentUser.uid,
+
           phone,
-          data_plan: plan.data_plan,
-          network_id: plan.network_id
+
+          data_plan:
+          plan.data_plan,
+
+          network_id:
+          plan.network_id
+
         })
       }
     );
 
-    const text = await res.text();
+    const text =
+      await res.text();
 
     let data;
 
     try {
+
       data = JSON.parse(text);
+
     } catch (e) {
-      console.error("Invalid JSON:", text);
-      throw new Error("Server returned invalid response");
+
+      console.error(
+        "Invalid JSON:",
+        text
+      );
+
+      throw new Error(
+        "Server returned invalid response"
+      );
     }
 
-if (!res.ok || !data.success) {
-  showAlert(data.error || "Purchase failed", "error");
-  return;
-}
+    // ===============================
+    // CHECK RESPONSE
+    // ===============================
 
-// SAVE DATA TRANSACTION
-await db.collection("transactions").add({
+    if (
+      !res.ok ||
+      !data.success
+    ) {
 
-  userId: currentUser.uid,
-  email: currentUser.email,
+  showErrorModal(
+    "Something went Wrong"
+  );
 
-  type: "data",
+return;
+    }
 
-  network: plan.network_id,
-  plan: plan.data_plan,
+    // ===============================
+    // SAVE TRANSACTION
+    // ===============================
 
-  amount: Number(plan.amount),
+    await db.collection(
+      "transactions"
+    ).add({
 
-  phone,
+      userId:
+      currentUser.uid,
 
-  createdAt: new Date()
+      email:
+      currentUser.email,
 
-});
+      type: "data",
 
-showSuccessCard("Data Purchase Successful");
+      network:
+      plan.network_id,
+
+      plan:
+      plan.data_plan,
+
+      amount:
+      Number(plan.amount),
+
+      phone,
+
+      status: "success",
+
+      createdAt:
+      new Date()
+
+    });
+
+    // ===============================
+    // SUCCESS
+    // ===============================
+
+    showSuccessCard(
+      "Data Purchase Successful"
+    );
+
+    // ===============================
+    // ADMIN NOTIFICATION
+    // ===============================
+
+    await db.collection(
+      "adminNotifications"
+    ).add({
+
+      title:
+      "Data Purchase",
+
+      message:
+
+      `${currentUser.email} bought ${plan.data_plan} data for ₦${Number(plan.amount).toLocaleString('en-NG')}`,
+
+      type: "data",
+
+      read: false,
+
+      createdAt:
+
+      firebase.firestore
+      .FieldValue
+      .serverTimestamp()
+
+    });
+
+// ===============================
+// REFRESH WALLET
+// ===============================
 
 await getWallet();
+} 
 
-  } catch (err) {
+catch (err) {
+console.error(err);
+} 
 
-    console.error(err);
+finally {
 
-    showAlert(err.message, "error");
-
-  } finally {
+    dataProcessing = false;
 
     hideLoader();
   }
@@ -3248,13 +4104,18 @@ async function loadDataPlans(network) {
 
     console.log("PLANS RESPONSE:", data);
 
-    if (!res.ok || !data.success) {
-      showAlert(
-        data.error || "Failed to load plans",
-        "error"
-      );
-      return;
-    }
+if (!res.ok || !data.success) {
+
+  showErrorModal(
+
+    data.error ||
+
+    "Failed to load plans."
+
+  );
+
+  return;
+}
 
     const plansDiv =
       document.getElementById("dataPlans");
@@ -3292,14 +4153,15 @@ async function loadDataPlans(network) {
 
   } catch (err) {
 
-    console.error(err);
+console.error(err);
 
-    showAlert(
-      err.message || "Error loading plans",
-      "error"
-    );
+showErrorModal(
 
-  } finally {
+  "Error loading plans. Please try again later."
+
+);
+
+} finally {
 
     hideLoader();
   }
@@ -3307,84 +4169,248 @@ async function loadDataPlans(network) {
 
 
 
+// ===============================
+// ⚡ PAY BILL WITH CONFIRMATION
+// ===============================
+
+let billProcessing = false;
+
 async function payBill(){
+
+  // ===============================
+  // PREVENT DOUBLE CLICK
+  // ===============================
+
+  if (billProcessing) {
+
+    showAlert(
+      "Transaction already processing...",
+      "warning"
+    );
+
+    return;
+  }
 
   try{
 
-    showLoader("Processing Bill Payment...");
+    // ===============================
+    // VALIDATION
+    // ===============================
 
-    const meter = document.getElementById("meterNumber").value.trim();
+if(!currentUser){
 
-    const disco = document.getElementById("disco").value;
+  showErrorModal(
+    "Please login first."
+  );
+
+  return;
+}
+
+    const meter =
+      document.getElementById(
+        "meterNumber"
+      ).value.trim();
+
+    const disco =
+      document.getElementById(
+        "disco"
+      ).value;
 
     const amount = Number(
-      document.getElementById("billAmount").value
+
+      document.getElementById(
+        "billAmount"
+      ).value
+
     );
 
-    if(!currentUser){
-      showAlert("Please login first","error");
-      return;
-    }
+if(!meter || !disco || !amount){
+
+  showErrorModal(
+    "Please fill all fields."
+  );
+
+  return;
+}
+
+
+
+// ===============================
+// CONFIRM PAYMENT
+// ===============================
+
+const confirmPay =
+await showConfirmModal(
+
+  "Confirm Electricity Payment",
+
+`Disco: ${disco}
+
+Meter Number: ${meter}
+
+Amount: ₦${amount.toLocaleString('en-NG')}
+
+Proceed with payment?`
+
+);
+
+if(!confirmPay){
+  return;
+}
+
+
+    // ===============================
+    // START PROCESSING
+    // ===============================
+
+    billProcessing = true;
+
+    showLoader(
+      "Processing Bill Payment..."
+    );
+
+    // ===============================
+    // CALL BACKEND
+    // ===============================
 
     const res = await fetch(
+
       "https://biva-backend-ezvu.onrender.com/pay-bill",
+
       {
         method:"POST",
 
         headers:{
-          "Content-Type":"application/json"
+          "Content-Type":
+          "application/json"
         },
 
         body:JSON.stringify({
+
           meter,
           disco,
           amount,
-          email: currentUser.email
+
+          email:
+          currentUser.email
+
         })
       }
     );
 
-    const data = await res.json();
+    const data =
+      await res.json();
 
-    if(!res.ok){
-      showAlert(data.error || "Payment failed","error");
-      return;
-    }
+    // ===============================
+    // CHECK RESPONSE
+    // ===============================
 
+if(!res.ok){
+
+  showErrorModal(
+
+    data.error ||
+
+    "Payment failed. Please try again later."
+
+  );
+
+  return;
+}
+
+    // ===============================
     // SAVE TRANSACTION
-    await db.collection("transactions").add({
+    // ===============================
 
-      userId: currentUser.uid,
-      email: currentUser.email,
+    await db.collection(
+      "transactions"
+    ).add({
+
+      userId:
+      currentUser.uid,
+
+      email:
+      currentUser.email,
 
       type: "bill",
 
       disco,
       meter,
-
       amount,
 
-      reference: data.reference || "Electricity Payment",
+      reference:
 
-      createdAt: new Date()
+      data.reference ||
+      "Electricity Payment",
+
+      status: "success",
+
+      createdAt:
+      new Date()
 
     });
 
-    showSuccessCard("Bill Payment Successful");
+    // ===============================
+    // SUCCESS
+    // ===============================
+
+    showSuccessCard(
+      "Bill Payment Successful"
+    );
+
+    // ===============================
+    // ADMIN NOTIFICATION
+    // ===============================
+
+    await db.collection(
+      "adminNotifications"
+    ).add({
+
+      title:
+      "Bill Payment",
+
+      message:
+
+      `${currentUser.email} paid ₦${Number(amount).toLocaleString('en-NG')} for ${disco}`,
+
+      type: "bill",
+
+      read: false,
+
+      createdAt:
+
+      firebase.firestore
+      .FieldValue
+      .serverTimestamp()
+
+    });
+
+    // ===============================
+    // REFRESH WALLET
+    // ===============================
 
     await getWallet();
 
-  }catch(err){
+} catch(err){
 
-    showAlert(err.message,"error");
+  // LOG REAL ERROR
+  console.error(
+    "Bill Payment Error:",
+    err
+  );
 
-  }finally{
+  // SHOW CLEAN ERROR MODAL
+  showErrorModal(
+    "Transaction failed."
+  );
+
+} finally{
+
+    billProcessing = false;
 
     hideLoader();
-
   }
 }
-
 
 
 
@@ -3479,6 +4505,105 @@ function closeSuccessCard(){
   ).style.display = "none";
 
 }
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// CUSTOM CONFIRM MODAL
+// =========================
+
+// GLOBAL VARIABLE
+let confirmResolver = null;
+
+
+// OPEN MODAL
+function showConfirmModal(title, message){
+
+  return new Promise((resolve)=>{
+
+    // SAVE RESOLVER
+    confirmResolver = resolve;
+
+    // SET CONTENT
+    document.getElementById(
+      "confirmTitle"
+    ).innerText = title;
+
+    document.getElementById(
+      "confirmMessage"
+    ).innerText = message;
+
+    // SHOW MODAL
+    document.getElementById(
+      "confirmModal"
+    ).classList.add("active");
+
+  });
+
+}
+
+
+// CLOSE MODAL
+function closeConfirmModal(result){
+
+  // HIDE MODAL
+  document.getElementById(
+    "confirmModal"
+  ).classList.remove("active");
+
+  // RETURN RESULT
+  if(confirmResolver){
+
+    confirmResolver(result);
+
+    confirmResolver = null;
+  }
+}
+
+
+/* =========================
+ERROR MODAL SYSTEM
+========================= */
+
+function showErrorModal(
+
+  title = "Transaction Failed",
+
+  message =
+  "Please try again later."
+
+){
+
+  document.getElementById(
+    "errorTitle"
+  ).innerText = title;
+
+  document.getElementById(
+    "errorMessage"
+  ).innerText = message;
+
+  document.getElementById(
+    "errorModal"
+  ).classList.add("active");
+
+}
+
+function closeErrorModal(){
+
+  document.getElementById(
+    "errorModal"
+  ).classList.remove("active");
+
+}
+
 
 
 </script>
@@ -3774,6 +4899,92 @@ function closeSuccessCard(){
   </div>
 
 </div>
+
+
+
+<!-- =========================
+CLASSIC CONFIRM MODAL
+========================= -->
+
+<div class="confirm-modal" id="confirmModal">
+
+  <div class="confirm-box">
+
+    <div class="confirm-icon">
+      💳
+    </div>
+
+    <h2 id="confirmTitle">
+      Confirm Transaction
+    </h2>
+
+    <p id="confirmMessage">
+      Are you sure you want to continue?
+    </p>
+
+    <div class="confirm-actions">
+
+      <button
+        class="confirm-btn cancel-btn"
+        onclick="closeConfirmModal(false)">
+
+        Cancel
+
+      </button>
+
+      <button
+        class="confirm-btn proceed-btn"
+        onclick="closeConfirmModal(true)">
+
+        Proceed
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+<!-- =========================
+ERROR MODAL
+========================= -->
+
+<div class="error-modal" id="errorModal">
+
+  <div class="error-box">
+
+    <div class="error-icon">
+      ❌
+    </div>
+
+    <h2 id="errorTitle">
+      Transaction Failed
+    </h2>
+
+    <p id="errorMessage">
+      Something went wrong.
+      Please try again later.
+    </p>
+
+    <button
+      class="error-btn"
+      onclick="closeErrorModal()">
+
+      Okay
+
+    </button>
+
+  </div>
+
+</div>
+
+
+
 
 
 
