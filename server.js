@@ -18,21 +18,34 @@ app.use("/api/vtu", require("./routes/vtu.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/data", require("./routes/data.routes"));
 
+// VIRTUAL ACCOUNT ROUTE
+app.use(
+  "/api",
+  require("./routes/virtualaccount.routes")
+);
+
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
+  res.sendFile(
+    path.join(__dirname, "public/index.html")
+  );
 });
 
 // SERVER
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+
+  console.log(
+    `🚀 Server running on port ${PORT}`
+  );
+
 });
 
 console.log("ENV LOADED:", {
+
   iacafe:
     process.env.IACAFE_API_KEY
       ? "SET"
@@ -42,4 +55,5 @@ console.log("ENV LOADED:", {
     process.env.FLW_SECRET_KEY
       ? "SET"
       : "MISSING"
+
 });
