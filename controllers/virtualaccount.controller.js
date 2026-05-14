@@ -39,7 +39,7 @@ exports.createVirtualAccount = async (req, res) => {
 
     }
 
-console.log(response.data);
+
 
     // CREATE FLUTTERWAVE ACCOUNT
     const response = await axios.post(
@@ -65,6 +65,8 @@ console.log(response.data);
       }
 
     );
+
+console.log(response.data);
 
     const account = response.data.data;
 
