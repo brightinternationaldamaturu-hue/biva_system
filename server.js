@@ -57,3 +57,8 @@ console.log("ENV LOADED:", {
       : "MISSING"
 
 });
+
+
+app.get("/test", (req, res) => {
+  res.send("Backend working successfully");
+});
