@@ -17,6 +17,7 @@ app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/vtu", require("./routes/vtu.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/data", require("./routes/data.routes"));
+app.use("/api",require("./routes/flutterwave.webhook.routes"));
 
 // VIRTUAL ACCOUNT ROUTE
 app.use(
