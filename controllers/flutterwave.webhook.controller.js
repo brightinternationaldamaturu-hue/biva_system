@@ -4,93 +4,98 @@ exports.flutterwaveWebhook = async (req, res) => {
 
   try {
 
-    const payload = req.body;
-
     console.log(
       "FLW WEBHOOK:",
-      JSON.stringify(payload, null, 2)
+      JSON.stringify(req.body, null, 2)
     );
 
+    const payload = req.body;
+
     // VERIFY EVENT
-if (
-  payload["event.type"] !==
-  "BANK_TRANSFER_TRANSACTION"
-) {
-
-  return res
-    .status(200)
-    .send("Ignored");
-
-}
+    if (
+      payload.event.type !==
+      "BANK_TRANSFER_TRANSACTION"
+    ) {
+      return res
+        .status(200)
+        .send("Ignored");
+    }
 
     const data = payload.data;
+
+    // ONLY SUCCESSFUL
+    if (data.status !== "successful") {
+      return res
+        .status(200)
+        .send("Payment not successful");
+    }
+
+    const email =
+      data.customer?.email;
 
     const amount =
       Number(data.amount || 0);
 
-const customerEmail =
-  data.customer.email;
+    const flwRef =
+      data.flw_ref;
 
-const usersSnap =
-  await db.collection("users")
-  .where(
-    "email",
-    "==",
-    customerEmail
-  )
-  .limit(1)
-  .get();
+    if (!email || !amount) {
 
-    if (usersSnap.empty) {
+      return res.status(400).json({
+        error: "Missing data"
+      });
 
-      console.log(
-        "No user found for account:",
-        accountNumber
-      );
+    }
+
+    // PREVENT DUPLICATE CREDIT
+    const existing =
+      await db
+      .collection("transactions")
+      .where("flwRef", "==", flwRef)
+      .get();
+
+    if (!existing.empty) {
 
       return res
         .status(200)
+        .send("Already processed");
+
+    }
+
+    // FIND USER
+    const userQuery =
+      await db
+      .collection("users")
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+
+    if (userQuery.empty) {
+
+      console.log("User not found");
+
+      return res
+        .status(404)
         .send("User not found");
 
     }
 
     const userDoc =
-      usersSnap.docs[0];
+      userQuery.docs[0];
 
     const userData =
       userDoc.data();
 
-    const userRef =
-      userDoc.ref;
-
-    // PREVENT DUPLICATE FUNDING
-    const existingTx =
-      await db
-        .collection("transactions")
-        .where("reference", "==", txRef)
-        .limit(1)
-        .get();
-
-    if (!existingTx.empty) {
-
-      console.log(
-        "Duplicate transaction ignored"
-      );
-
-      return res
-        .status(200)
-        .send("Duplicate");
-
-    }
-
-    // UPDATE WALLET
     const currentBalance =
-      Number(userData.wallet || 0);
+      Number(
+        userData.wallet || 0
+      );
 
     const newBalance =
       currentBalance + amount;
 
-    await userRef.update({
+    // UPDATE WALLET
+    await userDoc.ref.update({
 
       wallet: newBalance
 
@@ -101,45 +106,37 @@ const usersSnap =
       "transactions"
     ).add({
 
-      userId: userDoc.id,
-
-      email:
-        userData.email || "",
-
-      type: "wallet-funding",
-
+      email,
       amount,
-
-      reference: txRef,
-
-      method: "bank-transfer",
-
-      status: "success",
+      type: "wallet-funding",
+      status: "successful",
+      flwRef,
 
       description:
-        "Wallet funded via virtual account",
+        "Wallet funded via bank transfer",
 
       createdAt:
-        admin.firestore.FieldValue
-          .serverTimestamp()
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
 
     });
 
     console.log(
-      `Wallet funded successfully: ₦${amount}`
+      `Wallet funded for ${email}`
     );
 
     return res
       .status(200)
-      .send("Webhook processed");
+      .send("Wallet funded");
 
   } catch (error) {
 
     console.log(error);
 
-    return res
-      .status(500)
-      .send("Webhook error");
+    return res.status(500).json({
+      error: "Webhook failed"
+    });
 
   }
 
