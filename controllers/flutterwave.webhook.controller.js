@@ -11,15 +11,18 @@ exports.flutterwaveWebhook = async (req, res) => {
 
     const payload = req.body;
 
+
     // VERIFY EVENT
-    if (
-      payload.event.type !==
-      "BANK_TRANSFER_TRANSACTION"
-    ) {
-      return res
-        .status(200)
-        .send("Ignored");
-    }
+if (
+  payload.event !==
+  "charge.completed"
+) {
+
+  return res
+    .status(200)
+    .send("Ignored");
+
+}
 
     const data = payload.data;
 
