@@ -39,6 +39,8 @@ exports.createVirtualAccount = async (req, res) => {
 
     }
 
+console.log(response.data);
+
     // CREATE FLUTTERWAVE ACCOUNT
     const response = await axios.post(
 
@@ -66,17 +68,22 @@ exports.createVirtualAccount = async (req, res) => {
 
     const account = response.data.data;
 
-    const virtualAccount = {
+const virtualAccount = {
 
-      accountNumber:
-        account.account_number,
+  accountNumber:
+    account.account_number || "",
 
-      accountName:
-        account.account_name,
+  accountName:
+    account.account_name ||
+    `${fullName}`,
 
-      bankName:
-        account.bank_name
-    };
+  bankName:
+    account.bank_name || ""
+
+};
+
+
+
 
     // SAVE TO FIRESTORE
     await userRef.update({
