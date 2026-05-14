@@ -12,39 +12,34 @@ exports.flutterwaveWebhook = async (req, res) => {
     );
 
     // VERIFY EVENT
-    if (
-      payload.event !== "BANK_TRANSFER_TRANSACTION"
-    ) {
+if (
+  payload["event.type"] !==
+  "BANK_TRANSFER_TRANSACTION"
+) {
 
-      return res
-        .status(200)
-        .send("Ignored");
+  return res
+    .status(200)
+    .send("Ignored");
 
-    }
+}
 
     const data = payload.data;
 
     const amount =
       Number(data.amount || 0);
 
-    const accountNumber =
-      data.account_number;
+const customerEmail =
+  data.customer.email;
 
-    const txRef =
-      data.tx_ref ||
-      data.flw_ref ||
-      `TX-${Date.now()}`;
-
-    // FIND USER WITH ACCOUNT NUMBER
-    const usersSnap =
-      await db.collection("users")
-      .where(
-        "virtualAccount.accountNumber",
-        "==",
-        accountNumber
-      )
-      .limit(1)
-      .get();
+const usersSnap =
+  await db.collection("users")
+  .where(
+    "email",
+    "==",
+    customerEmail
+  )
+  .limit(1)
+  .get();
 
     if (usersSnap.empty) {
 
