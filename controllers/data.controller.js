@@ -268,8 +268,12 @@ exports.buyData = async (req, res) => {
         networkMap[String(network_id)] ||
         "Unknown",
 
-      plan:
-        cleanPlan,
+plan:
+  result?.data?.plan_name ||
+  cleanPlan ||
+  "Data Plan",
+
+
 
       network_id,
 
