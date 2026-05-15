@@ -309,14 +309,84 @@ exports.buyData = async (req, res) => {
         );
       }
 
+      /**
+       * SAVE TRANSACTION
+       */
+      await db.collection("transactions")
+        .doc(request_id)
+        .set({
 
+          userId,
+          phone,
+
+          type: "data",
+
+          network_id,
+          data_plan,
+
+          originalAmount,
+          profit,
+          amountCharged: sellingAmount,
+
+          status: "success",
+
+          response: result,
+
+          createdAt: new Date()
+        });
+
+
+/**
+ * ==========================
+ * DATA CASHBACK
+ * ==========================
+ */
+
+// 1% cashback
+const cashback =
+  Number(sellingAmount) * 0.01;
+
+/**
+ * CREDIT USER WALLET
+ */
+await userRef.update({
+
+  wallet:
+    admin.firestore.FieldValue.increment(
+      cashback
+    )
+
+});
+
+/**
+ * SAVE CASHBACK TRANSACTION
+ */
+await db.collection("transactions")
+  .add({
+
+    userId,
+
+    type: "cashback",
+
+    amount: cashback,
+
+    status: "success",
+
+    description:
+      "1% Data cashback reward",
+
+    createdAt:
+      new Date()
+
+});
 
       return res.json({
 
         success: true,
 
-        message:
-          "Data purchase successful",
+message:
+  `Data purchase successful.
+   You earned ₦${cashback.toFixed(2)} cashback 🎉`,
 
         amountCharged:
           sellingAmount,
