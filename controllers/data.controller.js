@@ -83,26 +83,20 @@ exports.buyData = async (req, res) => {
       network_id
     } = req.body;
 
-
-
-
-    // =========================
-    // VALIDATION
-    // =========================
     if (!userId || !phone || !data_plan || !network_id) {
 
       return res.status(400).json({
         success: false,
         error: "Missing required fields"
       });
+
     }
 
-    // =========================
-    // GET USER
-    // =========================
-    userRef = db.collection("users").doc(userId);
+    userRef =
+      db.collection("users").doc(userId);
 
-    const userSnap = await userRef.get();
+    const userSnap =
+      await userRef.get();
 
     if (!userSnap.exists) {
 
@@ -110,28 +104,32 @@ exports.buyData = async (req, res) => {
         success: false,
         error: "User not found"
       });
+
     }
 
-    const userData = userSnap.data();
+    const userData =
+      userSnap.data();
 
-    // =========================
-    // GET PLANS
-    // =========================
     const planRes = await axios.get(
       "https://iacafe.com.ng/devapi/v1/budget-data/plans",
       {
         params: { network_id },
         headers: {
-          Authorization: `Bearer ${process.env.IACAFE_API_KEY}`
+          Authorization:
+            `Bearer ${process.env.IACAFE_API_KEY}`
         }
       }
     );
 
-    const plans = planRes.data?.data || [];
+    const plans =
+      planRes.data?.data || [];
 
-    const selectedPlan = plans.find(
-      p => String(p.data_plan) === String(data_plan)
-    );
+    const selectedPlan =
+      plans.find(
+        p =>
+          String(p.data_plan) ===
+          String(data_plan)
+      );
 
     if (!selectedPlan) {
 
@@ -139,11 +137,9 @@ exports.buyData = async (req, res) => {
         success: false,
         error: "Invalid data plan"
       });
+
     }
 
-    // =========================
-    // PRICE
-    // =========================
     const originalAmount = Number(
       selectedPlan.api_user_price ||
       selectedPlan.reseller_price ||
@@ -161,47 +157,42 @@ exports.buyData = async (req, res) => {
     else if (originalAmount <= 5000) profit = 150;
     else profit = 200;
 
-    sellingAmount = originalAmount + profit;
+    sellingAmount =
+      originalAmount + profit;
 
-    // =========================
-    // CHECK WALLET
-    // =========================
-    if (Number(userData.wallet) < sellingAmount) {
+    if (
+      Number(userData.wallet) <
+      sellingAmount
+    ) {
 
       return res.status(400).json({
         success: false,
         error: "Insufficient balance"
       });
+
     }
 
-    // =========================
-    // DEDUCT WALLET
-    // =========================
     await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(
-        -sellingAmount
-      )
+
+      wallet:
+        admin.firestore.FieldValue.increment(
+          -sellingAmount
+        )
+
     });
 
-    // =========================
-    // REQUEST ID
-    // =========================
     const request_id =
       "BD_" + Date.now();
 
-    // =========================
-    // NETWORK MAP
-    // =========================
     const networkMap = {
+
       "1": "MTN",
       "2": "GLO",
       "3": "AIRTEL",
       "4": "9MOBILE"
+
     };
 
-    // =========================
-    // SEND PURCHASE
-    // =========================
     const response = await axios.post(
       "https://iacafe.com.ng/devapi/v1/budget-data",
       {
@@ -212,101 +203,103 @@ exports.buyData = async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
-          "Content-Type": "application/json"
+          Authorization:
+            `Bearer ${process.env.IACAFE_API_KEY}`,
+          "Content-Type":
+            "application/json"
         }
       }
     );
 
-    const result = response.data;
-
-    console.log(
-      "PURCHASE RESPONSE:",
-      result
-    );
+    const result =
+      response.data;
 
     const success =
       result?.success === true ||
       result?.code === "success";
 
     if (!success) {
+
       throw new Error(
-        result?.message || "Purchase failed"
+        result?.message ||
+        "Purchase failed"
       );
+
     }
 
-    // =========================
-    // CLEAN PLAN NAME
-    // =========================
     const cleanPlan =
       result?.data?.plan_name ||
-      selectedPlan.plan_name ||
-      selectedPlan.name ||
+      selectedPlan?.name ||
+      selectedPlan?.plan_name ||
       "Data Plan";
 
-    console.log("FINAL PLAN:", cleanPlan);
+    await db.collection("transactions")
+    .doc(request_id)
+    .set({
 
-    // =========================
-    // SAVE TRANSACTION
-    // =========================
-  await db.collection("transactions").doc(request_id).set({
+      userId,
 
-  userId,
+      email:
+        userData.email || "",
 
-  email: userData.email || "",
+      fullName:
+        userData.fullName || "",
 
-  fullName: userData.fullName || "",
+      phone,
 
-  phone,
+      type: "data",
 
-  type: "data",
+      status: "success",
 
-  status: "success",
+      network:
+        result?.data?.network ||
+        networkMap[
+          String(network_id)
+        ] ||
+        "Unknown",
 
-  network:
-    result?.data?.network ||
-    networkMap[String(network_id)] ||
-    "Unknown",
+      plan:
+        cleanPlan,
 
-  // FIXED PLAN
-  plan:
-    result?.data?.plan_name ||
-    selectedPlan?.name ||
-    selectedPlan?.plan_name ||
-    "Data Plan",
+      network_id,
 
-  network_id,
+      data_plan,
 
-  data_plan,
+      originalAmount,
 
-  originalAmount,
+      profit,
 
-  profit,
+      amount:
+        sellingAmount,
 
-  amount: sellingAmount,
+      amountCharged:
+        sellingAmount,
 
-  amountCharged: sellingAmount,
+      response:
+        result,
 
-  response: result,
+      createdAt:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
 
-  createdAt:
-    admin.firestore.FieldValue.serverTimestamp()
+    });
 
-});
-
-    // =========================
     // CASHBACK
-    // =========================
     const cashback =
-      Math.floor(sellingAmount * 0.01);
+      Math.floor(
+        sellingAmount * 0.01
+      );
 
-    // CREDIT USER
-await userRef.update({
-  cashbackBalance:
-    admin.firestore.FieldValue.increment(cashback)
-});
+    await userRef.update({
 
-    // SAVE CASHBACK
+      cashbackBalance:
+        admin.firestore
+        .FieldValue
+        .increment(cashback)
+
+    });
+
     await db.collection("transactions")
     .add({
 
@@ -332,7 +325,9 @@ await userRef.update({
 
       network:
         result?.data?.network ||
-        networkMap[String(network_id)] ||
+        networkMap[
+          String(network_id)
+        ] ||
         "Unknown",
 
       plan:
@@ -345,11 +340,9 @@ await userRef.update({
         admin.firestore
         .FieldValue
         .serverTimestamp()
+
     });
 
-    // =========================
-    // SUCCESS RESPONSE
-    // =========================
     return res.json({
 
       success: true,
@@ -364,9 +357,10 @@ await userRef.update({
 
       data:
         result
+
     });
 
-   } catch (err) {
+  } catch (err) {
 
     console.log(
       "BUY DATA ERROR:",
@@ -375,13 +369,18 @@ await userRef.update({
 
     try {
 
-      if (userRef && sellingAmount > 0) {
+      if (
+        userRef &&
+        sellingAmount > 0
+      ) {
 
         await userRef.update({
+
           wallet:
             admin.firestore
             .FieldValue
             .increment(sellingAmount)
+
         });
 
       }
@@ -400,25 +399,14 @@ await userRef.update({
       success: false,
 
       error:
-        err.message || "Data purchase failed"
+        err.message ||
+        "Data purchase failed"
 
     });
 
   }
 
 };
-
-
-exports.withdrawCashback = async (req, res) => {
-
-
-
-
-
-exports.withdrawCashback = async (req, res) => {
-
-
-
 
 exports.withdrawCashback = async (req, res) => {
 
@@ -427,59 +415,71 @@ exports.withdrawCashback = async (req, res) => {
     const { userId } = req.body;
 
     const userRef =
-      db.collection("users").doc(userId);
+      db.collection("users")
+      .doc(userId);
 
     const snap =
       await userRef.get();
 
-    if(!snap.exists){
+    if (!snap.exists) {
 
       return res.status(404).json({
         success: false,
         error: "User not found"
       });
+
     }
 
-    const user = snap.data();
+    const user =
+      snap.data();
 
     const cashback =
-      Number(user.cashbackBalance || 0);
+      Number(
+        user.cashbackBalance || 0
+      );
 
-    if(cashback <= 0){
+    if (cashback <= 0) {
 
       return res.status(400).json({
         success: false,
         error: "No cashback available"
       });
+
     }
 
-    // MOVE CASHBACK TO WALLET
     await userRef.update({
 
       wallet:
-        admin.firestore.FieldValue.increment(
-          cashback
-        ),
+        admin.firestore
+        .FieldValue
+        .increment(cashback),
 
       cashbackBalance: 0
+
     });
 
-    // SAVE TRANSACTION
-    await db.collection("transactions").add({
+    await db.collection("transactions")
+    .add({
 
       userId,
 
-      type: "cashback_withdrawal",
+      type:
+        "cashback_withdrawal",
 
-      amount: cashback,
+      amount:
+        cashback,
 
-      status: "success",
+      status:
+        "success",
 
       description:
         "Cashback moved to wallet",
 
       createdAt:
-        admin.firestore.FieldValue.serverTimestamp()
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
     });
 
     return res.json({
@@ -489,10 +489,12 @@ exports.withdrawCashback = async (req, res) => {
       message:
         "Cashback withdrawn successfully",
 
-      amount: cashback
+      amount:
+        cashback
+
     });
 
-  } catch(err){
+  } catch (err) {
 
     console.log(err);
 
@@ -500,7 +502,11 @@ exports.withdrawCashback = async (req, res) => {
 
       success: false,
 
-      error: err.message
+      error:
+        err.message
+
     });
+
   }
+
 };
