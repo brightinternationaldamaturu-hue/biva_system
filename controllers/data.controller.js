@@ -153,12 +153,29 @@ exports.buyData = async (req, res) => {
       "4": "9MOBILE"
     };
 
-    const cleanPlan =
-      selectedPlan.plan_name ||
-      selectedPlan.name ||
-      selectedPlan.size ||
-      `${selectedPlan.volume || ""} ${selectedPlan.validity || ""}` ||
-      data_plan;
+const cleanPlan = String(
+
+  selectedPlan.name ||
+
+  selectedPlan.plan_name ||
+
+  selectedPlan.plan ||
+
+  selectedPlan.size ||
+
+  selectedPlan.description ||
+
+  `${selectedPlan.volume || ""} ${selectedPlan.validity || ""}`.trim() ||
+
+  "Data Plan"
+
+);
+
+
+console.log("SELECTED PLAN:", selectedPlan);
+console.log("FINAL PLAN:", cleanPlan);
+
+
 
     const response = await axios.post(
       "https://iacafe.com.ng/devapi/v1/budget-data",
