@@ -309,76 +309,117 @@ exports.buyData = async (req, res) => {
         );
       }
 
-      /**
-       * SAVE TRANSACTION
-       */
-      await db.collection("transactions")
-        .doc(request_id)
-        .set({
 
-          userId,
-          phone,
 
-          type: "data",
+     /**
 
-          network_id,
-          data_plan,
+* SAVE TRANSACTION
+  */
+  await db.collection("transactions")
+  .doc(request_id)
+  .set({
 
-          originalAmount,
-          profit,
-          amountCharged: sellingAmount,
+  userId,
 
-          status: "success",
+  phone,
 
-          response: result,
+  type: "data",
 
-          createdAt: new Date()
-        });
+  // FOR FRONTEND RECEIPT
+  network:
+  selectedPlan.network ||
+  selectedPlan.network_name ||
+  network_id,
 
+  plan:
+  selectedPlan.name ||
+  selectedPlan.plan_name ||
+  selectedPlan.plan ||
+  data_plan,
+
+  network_id,
+
+  data_plan,
+
+  originalAmount,
+
+  profit,
+
+  // IMPORTANT
+  amount:
+  sellingAmount,
+
+  amountCharged:
+  sellingAmount,
+
+  status: "success",
+
+  response: result,
+
+  createdAt:
+  admin.firestore
+  .FieldValue
+  .serverTimestamp()
+
+});
 
 /**
- * ==========================
- * DATA CASHBACK
- * ==========================
- */
+
+* ==========================
+* DATA CASHBACK
+* ==========================
+  */
 
 // 1% cashback
 const cashback =
-  Number(sellingAmount) * 0.01;
+Math.floor(
+Number(sellingAmount) * 0.01
+);
+
 
 /**
- * CREDIT USER WALLET
- */
-await userRef.update({
 
-  wallet:
-    admin.firestore.FieldValue.increment(
-      cashback
-    )
+* CREDIT USER WALLET
+  */
+  await userRef.update({
+
+wallet:
+admin.firestore
+.FieldValue
+.increment(cashback)
 
 });
 
 /**
- * SAVE CASHBACK TRANSACTION
- */
-await db.collection("transactions")
+
+* SAVE CASHBACK TRANSACTION
+  */
+  await db.collection("transactions")
   .add({
 
-    userId,
+  userId,
 
-    type: "cashback",
+  type: "cashback",
 
-    amount: cashback,
+  // IMPORTANT FOR FRONTEND
+  amount:
+  cashback,
 
-    status: "success",
+  amountCharged:
+  cashback,
 
-    description:
-      "1% Data cashback reward",
+  status: "success",
 
-    createdAt:
-      new Date()
+  description:
+  "1% Data cashback reward",
+
+  createdAt:
+  admin.firestore
+  .FieldValue
+  .serverTimestamp()
 
 });
+
 
       return res.json({
 
