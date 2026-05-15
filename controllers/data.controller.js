@@ -83,6 +83,9 @@ exports.buyData = async (req, res) => {
       network_id
     } = req.body;
 
+
+
+
     // =========================
     // VALIDATION
     // =========================
@@ -298,12 +301,10 @@ exports.buyData = async (req, res) => {
       Math.floor(sellingAmount * 0.01);
 
     // CREDIT USER
-    await userRef.update({
-      wallet:
-        admin.firestore
-        .FieldValue
-        .increment(cashback)
-    });
+await userRef.update({
+  cashbackBalance:
+    admin.firestore.FieldValue.increment(cashback)
+});
 
     // SAVE CASHBACK
     await db.collection("transactions")
@@ -406,6 +407,92 @@ exports.buyData = async (req, res) => {
 
       error:
         err.message || "Data purchase failed"
+    });
+
+
+
+
+exports.withdrawCashback = async (req, res) => {
+
+  try {
+
+    const { userId } = req.body;
+
+    const userRef =
+      db.collection("users").doc(userId);
+
+    const snap =
+      await userRef.get();
+
+    if(!snap.exists){
+
+      return res.status(404).json({
+        success: false,
+        error: "User not found"
+      });
+    }
+
+    const user = snap.data();
+
+    const cashback =
+      Number(user.cashbackBalance || 0);
+
+    if(cashback <= 0){
+
+      return res.status(400).json({
+        success: false,
+        error: "No cashback available"
+      });
+    }
+
+    // MOVE CASHBACK TO WALLET
+    await userRef.update({
+
+      wallet:
+        admin.firestore.FieldValue.increment(
+          cashback
+        ),
+
+      cashbackBalance: 0
+    });
+
+    // SAVE TRANSACTION
+    await db.collection("transactions").add({
+
+      userId,
+
+      type: "cashback_withdrawal",
+
+      amount: cashback,
+
+      status: "success",
+
+      description:
+        "Cashback moved to wallet",
+
+      createdAt:
+        admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return res.json({
+
+      success: true,
+
+      message:
+        "Cashback withdrawn successfully",
+
+      amount: cashback
+    });
+
+  } catch(err){
+
+    console.log(err);
+
+    return res.status(500).json({
+
+      success: false,
+
+      error: err.message
     });
   }
 };
