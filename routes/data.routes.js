@@ -13,4 +13,9 @@ router.post("/buy", buyData);
 // GET PLANS
 router.get("/plans/:network_id", getPlans);
 
+router.post(
+  "/withdraw-cashback",
+  dataController.withdrawCashback
+);
+
 module.exports = router;
