@@ -401,13 +401,19 @@ await userRef.update({
       );
     }
 
-    return res.status(500).json({
+return res.status(500).json({
 
-      success: false,
+  success: false,
 
-      error:
-        err.message || "Data purchase failed"
-    });
+  error:
+    err.message || "Data purchase failed"
+});
+
+  }
+
+};
+
+exports.withdrawCashback = async (req, res) => {
 
 
 
