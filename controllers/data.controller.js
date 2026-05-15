@@ -245,55 +245,50 @@ exports.buyData = async (req, res) => {
     // =========================
     // SAVE TRANSACTION
     // =========================
-    await db.collection("transactions")
-    .doc(request_id)
-    .set({
+  await db.collection("transactions").doc(request_id).set({
 
-      userId,
+  userId,
 
-      email:
-        userData.email || "",
+  email: userData.email || "",
 
-      fullName:
-        userData.fullName || "",
+  fullName: userData.fullName || "",
 
-      phone,
+  phone,
 
-      type: "data",
+  type: "data",
 
-      status: "success",
+  status: "success",
 
-      network:
-        result?.data?.network ||
-        networkMap[String(network_id)] ||
-        "Unknown",
+  network:
+    result?.data?.network ||
+    networkMap[String(network_id)] ||
+    "Unknown",
 
-plan:
-  result?.data?.plan_name ||
-  cleanPlan ||
-  "Data Plan",
+  // FIXED PLAN
+  plan:
+    result?.data?.plan_name ||
+    selectedPlan?.name ||
+    selectedPlan?.plan_name ||
+    "Data Plan",
 
+  network_id,
 
+  data_plan,
 
-      network_id,
+  originalAmount,
 
-      data_plan,
+  profit,
 
-      originalAmount,
+  amount: sellingAmount,
 
-      profit,
+  amountCharged: sellingAmount,
 
-      amount:
-        sellingAmount,
+  response: result,
 
-      amountCharged:
-        sellingAmount,
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
-    });
+});
 
     // =========================
     // CASHBACK
