@@ -153,38 +153,44 @@ exports.buyData = async (req, res) => {
       "4": "9MOBILE"
     };
 
+console.log("SELECTED PLAN:", selectedPlan);
+
+
+
+const response = await axios.post(
+  "https://iacafe.com.ng/devapi/v1/budget-data",
+  {
+    request_id,
+    phone,
+    data_plan,
+    network_id
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
+      "Content-Type": "application/json"
+    }
+  }
+);
+
+const result = response.data;
+
 const cleanPlan =
   result?.data?.plan_name ||
   selectedPlan.plan_name ||
   selectedPlan.name ||
   "Data Plan";
 
-console.log("SELECTED PLAN:", selectedPlan);
 console.log("FINAL PLAN:", cleanPlan);
 
+const success =
+  result?.success === true ||
+  result?.code === "success";
 
 
-    const response = await axios.post(
-      "https://iacafe.com.ng/devapi/v1/budget-data",
-      {
-        request_id,
-        phone,
-        data_plan,
-        network_id
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
 
-    const result = response.data;
 
-    const success =
-      result?.success === true ||
-      result?.code === "success";
+
 
     if (!success) throw new Error("Purchase failed");
 
@@ -222,31 +228,26 @@ await db.collection("transactions").doc(request_id).set({
     admin.firestore.FieldValue.serverTimestamp()
 });
 
-    // =========================
-    // CASHBACK (1%)
-    // =========================
-const cashback = Math.floor(
-  sellingAmount * 0.01
-);
+
+
+
+// =========================
+// CASHBACK (1%)
+// =========================
+const cashback = Math.floor(sellingAmount * 0.01);
 
 // CREDIT USER
 await userRef.update({
-  wallet:
-    admin.firestore.FieldValue.increment(
-      cashback
-    )
+  wallet: admin.firestore.FieldValue.increment(cashback)
 });
 
 // SAVE CASHBACK TRANSACTION
 await db.collection("transactions").add({
-
   userId,
 
-  email:
-    userData.email || "",
+  email: userData.email || "",
 
-  fullName:
-    userData.fullName || "",
+  fullName: userData.fullName || "",
 
   phone,
 
@@ -265,17 +266,20 @@ await db.collection("transactions").add({
 
   plan:
     result?.data?.plan_name ||
-    "Data Cashback",
+    cleanPlan,
 
   description:
     `1% cashback from ${
-      result?.data?.plan_name || "Data Purchase"
+      result?.data?.plan_name || cleanPlan
     }`,
 
   createdAt:
     admin.firestore.FieldValue.serverTimestamp()
-
 });
+
+
+
+
 
     return res.json({
       success: true,
