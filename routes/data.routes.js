@@ -1,17 +1,12 @@
-const express = require("express");
+router.get(
+  "/plans/:network_id",
+  dataController.getPlans
+);
 
-const router = express.Router();
-
-const {
-  buyData,
-  getPlans
-} = require("../controllers/data.controller");
-
-// BUY DATA
-router.post("/buy", buyData);
-
-// GET PLANS
-router.get("/plans/:network_id", getPlans);
+router.post(
+  "/buy",
+  dataController.buyData
+);
 
 router.post(
   "/withdraw-cashback",
