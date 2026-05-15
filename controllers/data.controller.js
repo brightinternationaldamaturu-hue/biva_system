@@ -153,24 +153,11 @@ exports.buyData = async (req, res) => {
       "4": "9MOBILE"
     };
 
-const cleanPlan = String(
-
-  selectedPlan.name ||
-
+const cleanPlan =
+  result?.data?.plan_name ||
   selectedPlan.plan_name ||
-
-  selectedPlan.plan ||
-
-  selectedPlan.size ||
-
-  selectedPlan.description ||
-
-  `${selectedPlan.volume || ""} ${selectedPlan.validity || ""}`.trim() ||
-
-  "Data Plan"
-
-);
-
+  selectedPlan.name ||
+  "Data Plan";
 
 console.log("SELECTED PLAN:", selectedPlan);
 console.log("FINAL PLAN:", cleanPlan);
@@ -204,53 +191,91 @@ console.log("FINAL PLAN:", cleanPlan);
     // =========================
     // MAIN TRANSACTION (FIXED FORMAT)
     // =========================
-    await db.collection("transactions").doc(request_id).set({
-      userId,
-      email: userData.email || "",
-      fullName: userData.fullName || "",
-      phone,
+await db.collection("transactions").doc(request_id).set({
+  userId,
+  email: userData.email || "",
+  fullName: userData.fullName || "",
+  phone,
 
-      type: "data",
-      status: "success",
+  type: "data",
+  status: "success",
 
-      network: networkMap[String(network_id)] || "Unknown",
-      plan: cleanPlan,
+  network:
+    result?.data?.network ||
+    networkMap[String(network_id)] ||
+    "Unknown",
 
-      network_id,
-      data_plan,
+  plan:
+    result?.data?.plan_name ||
+    "Data Plan",
 
-      originalAmount,
-      profit,
+  network_id,
+  data_plan,
 
-      amount: sellingAmount,
-      amountCharged: sellingAmount,
+  originalAmount,
+  profit,
 
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+  amount: sellingAmount,
+  amountCharged: sellingAmount,
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
+});
 
     // =========================
     // CASHBACK (1%)
     // =========================
-    const cashback = Math.floor(sellingAmount * 0.01);
+const cashback = Math.floor(
+  sellingAmount * 0.01
+);
 
-    await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(cashback)
-    });
+// CREDIT USER
+await userRef.update({
+  wallet:
+    admin.firestore.FieldValue.increment(
+      cashback
+    )
+});
 
-    await db.collection("transactions").add({
-      userId,
-      email: userData.email || "",
-      fullName: userData.fullName || "",
-      phone,
-      type: "cashback",
-      status: "success",
-      amount: cashback,
-      amountCharged: cashback,
-      network: networkMap[String(network_id)] || "Unknown",
-      plan: cleanPlan,
-      description: "1% Data cashback reward",
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+// SAVE CASHBACK TRANSACTION
+await db.collection("transactions").add({
+
+  userId,
+
+  email:
+    userData.email || "",
+
+  fullName:
+    userData.fullName || "",
+
+  phone,
+
+  type: "cashback",
+
+  status: "success",
+
+  amount: cashback,
+
+  amountCharged: cashback,
+
+  network:
+    result?.data?.network ||
+    networkMap[String(network_id)] ||
+    "Unknown",
+
+  plan:
+    result?.data?.plan_name ||
+    "Data Cashback",
+
+  description:
+    `1% cashback from ${
+      result?.data?.plan_name || "Data Purchase"
+    }`,
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
 
     return res.json({
       success: true,
