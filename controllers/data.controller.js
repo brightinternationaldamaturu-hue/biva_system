@@ -218,7 +218,7 @@ const planRes = await axios.get(
     },
     headers: {
       Authorization:
-        `Bearer ${process.env.IACAFE_API_KEY}`
+        `Bearer ${process.env.IACAFE_API_KEY}`,
     }
   }
 );
