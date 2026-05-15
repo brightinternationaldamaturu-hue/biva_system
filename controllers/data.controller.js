@@ -366,16 +366,13 @@ await userRef.update({
         result
     });
 
-  } catch (err) {
+   } catch (err) {
 
     console.log(
       "BUY DATA ERROR:",
       err.message
     );
 
-    // =========================
-    // REFUND USER
-    // =========================
     try {
 
       if (userRef && sellingAmount > 0) {
@@ -387,10 +384,6 @@ await userRef.update({
             .increment(sellingAmount)
         });
 
-        console.log(
-          "USER REFUNDED:",
-          sellingAmount
-        );
       }
 
     } catch (refundErr) {
@@ -399,19 +392,28 @@ await userRef.update({
         "REFUND ERROR:",
         refundErr.message
       );
+
     }
 
-return res.status(500).json({
+    return res.status(500).json({
 
-  success: false,
+      success: false,
 
-  error:
-    err.message || "Data purchase failed"
-});
+      error:
+        err.message || "Data purchase failed"
+
+    });
 
   }
 
 };
+
+
+exports.withdrawCashback = async (req, res) => {
+
+
+
+
 
 exports.withdrawCashback = async (req, res) => {
 
