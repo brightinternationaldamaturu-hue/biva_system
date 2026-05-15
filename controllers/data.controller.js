@@ -326,16 +326,23 @@ exports.buyData = async (req, res) => {
   type: "data",
 
   // FOR FRONTEND RECEIPT
-  network:
-  selectedPlan.network ||
-  selectedPlan.network_name ||
-  network_id,
+const networkNames = {
+"1": "MTN",
+"2": "GLO",
+"3": "AIRTEL",
+"4": "9MOBILE"
+};
 
-  plan:
-  selectedPlan.name ||
-  selectedPlan.plan_name ||
-  selectedPlan.plan ||
-  data_plan,
+network:
+networkNames[String(network_id)] || "Unknown",
+
+plan:
+selectedPlan.plan_name ||
+selectedPlan.name ||
+selectedPlan.plan ||
+selectedPlan.size ||
+data_plan,
+
 
   network_id,
 
@@ -394,31 +401,39 @@ admin.firestore
 
 * SAVE CASHBACK TRANSACTION
   */
-  await db.collection("transactions")
-  .add({
+await db.collection("transactions")
+.add({
 
-  userId,
+userId,
 
-  type: "cashback",
+// IMPORTANT
+email:
+userData.email || "",
 
-  // IMPORTANT FOR FRONTEND
-  amount:
-  cashback,
+fullName:
+userData.fullName || "",
 
-  amountCharged:
-  cashback,
+phone:
+userData.phone || "",
 
-  status: "success",
+type: "cashback",
 
-  description:
-  "1% Data cashback reward",
+amount: cashback,
 
-  createdAt:
-  admin.firestore
-  .FieldValue
-  .serverTimestamp()
+amountCharged: cashback,
+
+status: "success",
+
+description:
+"1% Data cashback reward",
+
+createdAt:
+admin.firestore
+.FieldValue
+.serverTimestamp()
 
 });
+
 
 
       return res.json({
