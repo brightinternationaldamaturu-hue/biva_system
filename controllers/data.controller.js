@@ -379,80 +379,91 @@ try {
     );
   }
 
-  /**
-   * NETWORK MAP
-   */
-  const networkNames = {
 
-    "1": "MTN",
 
-    "2": "GLO",
+// ==========================
+// NETWORK NAME MAP
+// ==========================
+const networkNames = {
 
-    "3": "AIRTEL",
+  "1": "MTN",
+  "2": "GLO",
+  "3": "AIRTEL",
+  "4": "9MOBILE"
+};
 
-    "4": "9MOBILE"
-  };
+// ==========================
+// CLEAN PLAN NAME
+// ==========================
+const cleanPlanName =
 
-  /**
-   * SAVE TRANSACTION
-   */
-  await db.collection("transactions")
-  .doc(request_id)
-  .set({
+  selectedPlan.name ||
+  selectedPlan.plan_name ||
+  selectedPlan.plan ||
+  selectedPlan.size ||
+  selectedPlan.description ||
+  `${selectedPlan.volume || ""} ${selectedPlan.validity || ""}` ||
+  "Data Plan";
 
-    userId,
+// ==========================
+// SAVE MAIN TRANSACTION
+// ==========================
+await db.collection("transactions")
+.doc(request_id)
+.set({
 
-    email:
-      userData.email || "",
+  // USER INFO
+  userId,
 
-    fullName:
-      userData.fullName || "",
+  email:
+    userData.email || "",
 
-    phone,
+  fullName:
+    userData.fullName || "",
 
-    type: "data",
+  phone,
 
-    network:
-      networkNames[
-        String(network_id)
-      ] || "Unknown",
+  // TYPE
+  type: "data",
 
-    plan:
+  // IMPORTANT
+  network:
+    networkNames[
+      String(network_id)
+    ] || "Unknown",
 
-      selectedPlan.plan_name ||
+  // IMPORTANT
+  plan:
+    cleanPlanName,
 
-      selectedPlan.name ||
+  // RAW IDS
+  network_id,
+  data_plan,
 
-      selectedPlan.plan ||
+  // MONEY
+  originalAmount,
+  profit,
 
-      selectedPlan.size ||
+  amount:
+    sellingAmount,
 
-      data_plan,
+  amountCharged:
+    sellingAmount,
 
-    network_id,
+  // STATUS
+  status: "success",
 
-    data_plan,
+  // PROVIDER RESPONSE
+  response: result,
 
-    originalAmount,
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
 
-    profit,
+});
 
-    amount:
-      sellingAmount,
 
-    amountCharged:
-      sellingAmount,
-
-    status: "success",
-
-    response: result,
-
-    createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
-
-  });
 
   /**
    * ==========================
@@ -477,42 +488,62 @@ try {
 
   });
 
-  /**
-   * SAVE CASHBACK
-   */
-  await db.collection("transactions")
-  .add({
+ 
 
-    userId,
 
-    email:
-      userData.email || "",
+// ==========================
+// SAVE CASHBACK
+// ==========================
+await db.collection("transactions")
+.add({
 
-    fullName:
-      userData.fullName || "",
+  // USER INFO
+  userId,
 
-    phone:
-      userData.phone || "",
+  email:
+    userData.email || "",
 
-    type: "cashback",
+  fullName:
+    userData.fullName || "",
 
-    amount:
-      cashback,
+  phone:
+    phone || "",
 
-    amountCharged:
-      cashback,
+  // TYPE
+  type: "cashback",
 
-    status: "success",
+  // IMPORTANT
+  network:
+    networkNames[
+      String(network_id)
+    ] || "Unknown",
 
-    description:
-      "1% Data cashback reward",
+  plan:
+    cleanPlanName,
 
-    createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
+  // MONEY
+  amount:
+    cashback,
 
-  });
+  amountCharged:
+    cashback,
+
+  // STATUS
+  status: "success",
+
+  // DESCRIPTION
+  description:
+    `1% cashback from ${cleanPlanName}`,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+
 
   return res.json({
 
