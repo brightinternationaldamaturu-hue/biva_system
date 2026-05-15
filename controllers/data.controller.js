@@ -70,20 +70,39 @@ exports.getPlans = async (req, res) => {
  * ============================
  */
 exports.buyData = async (req, res) => {
-  try {
-    const { userId, phone, data_plan, network_id } = req.body;
 
+  let sellingAmount = 0;
+  let userRef = null;
+
+  try {
+
+    const {
+      userId,
+      phone,
+      data_plan,
+      network_id
+    } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
     if (!userId || !phone || !data_plan || !network_id) {
+
       return res.status(400).json({
         success: false,
         error: "Missing required fields"
       });
     }
 
-    const userRef = db.collection("users").doc(userId);
+    // =========================
+    // GET USER
+    // =========================
+    userRef = db.collection("users").doc(userId);
+
     const userSnap = await userRef.get();
 
     if (!userSnap.exists) {
+
       return res.status(404).json({
         success: false,
         error: "User not found"
@@ -92,6 +111,9 @@ exports.buyData = async (req, res) => {
 
     const userData = userSnap.data();
 
+    // =========================
+    // GET PLANS
+    // =========================
     const planRes = await axios.get(
       "https://iacafe.com.ng/devapi/v1/budget-data/plans",
       {
@@ -109,12 +131,16 @@ exports.buyData = async (req, res) => {
     );
 
     if (!selectedPlan) {
+
       return res.status(400).json({
         success: false,
         error: "Invalid data plan"
       });
     }
 
+    // =========================
+    // PRICE
+    // =========================
     const originalAmount = Number(
       selectedPlan.api_user_price ||
       selectedPlan.reseller_price ||
@@ -131,21 +157,37 @@ exports.buyData = async (req, res) => {
     else if (originalAmount <= 5000) profit = 150;
     else profit = 200;
 
-    const sellingAmount = originalAmount + profit;
+    sellingAmount = originalAmount + profit;
 
-    if (userData.wallet < sellingAmount) {
+    // =========================
+    // CHECK WALLET
+    // =========================
+    if (Number(userData.wallet) < sellingAmount) {
+
       return res.status(400).json({
         success: false,
         error: "Insufficient balance"
       });
     }
 
+    // =========================
+    // DEDUCT WALLET
+    // =========================
     await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(-sellingAmount)
+      wallet: admin.firestore.FieldValue.increment(
+        -sellingAmount
+      )
     });
 
-    const request_id = "BD_" + Date.now();
+    // =========================
+    // REQUEST ID
+    // =========================
+    const request_id =
+      "BD_" + Date.now();
 
+    // =========================
+    // NETWORK MAP
+    // =========================
     const networkMap = {
       "1": "MTN",
       "2": "GLO",
@@ -153,148 +195,217 @@ exports.buyData = async (req, res) => {
       "4": "9MOBILE"
     };
 
-console.log("SELECTED PLAN:", selectedPlan);
+    // =========================
+    // SEND PURCHASE
+    // =========================
+    const response = await axios.post(
+      "https://iacafe.com.ng/devapi/v1/budget-data",
+      {
+        request_id,
+        phone,
+        data_plan,
+        network_id
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
+    const result = response.data;
 
+    console.log(
+      "PURCHASE RESPONSE:",
+      result
+    );
 
-const response = await axios.post(
-  "https://iacafe.com.ng/devapi/v1/budget-data",
-  {
-    request_id,
-    phone,
-    data_plan,
-    network_id
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
-      "Content-Type": "application/json"
+    const success =
+      result?.success === true ||
+      result?.code === "success";
+
+    if (!success) {
+      throw new Error(
+        result?.message || "Purchase failed"
+      );
     }
-  }
-);
-
-const result = response.data;
-
-const cleanPlan =
-  result?.data?.plan_name ||
-  selectedPlan.plan_name ||
-  selectedPlan.name ||
-  "Data Plan";
-
-console.log("FINAL PLAN:", cleanPlan);
-
-const success =
-  result?.success === true ||
-  result?.code === "success";
-
-
-
-
-
-
-    if (!success) throw new Error("Purchase failed");
 
     // =========================
-    // MAIN TRANSACTION (FIXED FORMAT)
+    // CLEAN PLAN NAME
     // =========================
-await db.collection("transactions").doc(request_id).set({
-  userId,
-  email: userData.email || "",
-  fullName: userData.fullName || "",
-  phone,
+    const cleanPlan =
+      result?.data?.plan_name ||
+      selectedPlan.plan_name ||
+      selectedPlan.name ||
+      "Data Plan";
 
-  type: "data",
-  status: "success",
+    console.log("FINAL PLAN:", cleanPlan);
 
-  network:
-    result?.data?.network ||
-    networkMap[String(network_id)] ||
-    "Unknown",
+    // =========================
+    // SAVE TRANSACTION
+    // =========================
+    await db.collection("transactions")
+    .doc(request_id)
+    .set({
 
-  plan:
-    result?.data?.plan_name ||
-    "Data Plan",
+      userId,
 
-  network_id,
-  data_plan,
+      email:
+        userData.email || "",
 
-  originalAmount,
-  profit,
+      fullName:
+        userData.fullName || "",
 
-  amount: sellingAmount,
-  amountCharged: sellingAmount,
+      phone,
 
-  createdAt:
-    admin.firestore.FieldValue.serverTimestamp()
-});
+      type: "data",
 
+      status: "success",
 
+      network:
+        result?.data?.network ||
+        networkMap[String(network_id)] ||
+        "Unknown",
 
+      plan:
+        cleanPlan,
 
-// =========================
-// CASHBACK (1%)
-// =========================
-const cashback = Math.floor(sellingAmount * 0.01);
+      network_id,
 
-// CREDIT USER
-await userRef.update({
-  wallet: admin.firestore.FieldValue.increment(cashback)
-});
+      data_plan,
 
-// SAVE CASHBACK TRANSACTION
-await db.collection("transactions").add({
-  userId,
+      originalAmount,
 
-  email: userData.email || "",
+      profit,
 
-  fullName: userData.fullName || "",
+      amount:
+        sellingAmount,
 
-  phone,
+      amountCharged:
+        sellingAmount,
 
-  type: "cashback",
+      createdAt:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+    });
 
-  status: "success",
+    // =========================
+    // CASHBACK
+    // =========================
+    const cashback =
+      Math.floor(sellingAmount * 0.01);
 
-  amount: cashback,
+    // CREDIT USER
+    await userRef.update({
+      wallet:
+        admin.firestore
+        .FieldValue
+        .increment(cashback)
+    });
 
-  amountCharged: cashback,
+    // SAVE CASHBACK
+    await db.collection("transactions")
+    .add({
 
-  network:
-    result?.data?.network ||
-    networkMap[String(network_id)] ||
-    "Unknown",
+      userId,
 
-  plan:
-    result?.data?.plan_name ||
-    cleanPlan,
+      email:
+        userData.email || "",
 
-  description:
-    `1% cashback from ${
-      result?.data?.plan_name || cleanPlan
-    }`,
+      fullName:
+        userData.fullName || "",
 
-  createdAt:
-    admin.firestore.FieldValue.serverTimestamp()
-});
+      phone,
 
+      type: "cashback",
 
+      status: "success",
 
+      amount:
+        cashback,
 
+      amountCharged:
+        cashback,
 
+      network:
+        result?.data?.network ||
+        networkMap[String(network_id)] ||
+        "Unknown",
+
+      plan:
+        cleanPlan,
+
+      description:
+        `1% cashback from ${cleanPlan}`,
+
+      createdAt:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+    });
+
+    // =========================
+    // SUCCESS RESPONSE
+    // =========================
     return res.json({
+
       success: true,
-      message: `Data purchase successful. You earned ₦${cashback} cashback 🎉`,
+
+      message:
+        `Data purchase successful. You earned ₦${cashback} cashback 🎉`,
+
       cashback,
-      amountCharged: sellingAmount,
-      data: result
+
+      amountCharged:
+        sellingAmount,
+
+      data:
+        result
     });
 
   } catch (err) {
-    console.log(err.message);
+
+    console.log(
+      "BUY DATA ERROR:",
+      err.message
+    );
+
+    // =========================
+    // REFUND USER
+    // =========================
+    try {
+
+      if (userRef && sellingAmount > 0) {
+
+        await userRef.update({
+          wallet:
+            admin.firestore
+            .FieldValue
+            .increment(sellingAmount)
+        });
+
+        console.log(
+          "USER REFUNDED:",
+          sellingAmount
+        );
+      }
+
+    } catch (refundErr) {
+
+      console.log(
+        "REFUND ERROR:",
+        refundErr.message
+      );
+    }
 
     return res.status(500).json({
+
       success: false,
-      error: err.message
+
+      error:
+        err.message || "Data purchase failed"
     });
   }
 };
