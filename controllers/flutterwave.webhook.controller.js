@@ -104,26 +104,70 @@ if (
 
     });
 
-    // SAVE TRANSACTION
-    await db.collection(
-      "transactions"
-    ).add({
+// SAVE TRANSACTION
+await db.collection(
+  "transactions"
+).add({
 
-      email,
-      amount,
-      type: "wallet-funding",
-      status: "successful",
-      flwRef,
+  userId: userDoc.id,
 
-      description:
-        "Wallet funded via bank transfer",
+  email,
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
+  amount,
 
-    });
+  type: "fund",
+
+  status: "successful",
+
+  flwRef,
+
+  paymentType:
+    data.payment_type ||
+
+    "bank_transfer",
+
+  reference:
+    data.tx_ref ||
+
+    flwRef,
+
+  description:
+    "Wallet funded via bank transfer",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+// ==========================
+// ADMIN NOTIFICATION
+// ==========================
+
+await db.collection(
+  "adminNotifications"
+).add({
+
+  title:
+    "Wallet Funding",
+
+  message:
+
+`${email} funded wallet with ₦${Number(amount).toLocaleString('en-NG')}`,
+
+  type: "fund",
+
+  read: false,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
 
     console.log(
       `Wallet funded for ${email}`
