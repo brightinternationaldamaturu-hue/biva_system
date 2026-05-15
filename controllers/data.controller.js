@@ -146,17 +146,26 @@ exports.buyData = async (req, res) => {
       selectedPlan.price ||
       0
     );
+let profit = 0;
 
-    let profit = 0;
-
-    if (originalAmount <= 200) profit = 30;
-    else if (originalAmount <= 800) profit = 40;
-    else if (originalAmount <= 1000) profit = 50;
-    else if (originalAmount <= 2000) profit = 80;
-    else if (originalAmount <= 3500) profit = 100;
-    else if (originalAmount <= 5000) profit = 150;
-    else profit = 200;
-
+if (originalAmount <= 300) {
+  profit = 13;
+}
+else if (originalAmount <= 1000) {
+  profit = 50;
+}
+else if (originalAmount <= 2000) {
+  profit = 65;
+}
+else if (originalAmount <= 3500) {
+  profit = 100;
+}
+else if (originalAmount <= 5000) {
+  profit = 150;
+}
+else {
+  profit = 200;
+}
     sellingAmount =
       originalAmount + profit;
 
