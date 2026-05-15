@@ -143,10 +143,10 @@ await db.collection(
 const cashback =
   Number(amount) * 0.02;
 
-// CREDIT WALLET
+// SAVE TO CASHBACK BALANCE
 await userRef.update({
 
-  wallet:
+  cashbackBalance:
     admin.firestore
     .FieldValue
     .increment(cashback)
@@ -168,8 +168,12 @@ await db.collection(
 
   status: "successful",
 
+  network,
+
+  phone,
+
   description:
-    "2% Airtime cashback reward",
+    `2% cashback from ${network} airtime purchase`,
 
   createdAt:
     admin.firestore
