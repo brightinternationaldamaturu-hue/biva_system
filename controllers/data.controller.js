@@ -26,10 +26,10 @@ const response = await axios.get(
     params: {
       network_id
     },
-    headers: {
-      Authorization:
-        `Bearer ${process.env.IACAFE_API_KEY}`
-    }
+headers: {
+  Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
+  "Content-Type": "application/json"
+}
   }
 );
 
