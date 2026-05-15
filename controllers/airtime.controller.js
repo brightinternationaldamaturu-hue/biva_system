@@ -100,11 +100,97 @@ if (!success) {
 }
 
 
-      return res.json({
-        success: true,
-        message: "Airtime sent successfully"
-      });
+// ==========================
+// SAVE AIRTIME TRANSACTION
+// ==========================
 
+await db.collection(
+  "transactions"
+).add({
+
+  userId: userDoc.id,
+
+  email,
+
+  type: "airtime",
+
+  network,
+
+  phone,
+
+  amount,
+
+  status: "successful",
+
+  reference: txId,
+
+  description:
+    `${network} Airtime Purchase`,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+// ==========================
+// AIRTIME CASHBACK
+// ==========================
+
+// 2% cashback
+const cashback =
+  Number(amount) * 0.02;
+
+// CREDIT WALLET
+await userRef.update({
+
+  wallet:
+    admin.firestore
+    .FieldValue
+    .increment(cashback)
+
+});
+
+// SAVE CASHBACK TRANSACTION
+await db.collection(
+  "transactions"
+).add({
+
+  userId: userDoc.id,
+
+  email,
+
+  type: "cashback",
+
+  amount: cashback,
+
+  status: "successful",
+
+  description:
+    "2% Airtime cashback reward",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+// ==========================
+// SUCCESS RESPONSE
+// ==========================
+
+return res.json({
+
+  success: true,
+
+  message:
+    `Airtime sent successfully. You earned ₦${cashback.toFixed(2)} cashback 🎉`
+
+});
 
     } catch (err) {
       console.error("❌ PROVIDER ERROR:", err.response?.data || err.message);
