@@ -140,175 +140,161 @@ exports.buyData = async (req, res) => {
       });
     }
 
-// DEDUCT WALLET
-await userRef.update({
-  wallet: admin.firestore.FieldValue.increment(-sellingAmount)
+    await userRef.update({
+      wallet: admin.firestore.FieldValue.increment(-sellingAmount)
+    });
+
+    const request_id = "BD_" + Date.now();
+
+    const networkMap = {
+      "1": "MTN",
+      "2": "GLO",
+      "3": "AIRTEL",
+      "4": "9MOBILE"
+    };
+
+console.log("SELECTED PLAN:", selectedPlan);
+
+
+
+const response = await axios.post(
+  "https://iacafe.com.ng/devapi/v1/budget-data",
+  {
+    request_id,
+    phone,
+    data_plan,
+    network_id
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
+      "Content-Type": "application/json"
+    }
+  }
+);
+
+const result = response.data;
+
+const cleanPlan =
+  result?.data?.plan_name ||
+  selectedPlan.plan_name ||
+  selectedPlan.name ||
+  "Data Plan";
+
+console.log("FINAL PLAN:", cleanPlan);
+
+const success =
+  result?.success === true ||
+  result?.code === "success";
+
+
+
+
+
+
+    if (!success) throw new Error("Purchase failed");
+
+    // =========================
+    // MAIN TRANSACTION (FIXED FORMAT)
+    // =========================
+await db.collection("transactions").doc(request_id).set({
+  userId,
+  email: userData.email || "",
+  fullName: userData.fullName || "",
+  phone,
+
+  type: "data",
+  status: "success",
+
+  network:
+    result?.data?.network ||
+    networkMap[String(network_id)] ||
+    "Unknown",
+
+  plan:
+    result?.data?.plan_name ||
+    "Data Plan",
+
+  network_id,
+  data_plan,
+
+  originalAmount,
+  profit,
+
+  amount: sellingAmount,
+  amountCharged: sellingAmount,
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
 });
 
-const request_id = "BD_" + Date.now();
 
-const networkMap = {
-  "1": "MTN",
-  "2": "GLO",
-  "3": "AIRTEL",
-  "4": "9MOBILE"
-};
 
-try {
 
-  // SEND PURCHASE
-  const response = await axios.post(
-    "https://iacafe.com.ng/devapi/v1/budget-data",
-    {
-      request_id,
-      phone,
-      data_plan,
-      network_id
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.IACAFE_API_KEY}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
+// =========================
+// CASHBACK (1%)
+// =========================
+const cashback = Math.floor(sellingAmount * 0.01);
 
-  const result = response.data;
+// CREDIT USER
+await userRef.update({
+  wallet: admin.firestore.FieldValue.increment(cashback)
+});
 
-  const cleanPlan =
+// SAVE CASHBACK TRANSACTION
+await db.collection("transactions").add({
+  userId,
+
+  email: userData.email || "",
+
+  fullName: userData.fullName || "",
+
+  phone,
+
+  type: "cashback",
+
+  status: "success",
+
+  amount: cashback,
+
+  amountCharged: cashback,
+
+  network:
+    result?.data?.network ||
+    networkMap[String(network_id)] ||
+    "Unknown",
+
+  plan:
     result?.data?.plan_name ||
-    selectedPlan.plan_name ||
-    selectedPlan.name ||
-    "Data Plan";
+    cleanPlan,
 
-  const success =
-    result?.success === true ||
-    result?.code === "success";
+  description:
+    `1% cashback from ${
+      result?.data?.plan_name || cleanPlan
+    }`,
 
-  if (!success) {
-    throw new Error(
-      result?.message || "Purchase failed"
-    );
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
+});
+
+
+
+
+
+    return res.json({
+      success: true,
+      message: `Data purchase successful. You earned ₦${cashback} cashback 🎉`,
+      cashback,
+      amountCharged: sellingAmount,
+      data: result
+    });
+
+  } catch (err) {
+    console.log(err.message);
+
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
-
-  // SAVE MAIN TRANSACTION
-  await db.collection("transactions")
-  .doc(request_id)
-  .set({
-
-    userId,
-
-    email: userData.email || "",
-
-    fullName: userData.fullName || "",
-
-    phone,
-
-    type: "data",
-
-    status: "success",
-
-    network:
-      result?.data?.network ||
-      networkMap[String(network_id)] ||
-      "Unknown",
-
-    plan: cleanPlan,
-
-    network_id,
-
-    data_plan,
-
-    originalAmount,
-
-    profit,
-
-    amount: sellingAmount,
-
-    amountCharged: sellingAmount,
-
-    createdAt:
-      admin.firestore.FieldValue.serverTimestamp()
-  });
-
-  // CASHBACK
-  const cashback =
-    Math.floor(sellingAmount * 0.01);
-
-  // CREDIT USER
-  await userRef.update({
-    wallet:
-      admin.firestore.FieldValue.increment(cashback)
-  });
-
-  // SAVE CASHBACK
-  await db.collection("transactions")
-  .add({
-
-    userId,
-
-    email: userData.email || "",
-
-    fullName: userData.fullName || "",
-
-    phone,
-
-    type: "cashback",
-
-    status: "success",
-
-    amount: cashback,
-
-    amountCharged: cashback,
-
-    network:
-      result?.data?.network ||
-      networkMap[String(network_id)] ||
-      "Unknown",
-
-    plan: cleanPlan,
-
-    description:
-      `1% cashback from ${cleanPlan}`,
-
-    createdAt:
-      admin.firestore.FieldValue.serverTimestamp()
-  });
-
-  return res.json({
-
-    success: true,
-
-    message:
-      `Data purchase successful. You earned ₦${cashback} cashback 🎉`,
-
-    cashback,
-
-    amountCharged: sellingAmount,
-
-    data: result
-  });
-
-} catch (err) {
-
-  console.log(
-    "PURCHASE ERROR:",
-    err.response?.data || err.message
-  );
-
-  // REFUND USER
-  await userRef.update({
-    wallet:
-      admin.firestore.FieldValue.increment(sellingAmount)
-  });
-
-  return res.status(500).json({
-
-    success: false,
-
-    error:
-      err.response?.data?.message ||
-      err.message ||
-      "Purchase failed and wallet refunded"
-  });
-}
+};
