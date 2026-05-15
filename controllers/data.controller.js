@@ -422,6 +422,7 @@ exports.withdrawCashback = async (req, res) => {
   try {
 
     const { userId } = req.body;
+    console.log(req.body);
 
     const userRef =
       db.collection("users")
