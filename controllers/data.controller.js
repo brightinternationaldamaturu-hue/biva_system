@@ -2,30 +2,76 @@ const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
 /**
- * =========================
- * NETWORK MAP
- * =========================
+ * ============================
+ * GET DATA PLANS
+ * ============================
  */
-const networkNames = {
-  "1": "MTN",
-  "2": "GLO",
-  "3": "AIRTEL",
-  "4": "9MOBILE"
+exports.getPlans = async (req, res) => {
+  try {
+    const { network_id } = req.params;
+
+    const response = await axios.get(
+      "https://iacafe.com.ng/devapi/v1/budget-data/plans",
+      {
+        params: { network_id },
+        headers: {
+          Authorization: `Bearer ${process.env.IACAFE_API_KEY}`
+        }
+      }
+    );
+
+    const rawPlans = response.data?.data || [];
+
+    const plans = rawPlans.map(plan => {
+      const basePrice = Number(
+        plan.api_user_price ||
+        plan.reseller_price ||
+        plan.price ||
+        0
+      );
+
+      let profit = 0;
+
+      if (basePrice <= 300) profit = 13;
+      else if (basePrice <= 1000) profit = 50;
+      else if (basePrice <= 2000) profit = 65;
+      else if (basePrice <= 3500) profit = 100;
+      else if (basePrice <= 5000) profit = 150;
+      else profit = 200;
+
+      const selling_price = basePrice + profit;
+
+      return {
+        ...plan,
+        original_price: basePrice,
+        selling_price,
+        cashback: Math.floor(selling_price * 0.01)
+      };
+    });
+
+    return res.json({
+      success: true,
+      data: plans
+    });
+
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to load plans"
+    });
+  }
 };
 
+
 /**
- * =========================
+ * ============================
  * BUY DATA
- * =========================
+ * ============================
  */
 exports.buyData = async (req, res) => {
   try {
-    const {
-      userId,
-      phone,
-      data_plan,
-      network_id
-    } = req.body;
+    const { userId, phone, data_plan, network_id } = req.body;
 
     if (!userId || !phone || !data_plan || !network_id) {
       return res.status(400).json({
@@ -87,7 +133,7 @@ exports.buyData = async (req, res) => {
 
     const sellingAmount = originalAmount + profit;
 
-    if (Number(userData.wallet) < sellingAmount) {
+    if (userData.wallet < sellingAmount) {
       return res.status(400).json({
         success: false,
         error: "Insufficient balance"
@@ -98,8 +144,21 @@ exports.buyData = async (req, res) => {
       wallet: admin.firestore.FieldValue.increment(-sellingAmount)
     });
 
-    const request_id =
-      "BD_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+    const request_id = "BD_" + Date.now();
+
+    const networkMap = {
+      "1": "MTN",
+      "2": "GLO",
+      "3": "AIRTEL",
+      "4": "9MOBILE"
+    };
+
+    const cleanPlan =
+      selectedPlan.plan_name ||
+      selectedPlan.name ||
+      selectedPlan.size ||
+      `${selectedPlan.volume || ""} ${selectedPlan.validity || ""}` ||
+      data_plan;
 
     const response = await axios.post(
       "https://iacafe.com.ng/devapi/v1/budget-data",
@@ -120,24 +179,13 @@ exports.buyData = async (req, res) => {
     const result = response.data;
 
     const success =
-      result?.success === true || result?.code === "success";
+      result?.success === true ||
+      result?.code === "success";
 
-    if (!success) {
-      throw new Error(result?.message || "Purchase failed");
-    }
-
-    const cleanPlanName =
-      selectedPlan.name ||
-      selectedPlan.plan_name ||
-      selectedPlan.plan ||
-      selectedPlan.size ||
-      selectedPlan.description ||
-      "Data Plan";
-
-    const cashback = Math.floor(sellingAmount * 0.01);
+    if (!success) throw new Error("Purchase failed");
 
     // =========================
-    // MAIN TRANSACTION
+    // MAIN TRANSACTION (FIXED FORMAT)
     // =========================
     await db.collection("transactions").doc(request_id).set({
       userId,
@@ -146,9 +194,10 @@ exports.buyData = async (req, res) => {
       phone,
 
       type: "data",
+      status: "success",
 
-      network: networkNames[String(network_id)] || "Unknown",
-      plan: cleanPlanName,
+      network: networkMap[String(network_id)] || "Unknown",
+      plan: cleanPlan,
 
       network_id,
       data_plan,
@@ -159,57 +208,47 @@ exports.buyData = async (req, res) => {
       amount: sellingAmount,
       amountCharged: sellingAmount,
 
-      status: "success",
-
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
     // =========================
-    // CASHBACK UPDATE
+    // CASHBACK (1%)
     // =========================
+    const cashback = Math.floor(sellingAmount * 0.01);
+
     await userRef.update({
       wallet: admin.firestore.FieldValue.increment(cashback)
     });
 
-    // =========================
-    // CASHBACK TRANSACTION
-    // =========================
     await db.collection("transactions").add({
       userId,
       email: userData.email || "",
       fullName: userData.fullName || "",
       phone,
-
       type: "cashback",
-
-      network: networkNames[String(network_id)] || "Unknown",
-      plan: cleanPlanName,
-
+      status: "success",
       amount: cashback,
       amountCharged: cashback,
-
-      description: `1% cashback from ${cleanPlanName}`,
-
-      status: "success",
-
+      network: networkMap[String(network_id)] || "Unknown",
+      plan: cleanPlan,
+      description: "1% Data cashback reward",
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
     return res.json({
       success: true,
       message: `Data purchase successful. You earned ₦${cashback} cashback 🎉`,
-      amountCharged: sellingAmount,
       cashback,
+      amountCharged: sellingAmount,
       data: result
     });
 
   } catch (err) {
-    console.error("PURCHASE ERROR:", err.response?.data || err.message);
+    console.log(err.message);
 
     return res.status(500).json({
       success: false,
-      error: "Data purchase failed",
-      details: err.response?.data || err.message
+      error: err.message
     });
   }
 };
