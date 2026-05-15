@@ -2,10 +2,156 @@ const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
 /**
- * =====================================
- * GET DATA PLANS
- * =====================================
+
+* =====================================
+* GET DATA PLANS
+* =====================================
+  */
+
+exports.getPlans = async (req, res) => {
+
+try {
+
+```
+const { network_id } = req.params;
+
+console.log(
+  "NETWORK ID:",
+  network_id
+);
+
+const response = await axios.get(
+  "https://iacafe.com.ng/devapi/v1/budget-data/plans",
+  {
+    params: {
+      network_id
+    },
+    headers: {
+      Authorization:
+        `Bearer ${process.env.IACAFE_API_KEY}`
+    }
+  }
+);
+
+console.log(
+  "IACAFE RESPONSE:",
+  response.data
+);
+
+const rawPlans =
+  response.data.data || [];
+
+/**
+ * FORMAT PLANS
  */
+const plans = rawPlans.map(plan => {
+
+  const basePrice = Number(
+
+    plan.api_user_price ||
+
+    plan.reseller_price ||
+
+    plan.price ||
+
+    0
+  );
+
+  /**
+   * PROFIT
+   */
+  let profit = 0;
+
+  if (basePrice <= 300) {
+    profit = 13;
+  }
+
+  else if (basePrice <= 1000) {
+    profit = 50;
+  }
+
+  else if (basePrice <= 2000) {
+    profit = 65;
+  }
+
+  else if (basePrice <= 3500) {
+    profit = 100;
+  }
+
+  else if (basePrice <= 5000) {
+    profit = 150;
+  }
+
+  else {
+    profit = 200;
+  }
+
+  /**
+   * FINAL PRICE
+   */
+  const sellingPrice =
+    basePrice + profit;
+
+  /**
+   * CASHBACK
+   */
+  const cashback =
+    Math.floor(
+      sellingPrice * 0.01
+    );
+
+  return {
+
+    ...plan,
+
+    original_price:
+      basePrice,
+
+    selling_price:
+      sellingPrice,
+
+    cashback,
+
+    cashback_text:
+      `₦${cashback} Cashback`
+  };
+});
+
+return res.json({
+
+  success: true,
+
+  data: plans
+});
+```
+
+} catch (err) {
+
+```
+console.log(
+  "FULL ERROR:",
+  err.response?.data ||
+  err.message
+);
+
+return res.status(500).json({
+
+  success: false,
+
+  error:
+    "Failed to load plans"
+});
+```
+
+}
+};
+
+/**
+
+* =====================================
+* BUY DATA
+* =====================================
+  */
 
 exports.buyData = async (req, res) => {
 
@@ -22,11 +168,19 @@ const {
 /**
  * VALIDATION
  */
-if (!userId || !phone || !data_plan || !network_id) {
+if (
+  !userId ||
+  !phone ||
+  !data_plan ||
+  !network_id
+) {
 
   return res.status(400).json({
+
     success: false,
-    error: "Missing required fields"
+
+    error:
+      "Missing required fields"
   });
 }
 
@@ -42,8 +196,11 @@ const userSnap =
 if (!userSnap.exists) {
 
   return res.status(404).json({
+
     success: false,
-    error: "User not found"
+
+    error:
+      "User not found"
   });
 }
 
@@ -81,8 +238,11 @@ const selectedPlan = plans.find(
 if (!selectedPlan) {
 
   return res.status(400).json({
+
     success: false,
-    error: "Invalid data plan"
+
+    error:
+      "Invalid data plan"
   });
 }
 
@@ -90,9 +250,13 @@ if (!selectedPlan) {
  * ORIGINAL PRICE
  */
 const originalAmount = Number(
+
   selectedPlan.api_user_price ||
+
   selectedPlan.reseller_price ||
+
   selectedPlan.price ||
+
   0
 );
 
@@ -137,8 +301,11 @@ if (
 ) {
 
   return res.status(400).json({
+
     success: false,
-    error: "Insufficient balance"
+
+    error:
+      "Insufficient balance"
   });
 }
 
@@ -148,9 +315,10 @@ if (
 await userRef.update({
 
   wallet:
-    admin.firestore.FieldValue.increment(
-      -sellingAmount
-    )
+    admin.firestore
+    .FieldValue
+    .increment(-sellingAmount)
+
 });
 
 /**
@@ -160,7 +328,9 @@ const request_id =
   "BD_" +
   Date.now() +
   "_" +
-  Math.floor(Math.random() * 1000);
+  Math.floor(
+    Math.random() * 1000
+  );
 
 try {
 
@@ -194,19 +364,23 @@ try {
   );
 
   const success =
+
     result?.success === true ||
+
     result?.code === "success";
 
   if (!success) {
 
     throw new Error(
+
       result?.message ||
+
       "Purchase failed"
     );
   }
 
   /**
-   * NETWORK NAME MAP
+   * NETWORK MAP
    */
   const networkNames = {
 
@@ -220,7 +394,7 @@ try {
   };
 
   /**
-   * SAVE MAIN TRANSACTION
+   * SAVE TRANSACTION
    */
   await db.collection("transactions")
   .doc(request_id)
@@ -244,10 +418,15 @@ try {
       ] || "Unknown",
 
     plan:
+
       selectedPlan.plan_name ||
+
       selectedPlan.name ||
+
       selectedPlan.plan ||
+
       selectedPlan.size ||
+
       data_plan,
 
     network_id,
@@ -354,7 +533,8 @@ try {
 
   console.error(
     "PURCHASE ERROR:",
-    err.response?.data || err.message
+    err.response?.data ||
+    err.message
   );
 
   /**
@@ -363,9 +543,10 @@ try {
   await userRef.update({
 
     wallet:
-      admin.firestore.FieldValue.increment(
-        sellingAmount
-      )
+      admin.firestore
+      .FieldValue
+      .increment(sellingAmount)
+
   });
 
   return res.status(500).json({
