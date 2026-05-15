@@ -70,6 +70,76 @@ exports.fundWallet = async (req, res) => {
       wallet: admin.firestore.FieldValue.increment(safeAmount),
     });
 
+
+
+// =====================
+// REFERRAL BONUS SYSTEM
+// =====================
+
+// ONLY FOR FUNDING >= ₦800
+if (safeAmount >= 800) {
+
+  const userDoc = await db
+    .collection("users")
+    .doc(userId)
+    .get();
+
+  const userData = userDoc.data();
+
+  // CHECK IF USER WAS REFERRED
+  if (
+    userData?.referredBy &&
+    !userData?.referralBonusPaid
+  ) {
+
+    const referrerId =
+      userData.referredBy;
+
+    // CREDIT REFERRER ₦100
+    await db.collection("users")
+      .doc(referrerId)
+      .update({
+
+        wallet:
+          admin.firestore.FieldValue.increment(100)
+
+      });
+
+    // SAVE REFERRAL TRANSACTION
+    await db.collection("transactions")
+      .add({
+
+        userId: referrerId,
+
+        type: "referral_bonus",
+
+        amount: 100,
+
+        status: "success",
+
+        description:
+          `Referral bonus from ${userData.fullName || "New User"}`,
+
+        createdAt:
+          admin.firestore.FieldValue.serverTimestamp()
+
+      });
+
+    // MARK BONUS AS PAID
+    await db.collection("users")
+      .doc(userId)
+      .update({
+
+        referralBonusPaid: true
+
+      });
+
+  }
+
+}
+
+
+
     return res.json({
       success: true,
       message: "Wallet funded successfully",
