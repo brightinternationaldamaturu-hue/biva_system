@@ -151,3 +151,68 @@ if (safeAmount >= 800) {
     return res.status(500).json({ error: err.message });
   }
 };
+
+
+
+// =====================
+// GET USER WALLET
+// =====================
+exports.getWallet = async (req, res) => {
+
+  try {
+
+    const { uid } = req.params;
+
+    const doc = await db
+      .collection("users")
+      .doc(uid)
+      .get();
+
+    if (!doc.exists) {
+
+      return res.status(404).json({
+
+        success: false,
+        error: "User not found"
+
+      });
+
+    }
+
+    const user = doc.data();
+
+    return res.json({
+
+      success: true,
+
+      wallet:
+        Number(user.wallet || 0),
+
+      cashbackBalance:
+        Number(
+          user.cashbackBalance || 0
+        ),
+
+      virtualAccount:
+        user.virtualAccount || null,
+
+      referralCode:
+        user.referralCode || "",
+
+      referredBy:
+        user.referredBy || ""
+
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+
+      success: false,
+      error: err.message
+
+    });
+
+  }
+
+};
