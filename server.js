@@ -12,7 +12,7 @@ app.use(express.json());
 
 // ROUTES
 app.use("/api", require("./routes/airtime.routes"));
-app.use("/api/wallet", require("./routes/wallet.routes"));
+app.use("/api", require("./routes/wallet.routes"));
 app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/vtu", require("./routes/vtu.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
