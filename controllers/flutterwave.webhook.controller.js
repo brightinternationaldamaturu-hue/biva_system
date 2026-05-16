@@ -104,6 +104,50 @@ if (
 
     });
 
+
+// ==========================
+// REFERRAL BONUS SYSTEM
+// ==========================
+
+if (amount >= 100) {
+
+  const userRef = userDoc.ref;
+
+  if (userData?.referredBy && !userData?.referralBonusPaid) {
+
+    const refQuery = await db.collection("users")
+      .where("referralCode", "==", userData.referredBy)
+      .limit(1)
+      .get();
+
+    if (!refQuery.empty) {
+
+      const referrerRef = refQuery.docs[0].ref;
+
+      // CREDIT REFERRER
+      await referrerRef.update({
+        wallet: admin.firestore.FieldValue.increment(100)
+      });
+
+      // SAVE TRANSACTION
+      await db.collection("transactions").add({
+        userId: referrerRef.id,
+        type: "referral_bonus",
+        amount: 100,
+        status: "success",
+        description: `Referral bonus from ${email}`,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // MARK PAID
+      await userRef.update({
+        referralBonusPaid: true
+      });
+    }
+  }
+}
+
+
 // SAVE TRANSACTION
 await db.collection(
   "transactions"
