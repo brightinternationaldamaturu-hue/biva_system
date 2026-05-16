@@ -12,7 +12,9 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // STEP 1: VERIFY PAYMENT
+    // =========================
+    // VERIFY FLUTTERWAVE PAYMENT
+    // =========================
     const response = await axios.get(
       `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
       {
@@ -31,7 +33,6 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // STEP 2: VALIDATIONS
     if (data.status !== "successful") {
       return res.status(400).json({
         success: false,
@@ -57,7 +58,9 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // STEP 3: FIND USER
+    // =========================
+    // FIND USER
+    // =========================
     const snapshot = await db.collection("users")
       .where("email", "==", email)
       .limit(1)
@@ -75,7 +78,32 @@ exports.verifyPayment = async (req, res) => {
 
     const processedRef = db.collection("processedPayments").doc(tx_ref);
 
-    // STEP 4: SAFE TRANSACTION
+    // =========================
+    // GET USER DATA FIRST (IMPORTANT FIX)
+    // =========================
+    const userSnapPre = await userRef.get();
+    const userDataPre = userSnapPre.data();
+
+    // =========================
+    // FIND REFERRER OUTSIDE TRANSACTION (IMPORTANT FIX)
+    // =========================
+    let referrerRef = null;
+
+    if (amount >= 800 && userDataPre?.referredBy) {
+      const refQuery = await db
+        .collection("users")
+        .where("referralCode", "==", userDataPre.referredBy)
+        .limit(1)
+        .get();
+
+      if (!refQuery.empty) {
+        referrerRef = refQuery.docs[0].ref;
+      }
+    }
+
+    // =========================
+    // TRANSACTION BLOCK
+    // =========================
     await db.runTransaction(async (t) => {
 
       const processedSnap = await t.get(processedRef);
@@ -90,20 +118,22 @@ exports.verifyPayment = async (req, res) => {
         throw new Error("USER_NOT_FOUND");
       }
 
-      // CREDIT WALLET
+      const userData = userSnap.data();
+
+      // CREDIT USER WALLET
       t.update(userRef, {
         wallet: admin.firestore.FieldValue.increment(amount)
       });
 
-      // MARK PROCESSED
+      // MARK PAYMENT AS PROCESSED
       t.set(processedRef, {
         tx_ref,
         email,
         amount,
-        createdAt: new Date()
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      // TRANSACTION LOG
+      // LOG FUNDING TRANSACTION
       const transRef = db.collection("transactions").doc();
 
       t.set(transRef, {
@@ -112,8 +142,41 @@ exports.verifyPayment = async (req, res) => {
         type: "funding",
         status: "success",
         tx_ref,
-        createdAt: new Date()
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
+
+      // =========================
+      // REFERRAL BONUS (FIXED)
+      // =========================
+      if (
+        amount >= 800 &&
+        userData?.referredBy &&
+        !userData?.referralBonusPaid &&
+        referrerRef
+      ) {
+
+        // CREDIT REFERRER
+        t.update(referrerRef, {
+          wallet: admin.firestore.FieldValue.increment(100)
+        });
+
+        // REFERRAL BONUS TRANSACTION
+        const bonusRef = db.collection("transactions").doc();
+
+        t.set(bonusRef, {
+          userId: referrerRef.id,
+          type: "referral_bonus",
+          amount: 100,
+          status: "success",
+          description: `Referral bonus from ${userData.fullName || "New User"}`,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        // MARK USER AS PAID
+        t.update(userRef, {
+          referralBonusPaid: true
+        });
+      }
     });
 
     return res.json({
