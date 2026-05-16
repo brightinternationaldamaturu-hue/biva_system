@@ -12,36 +12,169 @@ function toSafeNumber(value) {
 // CREDIT WALLET
 // =====================
 exports.creditWallet = async (req, res) => {
+
   try {
+
     const { userId, amount } = req.body;
 
     if (!userId || amount === undefined) {
-      return res.status(400).json({ error: "Invalid request" });
+
+      return res.status(400).json({
+        error: "Invalid request"
+      });
+
     }
 
-    const safeAmount = toSafeNumber(amount);
+    const safeAmount =
+      toSafeNumber(amount);
 
     if (!safeAmount || safeAmount <= 0) {
-      return res.status(400).json({ error: "Invalid amount received" });
+
+      return res.status(400).json({
+        error: "Invalid amount received"
+      });
+
     }
 
-    await db.collection("users").doc(userId).update({
-      wallet: admin.firestore.FieldValue.increment(safeAmount),
-    });
+    // CREDIT USER WALLET
+    await db.collection("users")
+      .doc(userId)
+      .update({
 
-    await db.collection("transactions").add({
-      userId,
-      amount: safeAmount,
-      type: "credit",
-      createdAt: new Date(),
-    });
+        wallet:
+          admin.firestore.FieldValue.increment(
+            safeAmount
+          ),
 
-    return res.json({ success: true });
+      });
+
+    // SAVE TRANSACTION
+    await db.collection("transactions")
+      .add({
+
+        userId,
+
+        amount: safeAmount,
+
+        type: "credit",
+
+        status: "success",
+
+        createdAt:
+          admin.firestore.FieldValue.serverTimestamp()
+
+      });
+
+
+
+    // =====================
+    // REFERRAL BONUS SYSTEM
+    // =====================
+
+    // ONLY FOR FIRST FUNDING >= ₦800
+    if (safeAmount >= 800) {
+
+      const userDoc = await db
+        .collection("users")
+        .doc(userId)
+        .get();
+
+      const userData =
+        userDoc.data();
+
+      // CHECK IF REFERRED
+      if (
+
+        userData?.referredBy &&
+
+        !userData?.referralBonusPaid
+
+      ) {
+
+        // FIND REFERRER USING REFERRAL CODE
+        const refQuery = await db
+          .collection("users")
+          .where(
+            "referralCode",
+            "==",
+            userData.referredBy
+          )
+          .limit(1)
+          .get();
+
+        // IF REFERRER EXISTS
+        if (!refQuery.empty) {
+
+          const referrerDoc =
+            refQuery.docs[0];
+
+          const referrerId =
+            referrerDoc.id;
+
+          // CREDIT REFERRER
+          await db.collection("users")
+            .doc(referrerId)
+            .update({
+
+              wallet:
+                admin.firestore.FieldValue.increment(100)
+
+            });
+
+          // SAVE BONUS TRANSACTION
+          await db.collection("transactions")
+            .add({
+
+              userId: referrerId,
+
+              type: "referral_bonus",
+
+              amount: 100,
+
+              status: "success",
+
+              description:
+                `Referral bonus from ${userData.fullName || "New User"}`,
+
+              createdAt:
+                admin.firestore.FieldValue.serverTimestamp()
+
+            });
+
+          // MARK BONUS PAID
+          await db.collection("users")
+            .doc(userId)
+            .update({
+
+              referralBonusPaid: true
+
+            });
+
+        }
+
+      }
+
+    }
+
+    return res.json({
+
+      success: true
+
+    });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+
+    return res.status(500).json({
+
+      error: err.message
+
+    });
+
   }
+
 };
+
+
 
 // =====================
 // FUND WALLET (TEST / INIT)
