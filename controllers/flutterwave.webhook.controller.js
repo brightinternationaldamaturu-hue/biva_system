@@ -109,7 +109,7 @@ if (
 // REFERRAL BONUS SYSTEM
 // ==========================
 
-if (amount >= 100) {
+if (amount >= 800) {
 
   const userRef = userDoc.ref;
 
