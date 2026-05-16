@@ -92,47 +92,66 @@ if (safeAmount >= 800) {
     !userData?.referralBonusPaid
   ) {
 
-    const referrerId =
-      userData.referredBy;
+    // FIND REFERRER USING REFERRAL CODE
+    const refQuery = await db
+      .collection("users")
+      .where(
+        "referralCode",
+        "==",
+        userData.referredBy
+      )
+      .limit(1)
+      .get();
 
-    // CREDIT REFERRER ₦100
-    await db.collection("users")
-      .doc(referrerId)
-      .update({
+    // IF REFERRER EXISTS
+    if (!refQuery.empty) {
 
-        wallet:
-          admin.firestore.FieldValue.increment(100)
+      const referrerDoc =
+        refQuery.docs[0];
 
-      });
+      const referrerId =
+        referrerDoc.id;
 
-    // SAVE REFERRAL TRANSACTION
-    await db.collection("transactions")
-      .add({
+      // CREDIT REFERRER ₦100
+      await db.collection("users")
+        .doc(referrerId)
+        .update({
 
-        userId: referrerId,
+          wallet:
+            admin.firestore.FieldValue.increment(100)
 
-        type: "referral_bonus",
+        });
 
-        amount: 100,
+      // SAVE REFERRAL TRANSACTION
+      await db.collection("transactions")
+        .add({
 
-        status: "success",
+          userId: referrerId,
 
-        description:
-          `Referral bonus from ${userData.fullName || "New User"}`,
+          type: "referral_bonus",
 
-        createdAt:
-          admin.firestore.FieldValue.serverTimestamp()
+          amount: 100,
 
-      });
+          status: "success",
 
-    // MARK BONUS AS PAID
-    await db.collection("users")
-      .doc(userId)
-      .update({
+          description:
+            `Referral bonus from ${userData.fullName || "New User"}`,
 
-        referralBonusPaid: true
+          createdAt:
+            admin.firestore.FieldValue.serverTimestamp()
 
-      });
+        });
+
+      // MARK BONUS AS PAID
+      await db.collection("users")
+        .doc(userId)
+        .update({
+
+          referralBonusPaid: true
+
+        });
+
+    }
 
   }
 
