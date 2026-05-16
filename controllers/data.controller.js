@@ -294,6 +294,9 @@ else {
 
     });
 
+
+
+
     // CASHBACK
     const cashback =
       Math.floor(
@@ -468,29 +471,38 @@ exports.withdrawCashback = async (req, res) => {
 
     });
 
-    await db.collection("transactions")
-    .add({
+await db.collection("transactions")
+.add({
 
-      userId,
+  userId,
 
-      type:
-        "cashback_withdrawal",
+  email:
+    user.email || "",
 
-      amount:
-        cashback,
+  fullName:
+    user.fullName || "",
 
-      status:
-        "success",
+  phone:
+    user.phone || "",
 
-      description:
-        "Cashback moved to wallet",
+  type:
+    "cashback_withdrawal",
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
+  amount:
+    cashback,
 
-    });
+  status:
+    "success",
+
+  description:
+    "Cashback moved to wallet",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
 
     return res.json({
 
