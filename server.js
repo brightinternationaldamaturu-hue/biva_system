@@ -3,8 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-
 const app = express();
+const electricityRoutes = require("./routes/electricity.routes");
 
 // MIDDLEWARE
 app.use(cors());
@@ -18,6 +18,7 @@ app.use("/api/vtu", require("./routes/vtu.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/data", require("./routes/data.routes"));
 app.use("/api",require("./routes/flutterwave.webhook.routes"));
+app.use("/api/electricity",electricityRoutes);
 
 // VIRTUAL ACCOUNT ROUTE
 app.use(
