@@ -511,27 +511,28 @@ exports.buyElectricity = async (
 
     catch(refundError){
 
-      console.log(
-        "REFUND ERROR:",
-        refundError.message
-      );
+console.log(
+  "VERIFY ERROR:",
+  error.response?.data ||
+  error.message
+);
 
-    }
+return res.status(400)
+.json({
 
+  success:false,
 
-    return res.status(500)
-    .json({
+  error:
 
-      success:false,
+    error.response?.data?.message ||
 
-      error:
+    error.response?.data?.error ||
 
-      error.message ||
+    error.message ||
 
-      "Electricity failed"
+    "Meter verification failed"
 
-    });
-
+});
   }
 
 };
