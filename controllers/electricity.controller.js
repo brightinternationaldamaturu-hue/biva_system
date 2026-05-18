@@ -509,30 +509,36 @@ exports.buyElectricity = async (
 
     }
 
-    catch(refundError){
+catch(error){
 
-console.log(
-  "VERIFY ERROR:",
-  error.response?.data ||
-  error.message
-);
+  console.log(
 
-return res.status(400)
-.json({
+    "VERIFY ERROR:",
 
-  success:false,
+    error.response?.data ||
 
-  error:
+    error.message
 
-    error.response?.data?.message ||
+  );
 
-    error.response?.data?.error ||
+  return res.status(400)
 
-    error.message ||
+  .json({
 
-    "Meter verification failed"
+    success:false,
 
-});
-  }
+    error:
+
+      error.response?.data?.message ||
+
+      error.response?.data?.error ||
+
+      error.message ||
+
+      "Meter verification failed"
+
+  });
+
+}
 
 };
