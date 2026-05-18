@@ -117,15 +117,31 @@ exports.verifyMeter = async (
 
   catch(error){
 
-    console.log(error.message);
+    console.log(
 
-    return res.status(500)
+      "VERIFY ERROR:",
+
+      error.response?.data ||
+
+      error.message
+
+    );
+
+    return res.status(400)
+
     .json({
 
       success:false,
 
       error:
-      "Meter verification failed"
+
+        error.response?.data?.message ||
+
+        error.response?.data?.error ||
+
+        error.message ||
+
+        "Meter verification failed"
 
     });
 
@@ -260,7 +276,7 @@ exports.buyElectricity = async (
     }
 
 
-    // DEDUCT
+    // DEDUCT WALLET
     await userRef.update({
 
       wallet:
@@ -367,6 +383,12 @@ exports.buyElectricity = async (
       type:
       "electricity",
 
+      category:
+      "electricity",
+
+      title:
+      "Electricity Payment",
+
       status:
       "success",
 
@@ -437,6 +459,12 @@ exports.buyElectricity = async (
       type:
       "cashback",
 
+      category:
+      "cashback",
+
+      title:
+      "Electricity Cashback",
+
       status:
       "success",
 
@@ -480,8 +508,13 @@ exports.buyElectricity = async (
   catch(error){
 
     console.log(
+
       "ELECTRICITY ERROR:",
+
+      error.response?.data ||
+
       error.message
+
     );
 
 
@@ -509,36 +542,37 @@ exports.buyElectricity = async (
 
     }
 
-catch(error){
+    catch(refundError){
 
-  console.log(
+      console.log(
 
-    "VERIFY ERROR:",
+        "REFUND ERROR:",
 
-    error.response?.data ||
+        refundError.message
 
-    error.message
+      );
 
-  );
+    }
 
-  return res.status(400)
 
-  .json({
+    return res.status(500)
 
-    success:false,
+    .json({
 
-    error:
+      success:false,
 
-      error.response?.data?.message ||
+      error:
 
-      error.response?.data?.error ||
+        error.response?.data?.message ||
 
-      error.message ||
+        error.response?.data?.error ||
 
-      "Meter verification failed"
+        error.message ||
 
-  });
+        "Electricity failed"
 
-}
+    });
+
+  }
 
 };
