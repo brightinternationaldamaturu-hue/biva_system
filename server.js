@@ -8,6 +8,7 @@ const electricityRoutes = require("./routes/electricity.routes");
 const checkPendingTransactions = require("./services/pendingChecker");
 
 
+
 // MIDDLEWARE
 app.use(cors());
 app.use(express.json());
