@@ -2,17 +2,19 @@ export async function buyVoucherService(data){
 
   const response = await fetch(
 
-    "/api/voucher/buy",
+    "https://biva-backend-ezvu.onrender.com/api/voucher/buy",
 
     {
 
-      method:"POST",
+      method: "POST",
 
-      headers:{
+      headers: {
+
         "Content-Type":"application/json"
+
       },
 
-      body:JSON.stringify(data)
+      body: JSON.stringify(data)
 
     }
 
