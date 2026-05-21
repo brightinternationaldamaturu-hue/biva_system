@@ -5,6 +5,7 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 const electricityRoutes = require("./routes/electricity.routes");
+const checkPendingTransactions = require("./services/pendingChecker");
 
 // MIDDLEWARE
 app.use(cors());
@@ -64,3 +65,18 @@ console.log("ENV LOADED:", {
 app.get("/test", (req, res) => {
   res.send("Backend working successfully");
 });
+
+
+// RUN EVERY 2 MINUTES
+
+// RUN IMMEDIATELY ON SERVER START
+
+checkPendingTransactions();
+
+// RUN EVERY 2 MINUTES
+
+setInterval(() => {
+
+  checkPendingTransactions();
+
+}, 120000);
