@@ -322,55 +322,60 @@ exports.buyVoucher = async (req, res) => {
 
     });
 
+
+
+
     // =========================
-    // CASHBACK
-    // =========================
+// CASHBACK
+// =========================
 
-    const cashback =
+// 10% cashback
 
-      Math.floor(
-        amountToCharge * 0.01
-      );
+const cashback =
 
-    await userRef.update({
+  Math.floor(
+    amountToCharge * 0.10
+  );
 
-      cashbackBalance:
-        admin.firestore
-        .FieldValue
-        .increment(cashback)
+// ADD TO USER
 
-    });
+await userRef.update({
 
-    // SAVE CASHBACK TX
+  cashbackBalance:
+    admin.firestore
+    .FieldValue
+    .increment(cashback)
 
-    await db.collection("transactions")
-    .add({
+});
 
-      userId,
+// SAVE CASHBACK TX
 
-      email:
-        userData.email || "",
+await db.collection(
+  "transactions"
+).add({
 
-      type:"cashback",
+  userId,
 
-      category:"cashback",
+  type: "cashback",
 
-      title:"Cashback Reward",
+  category: "cashback",
 
-      amount:
-        cashback,
+  title: "Voucher Cashback",
 
-      status:"success",
+  amount: cashback,
 
-      description:
-        `1% cashback from ${desc} voucher purchase`,
+  status: "success",
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
+  description:
+    `10% cashback from ${desc} voucher purchase`,
 
-    });
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
 
     // =========================
     // RESPONSE
