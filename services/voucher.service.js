@@ -1,13 +1,8 @@
-export async function buyVoucherService({
-
-  userId,
-  desc
-
-}) {
+export async function buyVoucherService(data){
 
   const response = await fetch(
 
-    "/api/buy-voucher",
+    "/api/voucher/buy",
 
     {
 
@@ -17,24 +12,19 @@ export async function buyVoucherService({
         "Content-Type":"application/json"
       },
 
-      body: JSON.stringify({
-
-        userId,
-        desc
-
-      })
+      body:JSON.stringify(data)
 
     }
 
   );
 
-  const data = await response.json();
+  const result = await response.json();
 
-  if (!response.ok || !data.success) {
+  if(!response.ok){
 
     throw new Error(
 
-      data.error ||
+      result.error ||
 
       "Voucher purchase failed"
 
@@ -42,6 +32,6 @@ export async function buyVoucherService({
 
   }
 
-  return data;
+  return result;
 
 }
