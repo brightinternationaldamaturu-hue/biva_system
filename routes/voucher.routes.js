@@ -4,22 +4,20 @@ const router = express.Router();
 
 const {
 
-buyVoucher
+  buyVoucher
 
-} = require("../controllers/voucher.controller");
+} = require(
 
+  "../controllers/voucher.controller"
 
-// ===============================
-// BUY VOUCHER
-// ===============================
+);
 
 router.post(
 
-  "/buy-voucher",
+  "/voucher/buy",
 
   buyVoucher
 
 );
-
 
 module.exports = router;
