@@ -1,256 +1,510 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
+const axios = require("axios");
+const { db, admin } = require("../config/firebase");
+
 exports.buyAirtime = async (req, res) => {
+
+  let amountToCharge = 0;
+
+  let userRef = null;
+
+  let transactionRef = null;
+
   try {
+
     const {
-  userId,
-  phone,
-  network,
-  amount
-} = req.body;
+
+      phone,
+      network,
+      amount,
+      email
+
+    } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
 
     if (
-  !userId ||
-  !phone ||
-  !network ||
-  !amount
-) {
-      return res.status(400).json({ error: "Missing fields" });
+
+      !phone ||
+      !network ||
+      !amount ||
+      !email
+
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error: "Missing fields"
+
+      });
+
     }
+
+    // =========================
+    // NETWORK MAP
+    // =========================
 
     const networkMap = {
+
       MTN: "mtn",
+
       GLO: "glo",
+
       AIRTEL: "airtel",
+
       "9MOBILE": "9mobile"
+
     };
 
-    const networkCode = networkMap[network.toUpperCase()];
+    const networkCode =
+
+      networkMap[
+        network.toUpperCase()
+      ];
+
     if (!networkCode) {
-      return res.status(400).json({ error: "Invalid network" });
+
+      return res.status(400).json({
+
+        success: false,
+
+        error: "Invalid network"
+
+      });
+
     }
 
+    // =========================
+    // USER
+    // =========================
 
+    const snapshot = await db
+      .collection("users")
+      .where("email", "==", email)
+      .get();
 
+    if (snapshot.empty) {
 
+      return res.status(404).json({
 
-// ===============================
-// GET USER
-// ===============================
+        success: false,
 
-const userRef =
-  db.collection("users")
-  .doc(userId);
+        error: "User not found"
 
-const userSnap =
-  await userRef.get();
+      });
 
-if (!userSnap.exists) {
-
-  return res.status(404).json({
-
-    success: false,
-
-    error: "User not found"
-
-  });
-
-}
-
-const userData =
-  userSnap.data();
-
-
-
-
-
-    // CHECK BALANCE FIRST
-    if (userData.wallet < amount) {
-      return res.status(400).json({ error: "Insufficient balance" });
     }
 
-    const txId = "AIRTIME_" + Date.now();
+    const userDoc =
+      snapshot.docs[0];
 
-    // STEP 1: DEDUCT WALLET FIRST (SAFE STRATEGY)
-    await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(-amount)
+    userRef =
+      userDoc.ref;
+
+    const userData =
+      userDoc.data();
+
+    amountToCharge =
+      Number(amount);
+
+    // =========================
+    // BALANCE CHECK
+    // =========================
+
+    if (
+
+      Number(userData.wallet || 0) <
+      amountToCharge
+
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error: "Insufficient balance"
+
+      });
+
+    }
+
+    // =========================
+    // REQUEST ID
+    // =========================
+
+    const request_id =
+      "AIRTIME_" + Date.now();
+
+    // =========================
+    // CREATE PENDING TX
+    // =========================
+
+    transactionRef =
+      db.collection("transactions")
+      .doc(request_id);
+
+    await transactionRef.set({
+
+      request_id,
+
+      userId:
+        userDoc.id,
+
+      email,
+
+      fullName:
+        userData.fullName || "",
+
+      type: "airtime",
+
+      category: "airtime",
+
+      title:
+        `${network} Airtime`,
+
+      network,
+
+      phone,
+
+      amount:
+        amountToCharge,
+
+      status: "pending",
+
+      refunded: false,
+
+      provider: "IACAFE",
+
+      createdAt:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
     });
+
+    // =========================
+    // DEDUCT WALLET
+    // =========================
+
+    await userRef.update({
+
+      wallet:
+        admin.firestore
+        .FieldValue
+        .increment(-amountToCharge)
+
+    });
+
+    // =========================
+    // SEND API REQUEST
+    // =========================
+
+    const response = await axios.post(
+
+      "https://iacafe.com.ng/devapi/v1/airtime",
+
+      {
+
+        username:
+          process.env.IACAFE_USERNAME,
+
+        api_key:
+          process.env.IACAFE_API_KEY,
+
+        network:
+          networkCode,
+
+        phone,
+
+        amount:
+          amountToCharge,
+
+        ref:
+          request_id
+
+      }
+
+    );
+
+    const result =
+      response.data;
+
+    console.log(
+      "AIRTIME RESPONSE:",
+      result
+    );
+
+    // =========================
+    // STATUS CHECK
+    // =========================
+
+    const providerStatus = (
+
+      result?.data?.status ||
+
+      ""
+
+    ).toLowerCase();
+
+    const providerCode = (
+
+      result?.code ||
+
+      ""
+
+    ).toLowerCase();
+
+    // =========================
+    // PENDING
+    // =========================
+
+    if (
+
+      providerStatus === "pending" ||
+
+      providerStatus === "processing"
+
+    ) {
+
+      await transactionRef.update({
+
+        status: "pending",
+
+        response: result,
+
+        updatedAt:
+          admin.firestore
+          .FieldValue
+          .serverTimestamp()
+
+      });
+
+      return res.json({
+
+        success: true,
+
+        pending: true,
+
+        message:
+          "Airtime transaction processing",
+
+        data: result
+
+      });
+
+    }
+
+    // =========================
+    // SUCCESS
+    // =========================
+
+    const success =
+
+      providerCode === "success" &&
+
+      (
+
+        providerStatus === "completed-api" ||
+
+        providerStatus === "completed"
+
+      );
+
+    if (success) {
+
+      await transactionRef.update({
+
+        status: "success",
+
+        response: result,
+
+        completedAt:
+          admin.firestore
+          .FieldValue
+          .serverTimestamp()
+
+      });
+
+      // =========================
+      // CASHBACK
+      // =========================
+
+      const cashback =
+
+        Math.floor(
+          amountToCharge * 0.02
+        );
+
+      await userRef.update({
+
+        cashbackBalance:
+          admin.firestore
+          .FieldValue
+          .increment(cashback)
+
+      });
+
+      // SAVE CASHBACK TX
+
+      await db.collection(
+        "transactions"
+      ).add({
+
+        userId:
+          userDoc.id,
+
+        email,
+
+        type: "cashback",
+
+        category: "cashback",
+
+        title:
+          "Cashback Reward",
+
+        amount:
+          cashback,
+
+        status:
+          "success",
+
+        description:
+          `2% cashback from ${network} airtime purchase`,
+
+        createdAt:
+          admin.firestore
+          .FieldValue
+          .serverTimestamp()
+
+      });
+
+      return res.json({
+
+        success: true,
+
+        message:
+          `Airtime successful. Cashback ₦${cashback} earned 🎉`,
+
+        cashback,
+
+        data: result
+
+      });
+
+    }
+
+    // =========================
+    // FAILED
+    // =========================
+
+    throw new Error(
+
+      result?.message ||
+
+      "Airtime purchase failed"
+
+    );
+
+  }
+
+  catch (err) {
+
+    console.log(
+      "AIRTIME ERROR:",
+      err.message
+    );
+
+    // =========================
+    // REFUND
+    // =========================
 
     try {
 
+      if (
 
+        userRef &&
+        transactionRef &&
+        amountToCharge > 0
 
-      // STEP 2: CALL IACAFE (IMPORTANT: USE POST, NOT GET)
-      const response = await axios.post(
-        "https://iacafe.com.ng/devapi/v1/airtime",
-        {
-          username: process.env.IACAFE_USERNAME,
-          api_key: process.env.IACAFE_API_KEY,
-          network: networkCode,
-          phone,
-          amount,
-          ref: txId
+      ) {
+
+        const txSnap =
+          await transactionRef.get();
+
+        const txData =
+          txSnap.data();
+
+        if (
+
+          txData &&
+
+          txData.refunded !== true &&
+
+          txData.status !== "success" &&
+
+          txData.status !== "pending"
+
+        ) {
+
+          // MARK FAILED
+
+          await transactionRef.update({
+
+            status: "failed",
+
+            refunded: true,
+
+            failureReason:
+              err.message || "Unknown error",
+
+            failedAt:
+              admin.firestore
+              .FieldValue
+              .serverTimestamp()
+
+          });
+
+          // REFUND WALLET
+
+          await userRef.update({
+
+            wallet:
+              admin.firestore
+              .FieldValue
+              .increment(amountToCharge)
+
+          });
+
         }
-      );
 
-      console.log("IACAFE RESPONSE:", response.data);
+      }
 
-
-
-
-
-// STEP 3: SUCCESS CHECK
-
-const providerStatus =
-  response.data?.data?.status;
-
-const providerCode =
-  response.data?.code;
-
-const success =
-
-  providerCode === "success" &&
-
-  (
-    providerStatus === "completed-api" ||
-    providerStatus === "completed"
-  );
-
-if (!success) {
-
-  console.error(
-    "FAILED PROVIDER RESPONSE:",
-    response.data
-  );
-
-  throw new Error(
-
-    response.data?.message ||
-
-    "Airtime failed at provider"
-
-  );
-}
-
-
-// ==========================
-// SAVE AIRTIME TRANSACTION
-// ==========================
-
-await db.collection(
-  "transactions"
-).add({
-
-  userId,
-
-  email,
-
-  type: "airtime",
-
-  network,
-
-  phone,
-
-  amount,
-
-  status: "successful",
-
-  reference: txId,
-
-  description:
-    `${network} Airtime Purchase`,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-// ==========================
-// AIRTIME CASHBACK
-// ==========================
-
-// 2% cashback
-const cashback =
-  Number(amount) * 0.02;
-
-// SAVE TO CASHBACK BALANCE
-await userRef.update({
-
-  cashbackBalance:
-    admin.firestore
-    .FieldValue
-    .increment(cashback)
-
-});
-
-// SAVE CASHBACK TRANSACTION
-await db.collection(
-  "transactions"
-).add({
-
-  userId,
-
-  email,
-
-  type: "cashback",
-
-  amount: cashback,
-
-  status: "successful",
-
-  network,
-
-  phone,
-
-  description:
-    `2% cashback from ${network} airtime purchase`,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-// ==========================
-// SUCCESS RESPONSE
-// ==========================
-
-return res.json({
-
-  success: true,
-
-  message:
-    `Airtime sent successfully. You earned ₦${cashback.toFixed(2)} cashback 🎉`
-
-});
-
-    } catch (err) {
-      console.error("❌ PROVIDER ERROR:", err.response?.data || err.message);
-
-      // STEP 5: REFUND AUTOMATICALLY ON FAILURE
-      await userRef.update({
-        wallet: admin.firestore.FieldValue.increment(amount)
-      });
-
-      return res.status(500).json({
-        success: false,
-        error: "Airtime failed",
-        details: err.response?.data || err.message
-      });
     }
 
-  } catch (err) {
-    console.error("🔥 SERVER ERROR:", err.message);
+    catch (refundErr) {
+
+      console.log(
+        "REFUND ERROR:",
+        refundErr.message
+      );
+
+    }
 
     return res.status(500).json({
-      error: "Server error",
-      details: err.message
+
+      success: false,
+
+      error:
+        err.message || "Airtime failed"
+
     });
+
   }
+
 };
