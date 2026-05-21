@@ -3,9 +3,19 @@ const { db, admin } = require("../config/firebase");
 
 exports.buyAirtime = async (req, res) => {
   try {
-    const { phone, network, amount, email } = req.body;
+    const {
+  userId,
+  phone,
+  network,
+  amount
+} = req.body;
 
-    if (!phone || !network || !amount || !email) {
+    if (
+  !userId ||
+  !phone ||
+  !network ||
+  !amount
+) {
       return res.status(400).json({ error: "Missing fields" });
     }
 
@@ -21,18 +31,39 @@ exports.buyAirtime = async (req, res) => {
       return res.status(400).json({ error: "Invalid network" });
     }
 
-    // GET USER
-    const snapshot = await db.collection("users")
-      .where("email", "==", email)
-      .get();
 
-    if (snapshot.empty) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
-    const userDoc = snapshot.docs[0];
-    const userRef = userDoc.ref;
-    const userData = userDoc.data();
+
+
+// ===============================
+// GET USER
+// ===============================
+
+const userRef =
+  db.collection("users")
+  .doc(userId);
+
+const userSnap =
+  await userRef.get();
+
+if (!userSnap.exists) {
+
+  return res.status(404).json({
+
+    success: false,
+
+    error: "User not found"
+
+  });
+
+}
+
+const userData =
+  userSnap.data();
+
+
+
+
 
     // CHECK BALANCE FIRST
     if (userData.wallet < amount) {
@@ -47,6 +78,9 @@ exports.buyAirtime = async (req, res) => {
     });
 
     try {
+
+
+
       // STEP 2: CALL IACAFE (IMPORTANT: USE POST, NOT GET)
       const response = await axios.post(
         "https://iacafe.com.ng/devapi/v1/airtime",
@@ -108,7 +142,7 @@ await db.collection(
   "transactions"
 ).add({
 
-  userId: userDoc.id,
+  userId,
 
   email,
 
@@ -158,7 +192,7 @@ await db.collection(
   "transactions"
 ).add({
 
-  userId: userDoc.id,
+  userId,
 
   email,
 
