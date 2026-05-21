@@ -21,6 +21,7 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/data", require("./routes/data.routes"));
 app.use("/api",require("./routes/flutterwave.webhook.routes"));
 app.use("/api/electricity",electricityRoutes);
+app.use("/api", require("./routes/voucher.routes"));
 
 // VIRTUAL ACCOUNT ROUTE
 app.use(
