@@ -1,6 +1,128 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
+
+
+
+
+/**
+ * ============================
+ * GET DATA PLANS
+ * ============================
+ */
+
+exports.getPlans = async (req, res) => {
+
+  try {
+
+    const { network_id } =
+    req.params;
+
+    const response =
+    await axios.get(
+
+      "https://iacafe.com.ng/devapi/v1/budget-data/plans",
+
+      {
+        params: { network_id },
+
+        headers: {
+          Authorization:
+          `Bearer ${process.env.IACAFE_API_KEY}`
+        }
+      }
+
+    );
+
+    const rawPlans =
+    response.data?.data || [];
+
+    const plans =
+    rawPlans.map(plan => {
+
+      const basePrice = Number(
+
+        plan.api_user_price ||
+
+        plan.reseller_price ||
+
+        plan.price ||
+
+        0
+
+      );
+
+      let profit = 0;
+
+      if (basePrice <= 300) {
+        profit = 13;
+      }
+      else if (basePrice <= 1000) {
+        profit = 50;
+      }
+      else if (basePrice <= 2000) {
+        profit = 65;
+      }
+      else if (basePrice <= 3500) {
+        profit = 100;
+      }
+      else if (basePrice <= 5000) {
+        profit = 150;
+      }
+      else {
+        profit = 200;
+      }
+
+      const selling_price =
+      basePrice + profit;
+
+      return {
+
+        ...plan,
+
+        original_price:
+        basePrice,
+
+        selling_price,
+
+        cashback:
+        Math.floor(
+          selling_price * 0.01
+        )
+
+      };
+
+    });
+
+    return res.json({
+
+      success: true,
+
+      data: plans
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.log(err.message);
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+      "Failed to load plans"
+
+    });
+
+  }
+
+};
+
+
+
 /**
  * ======================================
  * BUY DATA (SECURED FINTECH VERSION)
@@ -299,6 +421,139 @@ exports.buyData = async (req, res) => {
 
       });
 
+
+
+      
+      /**
+ * ============================
+ * WITHDRAW CASHBACK
+ * ============================
+ */
+
+exports.withdrawCashback = async (req, res) => {
+
+  try {
+
+    const { userId } =
+    req.body;
+
+    const userRef =
+    db.collection("users")
+    .doc(userId);
+
+    const snap =
+    await userRef.get();
+
+    if (!snap.exists) {
+
+      return res.status(404).json({
+
+        success: false,
+
+        error:
+        "User not found"
+
+      });
+
+    }
+
+    const user =
+    snap.data();
+
+    const cashback =
+    Number(
+      user.cashbackBalance || 0
+    );
+
+    if (cashback <= 0) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+        "No cashback available"
+
+      });
+
+    }
+
+    await userRef.update({
+
+      wallet:
+      admin.firestore
+      .FieldValue
+      .increment(cashback),
+
+      cashbackBalance: 0
+
+    });
+
+    await db.collection("transactions")
+    .add({
+
+      userId,
+
+      email:
+      user.email || "",
+
+      fullName:
+      user.fullName || "",
+
+      phone:
+      user.phone || "",
+
+      type:
+      "cashback_withdrawal",
+
+      amount:
+      cashback,
+
+      status:
+      "success",
+
+      description:
+      "Cashback moved to wallet",
+
+      createdAt:
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
+    });
+
+    return res.json({
+
+      success: true,
+
+      message:
+      "Cashback withdrawn successfully",
+
+      amount:
+      cashback
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+      err.message
+
+    });
+
+  }
+
+};
+
+      
       // ===============================
       // CASHBACK
       // ===============================
