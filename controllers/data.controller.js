@@ -402,9 +402,60 @@ exports.buyData = async (req, res) => {
     // SUCCESS CHECK
     // ===============================
 
-    const success =
-      result?.success === true ||
-      result?.code === "success";
+const apiStatus = (
+  result?.status ||
+  result?.data?.status ||
+  ""
+).toLowerCase();
+
+const success =
+
+  apiStatus === "completed" ||
+
+  apiStatus === "successful" ||
+
+  apiStatus === "success" ||
+
+  apiStatus === "delivered";
+
+
+
+if(
+
+  apiStatus === "pending" ||
+
+  apiStatus === "processing"
+
+){
+
+  await transactionRef.update({
+
+    status: "pending",
+
+    response: result,
+
+    updatedAt:
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
+  });
+
+  return res.json({
+
+    success: true,
+
+    pending: true,
+
+    message:
+      "Transaction is processing",
+
+    data: result
+
+  });
+
+}
+
 
     // ===============================
     // SUCCESS
@@ -530,39 +581,52 @@ exports.buyData = async (req, res) => {
         const txData =
           txSnap.data();
 
-        if (
-          txData &&
-          txData.refunded !== true
-        ) {
+if (
 
-          // REFUND WALLET
+  txData &&
 
-          await userRef.update({
+  txData.refunded !== true &&
 
-            wallet:
-              admin.firestore
-              .FieldValue
-              .increment(sellingAmount)
+  txData.status !== "success" &&
 
-          });
+  txData.status !== "pending"
 
-          // UPDATE TX
+)
 
-          await transactionRef.update({
 
-            status: "failed",
+ {
 
-            refunded: true,
 
-            failureReason:
-              err.message || "Unknown error",
 
-            failedAt:
-              admin.firestore
-              .FieldValue
-              .serverTimestamp()
+// MARK FAILED FIRST
 
-          });
+await transactionRef.update({
+
+  status: "failed",
+
+  refunded: true,
+
+  failureReason:
+    err.message || "Unknown error",
+
+  failedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+// THEN REFUND
+
+await userRef.update({
+
+  wallet:
+    admin.firestore
+    .FieldValue
+    .increment(sellingAmount)
+
+});
+
 
         }
 
