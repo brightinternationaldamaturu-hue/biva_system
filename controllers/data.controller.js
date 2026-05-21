@@ -1,55 +1,38 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
-
-
-
-
 /**
- * ============================
+ * ======================================
  * GET DATA PLANS
- * ============================
+ * ======================================
  */
-
 exports.getPlans = async (req, res) => {
 
   try {
 
-    const { network_id } =
-    req.params;
+    const { network_id } = req.params;
 
-    const response =
-    await axios.get(
-
+    const response = await axios.get(
       "https://iacafe.com.ng/devapi/v1/budget-data/plans",
-
       {
         params: { network_id },
-
         headers: {
           Authorization:
-          `Bearer ${process.env.IACAFE_API_KEY}`
+            `Bearer ${process.env.IACAFE_API_KEY}`
         }
       }
-
     );
 
     const rawPlans =
-    response.data?.data || [];
+      response.data?.data || [];
 
-    const plans =
-    rawPlans.map(plan => {
+    const plans = rawPlans.map(plan => {
 
       const basePrice = Number(
-
         plan.api_user_price ||
-
         plan.reseller_price ||
-
         plan.price ||
-
         0
-
       );
 
       let profit = 0;
@@ -74,21 +57,21 @@ exports.getPlans = async (req, res) => {
       }
 
       const selling_price =
-      basePrice + profit;
+        basePrice + profit;
 
       return {
 
         ...plan,
 
         original_price:
-        basePrice,
+          basePrice,
 
         selling_price,
 
         cashback:
-        Math.floor(
-          selling_price * 0.01
-        )
+          Math.floor(
+            selling_price * 0.01
+          )
 
       };
 
@@ -112,8 +95,7 @@ exports.getPlans = async (req, res) => {
 
       success: false,
 
-      error:
-      "Failed to load plans"
+      error: "Failed to load plans"
 
     });
 
@@ -122,26 +104,29 @@ exports.getPlans = async (req, res) => {
 };
 
 
-
 /**
  * ======================================
- * BUY DATA (SECURED FINTECH VERSION)
+ * BUY DATA (SECURED)
  * ======================================
  */
 
 exports.buyData = async (req, res) => {
 
   let sellingAmount = 0;
+
   let userRef = null;
+
   let transactionRef = null;
 
   try {
 
     const {
+
       userId,
       phone,
       data_plan,
       network_id
+
     } = req.body;
 
     // ===============================
@@ -156,8 +141,12 @@ exports.buyData = async (req, res) => {
     ) {
 
       return res.status(400).json({
+
         success: false,
-        error: "Missing required fields"
+
+        error:
+          "Missing required fields"
+
       });
 
     }
@@ -176,8 +165,11 @@ exports.buyData = async (req, res) => {
     if (!userSnap.exists) {
 
       return res.status(404).json({
+
         success: false,
+
         error: "User not found"
+
       });
 
     }
@@ -186,7 +178,7 @@ exports.buyData = async (req, res) => {
       userSnap.data();
 
     // ===============================
-    // GET PLANS
+    // GET PLAN
     // ===============================
 
     const planRes = await axios.get(
@@ -213,8 +205,11 @@ exports.buyData = async (req, res) => {
     if (!selectedPlan) {
 
       return res.status(400).json({
+
         success: false,
+
         error: "Invalid data plan"
+
       });
 
     }
@@ -264,21 +259,27 @@ exports.buyData = async (req, res) => {
     ) {
 
       return res.status(400).json({
+
         success: false,
-        error: "Insufficient balance"
+
+        error:
+          "Insufficient balance"
+
       });
 
     }
 
     // ===============================
-    // NETWORK NAME
+    // NETWORK MAP
     // ===============================
 
     const networkMap = {
+
       "1": "MTN",
       "2": "GLO",
       "3": "AIRTEL",
       "4": "9MOBILE"
+
     };
 
     // ===============================
@@ -311,6 +312,11 @@ exports.buyData = async (req, res) => {
       phone,
 
       type: "data",
+
+      category: "data",
+
+      title:
+        `${networkMap[String(network_id)]} Data`,
 
       status: "pending",
 
@@ -350,7 +356,7 @@ exports.buyData = async (req, res) => {
     });
 
     // ===============================
-    // DEDUCT WALLET
+    // DEDUCT WALLET FIRST
     // ===============================
 
     await userRef.update({
@@ -363,7 +369,7 @@ exports.buyData = async (req, res) => {
     });
 
     // ===============================
-    // SEND TO IACAFE
+    // SEND API REQUEST
     // ===============================
 
     const response = await axios.post(
@@ -406,8 +412,6 @@ exports.buyData = async (req, res) => {
 
     if (success) {
 
-      // UPDATE TRANSACTION
-
       await transactionRef.update({
 
         status: "success",
@@ -421,141 +425,8 @@ exports.buyData = async (req, res) => {
 
       });
 
-
-
-      
-      /**
- * ============================
- * WITHDRAW CASHBACK
- * ============================
- */
-
-exports.withdrawCashback = async (req, res) => {
-
-  try {
-
-    const { userId } =
-    req.body;
-
-    const userRef =
-    db.collection("users")
-    .doc(userId);
-
-    const snap =
-    await userRef.get();
-
-    if (!snap.exists) {
-
-      return res.status(404).json({
-
-        success: false,
-
-        error:
-        "User not found"
-
-      });
-
-    }
-
-    const user =
-    snap.data();
-
-    const cashback =
-    Number(
-      user.cashbackBalance || 0
-    );
-
-    if (cashback <= 0) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        error:
-        "No cashback available"
-
-      });
-
-    }
-
-    await userRef.update({
-
-      wallet:
-      admin.firestore
-      .FieldValue
-      .increment(cashback),
-
-      cashbackBalance: 0
-
-    });
-
-    await db.collection("transactions")
-    .add({
-
-      userId,
-
-      email:
-      user.email || "",
-
-      fullName:
-      user.fullName || "",
-
-      phone:
-      user.phone || "",
-
-      type:
-      "cashback_withdrawal",
-
-      amount:
-      cashback,
-
-      status:
-      "success",
-
-      description:
-      "Cashback moved to wallet",
-
-      createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
-
-    });
-
-    return res.json({
-
-      success: true,
-
-      message:
-      "Cashback withdrawn successfully",
-
-      amount:
-      cashback
-
-    });
-
-  }
-
-  catch (err) {
-
-    console.log(err);
-
-    return res.status(500).json({
-
-      success: false,
-
-      error:
-      err.message
-
-    });
-
-  }
-
-};
-
-      
       // ===============================
-      // CASHBACK
+      // CASHBACK ONLY ON SUCCESS
       // ===============================
 
       const cashback =
@@ -572,14 +443,24 @@ exports.withdrawCashback = async (req, res) => {
 
       });
 
-      // SAVE CASHBACK TRANSACTION
+      // SAVE CASHBACK TX
 
       await db.collection("transactions")
       .add({
 
         userId,
 
+        email:
+          userData.email || "",
+
+        fullName:
+          userData.fullName || "",
+
         type: "cashback",
+
+        category: "cashback",
+
+        title: "Cashback Reward",
 
         status: "success",
 
@@ -614,7 +495,7 @@ exports.withdrawCashback = async (req, res) => {
     }
 
     // ===============================
-    // IF FAILED
+    // FAILED
     // ===============================
 
     throw new Error(
@@ -632,7 +513,7 @@ exports.withdrawCashback = async (req, res) => {
     );
 
     // ===============================
-    // REFUND USER
+    // REFUND
     // ===============================
 
     try {
@@ -643,15 +524,11 @@ exports.withdrawCashback = async (req, res) => {
         sellingAmount > 0
       ) {
 
-        // CHECK TRANSACTION
-
         const txSnap =
           await transactionRef.get();
 
         const txData =
           txSnap.data();
-
-        // REFUND ONLY ONCE
 
         if (
           txData &&
@@ -669,7 +546,7 @@ exports.withdrawCashback = async (req, res) => {
 
           });
 
-          // UPDATE TRANSACTION
+          // UPDATE TX
 
           await transactionRef.update({
 
@@ -709,6 +586,140 @@ exports.withdrawCashback = async (req, res) => {
       error:
         err.message ||
         "Data purchase failed"
+
+    });
+
+  }
+
+};
+
+
+/**
+ * ======================================
+ * WITHDRAW CASHBACK
+ * ======================================
+ */
+
+exports.withdrawCashback = async (req, res) => {
+
+  try {
+
+    const { userId } = req.body;
+
+    const userRef =
+      db.collection("users")
+      .doc(userId);
+
+    const snap =
+      await userRef.get();
+
+    if (!snap.exists) {
+
+      return res.status(404).json({
+
+        success: false,
+
+        error: "User not found"
+
+      });
+
+    }
+
+    const user =
+      snap.data();
+
+    const cashback =
+      Number(
+        user.cashbackBalance || 0
+      );
+
+    if (cashback <= 0) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "No cashback available"
+
+      });
+
+    }
+
+    await userRef.update({
+
+      wallet:
+        admin.firestore
+        .FieldValue
+        .increment(cashback),
+
+      cashbackBalance: 0
+
+    });
+
+    await db.collection("transactions")
+    .add({
+
+      userId,
+
+      email:
+        user.email || "",
+
+      fullName:
+        user.fullName || "",
+
+      phone:
+        user.phone || "",
+
+      type:
+        "cashback_withdrawal",
+
+      category:
+        "cashback",
+
+      title:
+        "Cashback Withdrawal",
+
+      amount:
+        cashback,
+
+      status:
+        "success",
+
+      description:
+        "Cashback moved to wallet",
+
+      createdAt:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
+    });
+
+    return res.json({
+
+      success: true,
+
+      message:
+        "Cashback withdrawn successfully",
+
+      amount:
+        cashback
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+        err.message
 
     });
 
