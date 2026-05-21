@@ -2,22 +2,32 @@ const express = require("express");
 
 const router = express.Router();
 
-const dataController =
-require("../controllers/data.controller");
+const {
+
+  getPlans,
+  buyData,
+  withdrawCashback
+
+} = require("../controllers/data.controller");
+
+
+// ===============================
+// ROUTES
+// ===============================
 
 router.get(
   "/plans/:network_id",
-  dataController.getPlans
+  getPlans
 );
 
 router.post(
   "/buy",
-  dataController.buyData
+  buyData
 );
 
 router.post(
   "/withdraw-cashback",
-  dataController.withdrawCashback
+  withdrawCashback
 );
 
 module.exports = router;
