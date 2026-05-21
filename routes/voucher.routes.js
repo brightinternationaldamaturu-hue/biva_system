@@ -4,7 +4,7 @@ const router = express.Router();
 
 const {
 
-  buyVoucher
+buyVoucher
 
 } = require("../controllers/voucher.controller");
 
