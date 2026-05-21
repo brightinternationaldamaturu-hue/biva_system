@@ -1,9 +1,6 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
 
-const axios = require("axios");
-const { db, admin } = require("../config/firebase");
-
 exports.buyAirtime = async (req, res) => {
 
   let amountToCharge = 0;
@@ -440,17 +437,15 @@ exports.buyAirtime = async (req, res) => {
         const txData =
           txSnap.data();
 
-        if (
+if (
 
-          txData &&
+  txData &&
 
-          txData.refunded !== true &&
+  txData.refunded !== true &&
 
-          txData.status !== "success" &&
+  txData.status !== "success"
 
-          txData.status !== "pending"
-
-        ) {
+) {
 
           // MARK FAILED
 
