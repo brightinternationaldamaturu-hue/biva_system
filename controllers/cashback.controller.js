@@ -1,3 +1,7 @@
+const { db, admin } = require("../config/firebase");
+
+
+
 exports.withdrawCashback = async (req, res) => {
   try {
     const { userId } = req.body;
