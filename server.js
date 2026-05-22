@@ -6,7 +6,7 @@ const path = require("path");
 const app = express();
 const electricityRoutes = require("./routes/electricity.routes");
 const checkPendingTransactions = require("./services/pendingChecker");
-
+const cashbackRoutes = require("./routes/cashback.routes");
 
 
 // MIDDLEWARE
@@ -23,7 +23,7 @@ app.use("/api/data", require("./routes/data.routes"));
 app.use("/api",require("./routes/flutterwave.webhook.routes"));
 app.use("/api/electricity",electricityRoutes);
 app.use("/api", require("./routes/voucher.routes"));
-
+app.use("/", cashbackRoutes);
 // VIRTUAL ACCOUNT ROUTE
 app.use(
   "/api",
