@@ -30,6 +30,7 @@ app.use(
   require("./routes/virtualaccount.routes")
 );
 
+
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
 
