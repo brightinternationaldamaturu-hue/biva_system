@@ -5,7 +5,6 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 const electricityRoutes = require("./routes/electricity.routes");
-const checkPendingTransactions = require("./services/pendingChecker");
 const cashbackRoutes = require("./routes/cashback.routes");
 
 
@@ -70,17 +69,3 @@ app.get("/test", (req, res) => {
   res.send("Backend working successfully");
 });
 
-
-// RUN EVERY 2 MINUTES
-
-// RUN IMMEDIATELY ON SERVER START
-
-checkPendingTransactions();
-
-// RUN EVERY 2 MINUTES
-
-setInterval(() => {
-
-  checkPendingTransactions();
-
-}, 120000);
