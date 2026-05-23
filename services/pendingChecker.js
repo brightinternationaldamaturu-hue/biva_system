@@ -7,10 +7,26 @@ async function checkPendingTransactions() {
 
     console.log("🔄 Checking pending transactions...");
 
+
     const snapshot = await db
-      .collection("transactions")
-      .where("status", "==", "pending")
-      .get();
+  .collection("transactions")
+  .get();
+
+console.log(
+  "TOTAL TX:",
+  snapshot.size
+);
+
+snapshot.forEach((d) => {
+
+  console.log(
+    d.id,
+    d.data().status
+  );
+
+});
+
+    
 
     if (snapshot.empty) {
 
