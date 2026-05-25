@@ -1,13 +1,15 @@
 const brevo = require("@getbrevo/brevo");
 
-
-// ===============================
-// CONFIG
-// ===============================
+// =========================
+// API INSTANCE
+// =========================
 
 const apiInstance =
-
   new brevo.TransactionalEmailsApi();
+
+// =========================
+// API KEY
+// =========================
 
 apiInstance.setApiKey(
 
@@ -17,10 +19,52 @@ apiInstance.setApiKey(
 
 );
 
+// =========================
+// SEND EMAIL
+// =========================
 
-// ===============================
-// TEMPLATE
-// ===============================
+async function sendEmail({
+
+  to,
+  subject,
+  html
+
+}) {
+
+  const sendSmtpEmail =
+    new brevo.SendSmtpEmail();
+
+  sendSmtpEmail.subject =
+    subject;
+
+  sendSmtpEmail.htmlContent =
+    html;
+
+  sendSmtpEmail.sender = {
+
+    name: "BIVA",
+    email: "noreply@biva.ng"
+
+  };
+
+  sendSmtpEmail.to = [
+
+    {
+      email: to
+    }
+
+  ];
+
+  return await apiInstance
+    .sendTransacEmail(
+      sendSmtpEmail
+    );
+
+}
+
+// =========================
+// EMAIL TEMPLATE
+// =========================
 
 function transactionTemplate({
 
@@ -29,70 +73,53 @@ function transactionTemplate({
   status,
   reference
 
-}){
+}) {
 
   return `
 
   <div style="
-    background:#07111F;
-    padding:40px;
     font-family:Arial;
+    background:#0F172A;
     color:white;
+    padding:30px;
   ">
 
+    <h2 style="
+      color:#00D492;
+    ">
+      ${title}
+    </h2>
+
+    <p>
+      Your transaction was successful.
+    </p>
+
     <div style="
-      max-width:500px;
-      margin:auto;
-      background:#0F172A;
-      border-radius:24px;
-      padding:30px;
+      background:#111827;
+      padding:20px;
+      border-radius:14px;
+      margin-top:20px;
     ">
 
-      <h1 style="
-        color:#00D492;
-        margin-top:0;
-      ">
-        BIVA
-      </h1>
-
-      <h2>
-        ${title}
-      </h2>
-
       <p>
-        Your transaction was successful.
+        Amount:
+        <b>
+          ₦${Number(amount).toLocaleString()}
+        </b>
       </p>
 
-      <div style="
-        background:#07111F;
-        padding:20px;
-        border-radius:18px;
-        margin-top:20px;
-      ">
-
-        <p>
-          <strong>Amount:</strong>
-          ₦${Number(amount)
-            .toLocaleString("en-NG")}
-        </p>
-
-        <p>
-          <strong>Status:</strong>
+      <p>
+        Status:
+        <b>
           ${status}
-        </p>
+        </b>
+      </p>
 
-        <p>
-          <strong>Reference:</strong>
+      <p>
+        Reference:
+        <b>
           ${reference}
-        </p>
-
-      </div>
-
-      <p style="
-        margin-top:30px;
-        opacity:.7;
-      ">
-        Thank you for using BIVA ❤️
+        </b>
       </p>
 
     </div>
@@ -102,66 +129,6 @@ function transactionTemplate({
   `;
 
 }
-
-
-// ===============================
-// SEND EMAIL
-// ===============================
-
-async function sendEmail({
-
-  to,
-  subject,
-  html
-
-}){
-
-  try{
-
-    const email =
-
-      new brevo.SendSmtpEmail();
-
-    email.sender = {
-
-      name: "BIVA",
-
-      email: "noreply@biva.com.ng"
-
-    };
-
-    email.to = [
-
-      { email: to }
-
-    ];
-
-    email.subject = subject;
-
-    email.htmlContent = html;
-
-    await apiInstance.sendTransacEmail(
-      email
-    );
-
-    console.log(
-      "EMAIL SENT:",
-      to
-    );
-
-  }
-
-  catch(err){
-
-    console.log(
-      "EMAIL ERROR:",
-      err.message
-    );
-
-  }
-
-}
-
 
 module.exports = {
 
