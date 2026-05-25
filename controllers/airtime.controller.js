@@ -1,5 +1,9 @@
 const axios = require("axios");
 const { db, admin } = require("../config/firebase");
+const { sendEmail, transactionTemplate } = require("../services/email.service");
+
+
+
 
 exports.buyAirtime = async (req, res) => {
 
@@ -381,20 +385,56 @@ exports.buyAirtime = async (req, res) => {
 
       });
 
-      return res.json({
+      // =========================
+// SEND EMAIL
+// =========================
 
-        success: true,
+await sendEmail({
 
-        message:
-          `Airtime successful. Cashback ₦${cashback} earned 🎉`,
+  to: email,
 
-        cashback,
+  subject:
+    "Airtime Purchase Successful",
 
-        data: result
+  html:
 
-      });
+    transactionTemplate({
 
-    }
+      title:
+        `${network} Airtime Purchase`,
+
+      amount:
+        amountToCharge,
+
+      status:
+        "Successful",
+
+      reference:
+        request_id
+
+    })
+
+});
+
+
+// =========================
+// RESPONSE
+// =========================
+
+return res.json({
+
+  success: true,
+
+  message:
+    `Airtime successful. Cashback ₦${cashback} earned 🎉`,
+
+  cashback,
+
+  data: result
+
+});
+
+
 
     // =========================
     // FAILED
