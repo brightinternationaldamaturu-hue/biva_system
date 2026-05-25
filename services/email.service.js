@@ -1,15 +1,15 @@
 const brevo = require("@getbrevo/brevo");
 
-// =========================
+// ===============================
 // API INSTANCE
-// =========================
+// ===============================
 
 const apiInstance =
   new brevo.TransactionalEmailsApi();
 
-// =========================
+// ===============================
 // API KEY
-// =========================
+// ===============================
 
 apiInstance.setApiKey(
 
@@ -19,9 +19,9 @@ apiInstance.setApiKey(
 
 );
 
-// =========================
+// ===============================
 // SEND EMAIL
-// =========================
+// ===============================
 
 async function sendEmail({
 
@@ -31,40 +31,64 @@ async function sendEmail({
 
 }) {
 
-  const sendSmtpEmail =
-    new brevo.SendSmtpEmail();
+  try {
 
-  sendSmtpEmail.subject =
-    subject;
+    const sendSmtpEmail =
+      new brevo.SendSmtpEmail();
 
-  sendSmtpEmail.htmlContent =
-    html;
+    sendSmtpEmail.subject =
+      subject;
 
-  sendSmtpEmail.sender = {
+    sendSmtpEmail.htmlContent =
+      html;
 
-    name: "BIVA",
-    email: "noreply@biva.ng"
+    sendSmtpEmail.sender = {
 
-  };
+      name: "BIVA",
 
-  sendSmtpEmail.to = [
+      email:
+        "noreply@biva.com"
 
-    {
-      email: to
-    }
+    };
 
-  ];
+    sendSmtpEmail.to = [
 
-  return await apiInstance
-    .sendTransacEmail(
-      sendSmtpEmail
+      {
+
+        email: to
+
+      }
+
+    ];
+
+    const result =
+      await apiInstance.sendTransacEmail(
+        sendSmtpEmail
+      );
+
+    console.log(
+      "EMAIL SENT:",
+      result
     );
+
+    return result;
+
+  }
+
+  catch(err){
+
+    console.log(
+      "EMAIL ERROR:",
+      err.message
+    );
+
+  }
 
 }
 
-// =========================
+// ===============================
 // EMAIL TEMPLATE
-// =========================
+// ===============================
 
 function transactionTemplate({
 
@@ -78,28 +102,26 @@ function transactionTemplate({
   return `
 
   <div style="
-    font-family:Arial;
-    background:#0F172A;
-    color:white;
+    background:#0f172a;
     padding:30px;
+    font-family:Arial;
+    color:white;
   ">
 
     <h2 style="
       color:#00D492;
+      margin-bottom:20px;
     ">
-      ${title}
+      BIVA Transaction Alert
     </h2>
-
-    <p>
-      Your transaction was successful.
-    </p>
 
     <div style="
       background:#111827;
       padding:20px;
       border-radius:14px;
-      margin-top:20px;
     ">
+
+      <h3>${title}</h3>
 
       <p>
         Amount:
@@ -124,11 +146,20 @@ function transactionTemplate({
 
     </div>
 
+    <p style="
+      margin-top:20px;
+      opacity:.7;
+    ">
+      Thank you for using BIVA.
+    </p>
+
   </div>
 
   `;
 
 }
+
+// ===============================
 
 module.exports = {
 
