@@ -3,7 +3,6 @@ const { db, admin } = require("../config/firebase");
 const { sendEmail, transactionTemplate } = require("../services/email.service");
 
 
-
 exports.buyAirtime = async (req, res) => {
 
   let amountToCharge = 0;
@@ -384,10 +383,11 @@ exports.buyAirtime = async (req, res) => {
 
       });
 
-      // =========================
-// SEND EMAIL
-// =========================
 
+
+// =========================
+// Send Email
+// =========================
 await sendEmail({
 
   to: email,
