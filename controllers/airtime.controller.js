@@ -4,7 +4,6 @@ const { sendEmail, transactionTemplate } = require("../services/email.service");
 
 
 
-
 exports.buyAirtime = async (req, res) => {
 
   let amountToCharge = 0;
