@@ -210,6 +210,9 @@ exports.buyElectricity = async (
     Number(buyAmount);
 
 
+    const balanceBefore = Number(user.wallet || 0);
+    const balanceAfter = balanceBefore - amount;
+
     if(amount < 100){
 
       return res.status(400)
@@ -367,63 +370,56 @@ exports.buyElectricity = async (
 
 
     // SAVE TRANSACTION
-    await db.collection(
-      "transactions"
-    )
+await db.collection("transactions")
+.doc(request_id)
+.set({
 
-    .doc(request_id)
+  userId,
 
-    .set({
+  email:
+    user.email || "",
 
-      userId,
+  type:
+    "electricity",
 
-      email:
-      user.email || "",
+  category:
+    "electricity",
 
-      type:
-      "electricity",
+  title:
+    "Electricity Payment",
 
-      category:
-      "electricity",
+  status:
+    "success",
 
-      title:
-      "Electricity Payment",
+  disco,
 
-      status:
-      "success",
+  meterType,
 
-      disco,
+  meterNumber,
 
-      meterType,
+  token,
 
-      meterNumber,
+  units:
+    result?.data?.units || "",
 
-      token,
+  band:
+    result?.data?.band || "",
 
-      units:
-      result?.data
-      ?.units || "",
+  customerName:
+    result?.data?.customer_name || "",
 
-      band:
-      result?.data
-      ?.band || "",
+  customerAddress:
+    result?.data?.customer_address || "",
 
-      customerName:
-      result?.data
-      ?.customer_name || "",
+  amount,
 
-      customerAddress:
-      result?.data
-      ?.customer_address || "",
+  balanceBefore,
+  balanceAfter,
 
-      amount,
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
 
-      createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
-
-    });
+});
 
 
     // CASHBACK
