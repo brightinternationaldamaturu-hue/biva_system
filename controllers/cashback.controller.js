@@ -4,76 +4,79 @@ exports.withdrawCashback = async (req, res) => {
   try {
     const { userId } = req.body;
 
-    const userRef = db.collection("users").doc(userId);
-
-    const snap = await userRef.get();
-
-    if (!snap.exists) {
-      return res.status(404).json({
-        success: false,
-        error: "User not found"
-      });
-    }
-
-    const user = snap.data();
-
-    const cashback = Number(user.cashbackBalance || 0);
-
-    if (cashback <= 0) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        error: "No cashback available"
+        error: "Missing userId"
       });
     }
 
-    // =========================
-    // SNAPSHOT (IMPORTANT)
-    // =========================
-    const beforeBalance = Number(user.wallet || 0);
-    const afterBalance = beforeBalance + cashback;
+    const userRef = db.collection("users").doc(userId);
+    const txRef = db.collection("transactions").doc();
 
-    const transactionRef = db.collection("transactions").doc();
+    const result = await db.runTransaction(async (t) => {
 
-    // =========================
-    // WRITE TRANSACTION FIRST (SAFE)
-    // =========================
-    await transactionRef.set({
-      userId,
-      email: user.email || "",
-      fullName: user.fullName || "",
-      phone: user.phone || "",
+      const snap = await t.get(userRef);
 
-      type: "cashback_withdrawal",
-      category: "cashback",
-      title: "Cashback Withdrawal",
+      if (!snap.exists) {
+        throw new Error("User not found");
+      }
 
-      amount: cashback,
+      const user = snap.data();
 
-      beforeBalance,
-      afterBalance,
+      const cashback = Number(user.cashbackBalance || 0);
 
-      status: "success",
-      description: "Cashback moved to wallet",
+      if (cashback <= 0) {
+        throw new Error("No cashback available");
+      }
 
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+      // ✅ SNAPSHOT INSIDE TRANSACTION (IMPORTANT FIX)
+      const beforeBalance = Number(user.wallet || 0);
+      const afterBalance = beforeBalance + cashback;
 
-    // =========================
-    // UPDATE USER AFTER
-    // =========================
-    await userRef.update({
-      wallet: admin.firestore.FieldValue.increment(cashback),
-      cashbackBalance: 0
+      // =========================
+      // UPDATE USER
+      // =========================
+      t.update(userRef, {
+        wallet: admin.firestore.FieldValue.increment(cashback),
+        cashbackBalance: 0
+      });
+
+      // =========================
+      // SAVE TRANSACTION
+      // =========================
+      t.set(txRef, {
+        userId,
+        email: user.email || "",
+        fullName: user.fullName || "",
+        phone: user.phone || "",
+
+        type: "cashback_withdrawal",
+        category: "cashback",
+        title: "Cashback Withdrawal",
+
+        amount: cashback,
+
+        beforeBalance,
+        afterBalance,
+
+        status: "success",
+        description: "Cashback moved to wallet",
+
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      return {
+        amount: cashback,
+        beforeBalance,
+        afterBalance
+      };
     });
 
     return res.json({
       success: true,
       message: "Cashback withdrawn successfully",
-      data: {
-        amount: cashback,
-        beforeBalance,
-        afterBalance
-      }
+      data: result
     });
 
   } catch (err) {
