@@ -100,6 +100,10 @@ exports.buyVoucher = async (req, res) => {
 
       Number(selectedPlan.price);
 
+
+      const balanceBefore = Number(userData.wallet || 0);
+const balanceAfter = balanceBefore - amountToCharge;
+
     // =========================
     // USER
     // =========================
@@ -191,8 +195,11 @@ exports.buyVoucher = async (req, res) => {
 
       plan:
         desc,
-
+        
+      balanceBefore,
+      balanceAfter,
       status:"pending",
+
 
       refunded:false,
 
