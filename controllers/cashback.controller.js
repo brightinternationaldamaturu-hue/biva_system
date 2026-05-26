@@ -1,22 +1,11 @@
 const { db, admin } = require("../config/firebase");
 
 exports.withdrawCashback = async (req, res) => {
-  const { userId } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({
-      success: false,
-      error: "Missing userId"
-    });
-  }
-
-  const userRef = db.collection("users").doc(userId);
-
-  let beforeBalance = 0;
-  let afterBalance = 0;
-  let cashbackAmount = 0;
-
   try {
+    const { userId } = req.body;
+
+    const userRef = db.collection("users").doc(userId);
+
     await db.runTransaction(async (t) => {
       const snap = await t.get(userRef);
 
@@ -26,28 +15,28 @@ exports.withdrawCashback = async (req, res) => {
 
       const user = snap.data();
 
-      cashbackAmount = Number(user.cashbackBalance || 0);
+      const cashback = Number(user.cashbackBalance || 0);
 
-      if (cashbackAmount <= 0) {
+      if (cashback <= 0) {
         throw new Error("No cashback available");
       }
 
       // =========================
-      // WALLET SNAPSHOT (SAFE)
+      // SNAPSHOT (LIKE AIRTIME STYLE)
       // =========================
-      beforeBalance = Number(user.wallet || 0);
-      afterBalance = beforeBalance + cashbackAmount;
+      const beforeBalance = Number(user.wallet || 0);
+      const afterBalance = beforeBalance + cashback;
 
       // =========================
       // UPDATE USER
       // =========================
       t.update(userRef, {
-        wallet: admin.firestore.FieldValue.increment(cashbackAmount),
+        wallet: admin.firestore.FieldValue.increment(cashback),
         cashbackBalance: 0
       });
 
       // =========================
-      // TRANSACTION RECORD
+      // TRANSACTION
       // =========================
       const txRef = db.collection("transactions").doc();
 
@@ -61,7 +50,7 @@ exports.withdrawCashback = async (req, res) => {
         category: "cashback",
         title: "Cashback Withdrawal",
 
-        amount: cashbackAmount,
+        amount: cashback,
 
         beforeBalance,
         afterBalance,
@@ -75,16 +64,11 @@ exports.withdrawCashback = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Cashback withdrawn successfully",
-      data: {
-        amount: cashbackAmount,
-        beforeBalance,
-        afterBalance
-      }
+      message: "Cashback withdrawn successfully"
     });
 
   } catch (err) {
-    console.log("CASHBACK WITHDRAW ERROR:", err.message);
+    console.log("CASHBACK ERROR:", err.message);
 
     return res.status(400).json({
       success: false,
