@@ -112,6 +112,13 @@ exports.buyAirtime = async (req, res) => {
     amountToCharge =
       Number(amount);
 
+
+      const balanceBefore =
+  Number(userData.wallet || 0);
+
+const balanceAfter =
+  balanceBefore - amountToCharge;
+
     // =========================
     // BALANCE CHECK
     // =========================
@@ -148,44 +155,48 @@ exports.buyAirtime = async (req, res) => {
       db.collection("transactions")
       .doc(request_id);
 
-    await transactionRef.set({
+await transactionRef.set({
 
-      request_id,
+  request_id,
 
-      userId:
-        userDoc.id,
+  userId:
+    userDoc.id,
 
-      email,
+  email,
 
-      fullName:
-        userData.fullName || "",
+  fullName:
+    userData.fullName || "",
 
-      type: "airtime",
+  type: "airtime",
 
-      category: "airtime",
+  category: "airtime",
 
-      title:
-        `${network} Airtime`,
+  title:
+    `${network} Airtime`,
 
-      network,
+  network,
 
-      phone,
+  phone,
 
-      amount:
-        amountToCharge,
+  amount:
+    amountToCharge,
 
-      status: "pending",
+  balanceBefore,
 
-      refunded: false,
+  balanceAfter,
 
-      provider: "IACAFE",
+  status: "pending",
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
+  refunded: false,
 
-    });
+  provider: "IACAFE",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
 
     // =========================
     // DEDUCT WALLET
