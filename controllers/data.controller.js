@@ -249,6 +249,12 @@ exports.buyData = async (req, res) => {
     sellingAmount =
       originalAmount + profit;
 
+      const balanceBefore =
+  Number(userData.wallet || 0);
+
+const balanceAfter =
+  balanceBefore - sellingAmount;
+
     // ===============================
     // BALANCE CHECK
     // ===============================
@@ -343,6 +349,9 @@ exports.buyData = async (req, res) => {
 
       amountCharged:
         sellingAmount,
+
+        balanceBefore,
+        balanceAfter,
 
       refunded: false,
 
