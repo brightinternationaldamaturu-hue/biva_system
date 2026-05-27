@@ -1,5 +1,5 @@
 const { db, admin } =
-require("../config/firebase");
+require("../../config/firebase");
 
 exports.sendAdminNotification =
 async ({
