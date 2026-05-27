@@ -330,7 +330,46 @@ await transactionRef.set({
 
     if (success) {
 
-   
+await sendAdminNotification({
+
+  type: "data",
+
+  title:
+    `${networkMap[String(network_id)]} Data Purchase`,
+
+  amount:
+    sellingAmount,
+
+  reference:
+    request_id,
+
+  user: {
+
+    userId,
+
+    fullName:
+      userData.fullName,
+
+    email:
+      userData.email,
+
+    phone
+
+  },
+
+  extra: {
+
+    plan:
+      selectedPlan.plan_name,
+
+    transactionType:
+      "data"
+
+  }
+
+});
+
+      
 
 
 await transactionRef.update({
