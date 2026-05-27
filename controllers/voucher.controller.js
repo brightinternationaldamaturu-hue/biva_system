@@ -97,42 +97,46 @@ exports.buyVoucher = async (req, res) => {
 
     }
 
-    amountToCharge =
+amountToCharge =
+  Number(selectedPlan.price);
 
-      Number(selectedPlan.price);
+// =========================
+// USER
+// =========================
 
+userRef =
 
-      const balanceBefore = Number(userData.wallet || 0);
-const balanceAfter = balanceBefore - amountToCharge;
+  db.collection("users")
+  .doc(userId);
 
-    // =========================
-    // USER
-    // =========================
+const userSnap =
 
-    userRef =
+  await userRef.get();
 
-      db.collection("users")
-      .doc(userId);
+if (!userSnap.exists) {
 
-    const userSnap =
+  return res.status(404).json({
 
-      await userRef.get();
+    success:false,
 
-    if (!userSnap.exists) {
+    error:"User not found"
 
-      return res.status(404).json({
+  });
 
-        success:false,
+}
 
-        error:"User not found"
+const userData =
+  userSnap.data();
 
-      });
+// =========================
+// BALANCE SNAPSHOT
+// =========================
 
-    }
+const balanceBefore =
+  Number(userData.wallet || 0);
 
-    const userData =
-
-      userSnap.data();
+const balanceAfter =
+  balanceBefore - amountToCharge;
 
     // =========================
     // BALANCE CHECK
