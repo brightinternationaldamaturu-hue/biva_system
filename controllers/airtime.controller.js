@@ -399,12 +399,12 @@ await transactionRef.set({
   
       
       
-  await sendAdminNotification({
+await sendAdminNotification({
 
   type: "airtime",
 
-title:
-  `${userData.fullName} bought ₦${amountToCharge} ${network} Airtime`,
+  title:
+    `${userData.fullName} bought ₦${amountToCharge} ${network} Airtime`,
 
   amount:
     amountToCharge,
@@ -427,19 +427,22 @@ title:
 
   },
 
-extra: {
+  extra: {
 
-  network,
+    network,
 
-  phone,
+    phone,
 
-  amount:
-    amountToCharge,
+    email:
+      userData.email,
 
-  transactionType:
-    "airtime"
+    amount:
+      amountToCharge,
 
-}
+    transactionType:
+      "airtime"
+
+  }
 
 });
 
