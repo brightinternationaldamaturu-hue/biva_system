@@ -557,6 +557,63 @@ if(
 
     }
 
+
+    // ===============================
+    // Admin Notification
+    // ===============================
+
+await sendAdminNotification({
+
+  type: "data",
+
+  title:
+    `${userData.fullName} bought ₦${sellingAmount} Data`,
+
+  amount:
+    sellingAmount,
+
+  reference:
+    request_id,
+
+  user: {
+
+    userId,
+
+    fullName:
+      userData.fullName,
+
+    email:
+      userData.email,
+
+    phone
+
+  },
+
+  extra: {
+
+    network:
+      networkMap[String(network_id)],
+
+    phone,
+
+    email:
+      userData.email,
+
+    amount:
+      sellingAmount,
+
+    plan:
+      selectedPlan.plan_name,
+
+    transactionType:
+      "data"
+
+  }
+
+});
+
+
+
     // ===============================
     // FAILED
     // ===============================
@@ -668,6 +725,12 @@ await userRef.update({
   }
 
 };
+
+
+
+
+
+
 
 
 /**
