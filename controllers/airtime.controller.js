@@ -396,6 +396,49 @@ await transactionRef.set({
       });
 
 
+  
+      
+      
+  await sendAdminNotification({
+
+  type: "airtime",
+
+  title:
+    `${network} Airtime Purchase`,
+
+  amount:
+    amountToCharge,
+
+  reference:
+    request_id,
+
+  user: {
+
+    userId:
+      userDoc.id,
+
+    fullName:
+      userData.fullName,
+
+    email:
+      userData.email,
+
+    phone
+
+  },
+
+  extra: {
+
+    network,
+
+    transactionType:
+      "airtime"
+
+  }
+
+});
+
+
 
 // =========================
 // RESPONSE
