@@ -835,6 +835,75 @@ exports.withdrawCashback = async (req, res) => {
 
     });
 
+
+
+
+
+
+
+    try {
+
+  await sendAdminNotification({
+
+    type:
+      "cashback_withdrawal",
+
+    title:
+      `${user.fullName} withdrew ₦${cashback} Cashback`,
+
+    amount:
+      cashback,
+
+    reference:
+      `CB_${Date.now()}`,
+
+    user: {
+
+      userId,
+
+      fullName:
+        user.fullName,
+
+      email:
+        user.email,
+
+      phone:
+        user.phone
+
+    },
+
+    extra: {
+
+      email:
+        user.email,
+
+      amount:
+        cashback,
+
+      transactionType:
+        "cashback_withdrawal"
+
+    }
+
+  });
+
+}
+
+catch(notifyErr){
+
+  console.log(
+
+    "ADMIN NOTIFICATION ERROR:",
+
+    notifyErr.message
+
+  );
+
+}
+
+
+
+
     return res.json({
 
       success: true,
@@ -848,6 +917,9 @@ exports.withdrawCashback = async (req, res) => {
     });
 
   }
+
+
+  
 
   catch (err) {
 
