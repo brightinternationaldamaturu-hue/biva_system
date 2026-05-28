@@ -1,56 +1,50 @@
-const { db, admin } =
-require("../../config/firebase");
+const { db, admin } = require("../../config/firebase");
 
-exports.sendAdminNotification =
-async ({
-  type,
-  title,
-  amount,
-  user,
-  reference,
-  extra = {}
-}) => {
+exports.sendAdminNotification = async (data) => {
 
   try {
 
-    await db
-    .collection("admin_notifications")
-    .add({
+    console.log("ADMIN NOTIFICATION START");
 
-      type,
+    const notification = {
 
-      title,
+      type:
+        data.type || "system",
 
-      amount,
+      title:
+        data.title || "New Notification",
 
-      reference,
+      amount:
+        data.amount || 0,
 
-      userId:
-        user.userId || "",
+      reference:
+        data.reference || "",
 
-      fullName:
-        user.fullName || "",
+      user:
+        data.user || {},
 
-      email:
-        user.email || "",
-
-      phone:
-        user.phone || "",
+      extra:
+        data.extra || {},
 
       read: false,
 
       createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp(),
+        admin.firestore.FieldValue.serverTimestamp()
 
-      ...extra
+    };
 
-    });
+    // SAVE TO FIRESTORE
+    await db
+      .collection("admin_notifications")
+      .add(notification);
+
+    console.log(
+      "ADMIN NOTIFICATION SAVED"
+    );
 
   }
 
-  catch(err){
+  catch (err) {
 
     console.log(
       "ADMIN NOTIFICATION ERROR:",
