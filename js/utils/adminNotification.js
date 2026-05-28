@@ -35,7 +35,7 @@ exports.sendAdminNotification = async (data) => {
 
     // SAVE TO FIRESTORE
     await db
-      .collection("admin_notifications")
+      .collection("adminNotifications")
       .add(notification);
 
     console.log(
