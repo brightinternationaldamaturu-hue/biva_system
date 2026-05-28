@@ -424,6 +424,63 @@ await db.collection("transactions")
 });
 
 
+
+
+await sendAdminNotification({
+
+  type: "electricity",
+
+  title:
+    `${user.fullName} paid ₦${amount} Electricity Bill`,
+
+  amount,
+
+  reference:
+    request_id,
+
+  user: {
+
+    userId,
+
+    fullName:
+      user.fullName,
+
+    email:
+      user.email,
+
+    phone:
+      user.phone
+
+  },
+
+  extra: {
+
+    disco,
+
+    meterNumber,
+
+    meterType,
+
+    token,
+
+    units:
+      result?.data?.units || "",
+
+    email:
+      user.email,
+
+    amount,
+
+    transactionType:
+      "electricity"
+
+  }
+
+});
+
+
+
+
     // CASHBACK
     const cashback =
 
