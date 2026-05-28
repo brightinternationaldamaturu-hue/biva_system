@@ -338,7 +338,7 @@ const balanceAfter =
 
 
 
-    await sendAdminNotification({
+  await sendAdminNotification({
 
   type: "voucher",
 
@@ -417,6 +417,8 @@ await db.collection(
 ).add({
 
   userId,
+
+  email: userData.email,
 
   type: "cashback",
 
