@@ -338,6 +338,55 @@ const balanceAfter =
 
 
 
+    await sendAdminNotification({
+
+  type: "voucher",
+
+  title:
+    `${userData.fullName} generated ₦${amountToCharge} Voucher`,
+
+  amount:
+    amountToCharge,
+
+  reference:
+    request_id,
+
+  user: {
+
+    userId,
+
+    fullName:
+      userData.fullName,
+
+    email:
+      userData.email
+
+  },
+
+  extra: {
+
+    voucher:
+      voucherCode,
+
+    plan:
+      desc,
+
+    email:
+      userData.email,
+
+    amount:
+      amountToCharge,
+
+    transactionType:
+      "voucher"
+
+  }
+
+});
+
+
+
+
     // =========================
 // CASHBACK
 // =========================
