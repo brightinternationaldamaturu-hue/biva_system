@@ -403,8 +403,8 @@ await transactionRef.set({
 
   type: "airtime",
 
-  title:
-    `${network} Airtime Purchase`,
+title:
+  `${userData.fullName} bought ₦${amountToCharge} ${network} Airtime`,
 
   amount:
     amountToCharge,
@@ -427,14 +427,19 @@ await transactionRef.set({
 
   },
 
-  extra: {
+extra: {
 
-    network,
+  network,
 
-    transactionType:
-      "airtime"
+  phone,
 
-  }
+  amount:
+    amountToCharge,
+
+  transactionType:
+    "airtime"
+
+}
 
 });
 
