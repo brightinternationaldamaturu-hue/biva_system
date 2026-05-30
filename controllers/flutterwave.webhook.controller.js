@@ -119,20 +119,13 @@ if (amount >= 800) {
       .where("referralCode", "==", userData.referredBy)
       .limit(1)
       .get();
+    
 
     if (!refQuery.empty) {
 
-      const referrerRef = refQuery.docs[0].ref;
+const referrerRef =
+  refQuery.docs[0].ref;
 
-      // CREDIT REFERRER
-      await referrerRef.update({
-        wallet: admin.firestore.FieldValue.increment(100)
-      });
-
-
-      
-
-// SAVE TRANSACTION
 const referrerSnap =
   await referrerRef.get();
 
@@ -147,11 +140,15 @@ const bonusBefore =
 const bonusAfter =
   bonusBefore + bonusAmount;
 
+// CREDIT REFERRER ONLY ONCE
 await referrerRef.update({
   wallet:
-    admin.firestore.FieldValue.increment(100)
+    admin.firestore.FieldValue.increment(
+      bonusAmount
+    )
 });
 
+// SAVE BONUS TRANSACTION
 await db.collection("transactions").add({
 
   userId:
@@ -192,10 +189,10 @@ await db.collection("transactions").add({
 
 });
 
-      // MARK PAID
-      await userRef.update({
-        referralBonusPaid: true
-      });
+// MARK PAID
+await userRef.update({
+  referralBonusPaid: true
+});
     }
   }
 }
