@@ -121,25 +121,58 @@ exports.creditWallet = async (req, res) => {
 
             });
 
+
+          
+
           // SAVE BONUS TRANSACTION
-          await db.collection("transactions")
-            .add({
+const referrerData =
+  referrerDoc.data();
 
-              userId: referrerId,
+const balanceBefore =
+  Number(referrerData.wallet || 0);
 
-              type: "referral_bonus",
+const bonusAmount = 100;
 
-              amount: 100,
+const balanceAfter =
+  balanceBefore + bonusAmount;
 
-              status: "success",
+await db.collection("transactions")
+  .add({
 
-              description:
-                `Referral bonus from ${userData.fullName || "New User"}`,
+    userId: referrerId,
 
-              createdAt:
-                admin.firestore.FieldValue.serverTimestamp()
+    email:
+      referrerData.email || "",
 
-            });
+    fullName:
+      referrerData.fullName || "",
+
+    type:
+      "referral_bonus",
+
+    category:
+      "referral",
+
+    title:
+      "Referral Bonus",
+
+    amount:
+      bonusAmount,
+
+    balanceBefore,
+
+    balanceAfter,
+
+    status:
+      "success",
+
+    description:
+      `Referral bonus from ${userData.fullName || "New User"}`,
+
+    createdAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  });
 
           // MARK BONUS PAID
           await db.collection("users")
