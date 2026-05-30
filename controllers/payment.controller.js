@@ -66,36 +66,122 @@ exports.verifyPayment = async (req, res) => {
 
       const txRef = db.collection("transactions").doc();
 
-      t.set(txRef, {
-        email,
-        amount,
-        type: "funding",
-        status: "success",
-        tx_ref,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+const balanceBefore =
+  Number(userData.wallet || 0);
 
-      // 👉 REFERRAL FIX
-      if (referrerRef && !userData.referralBonusPaid) {
+const balanceAfter =
+  balanceBefore + amount;
 
-        t.update(referrerRef, {
-          wallet: admin.firestore.FieldValue.increment(100)
-        });
+t.set(txRef, {
 
-        const bonusRef = db.collection("transactions").doc();
+  userId:
+    userRef.id,
 
-        t.set(bonusRef, {
-          userId: referrerRef.id,
-          type: "referral_bonus",
-          amount: 100,
-          status: "success",
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
+  email,
 
-        t.update(userRef, {
-          referralBonusPaid: true
-        });
-      }
+  fullName:
+    userData.fullName || "",
+
+  type:
+    "funding",
+
+  category:
+    "wallet",
+
+  title:
+    "Wallet Funding",
+
+  amount,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  status:
+    "success",
+
+  tx_ref,
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
+
+
+      
+
+      // 👉 REFERRAL BONUS
+if (referrerRef && !userData.referralBonusPaid) {
+
+  const referrerSnap =
+    await t.get(referrerRef);
+
+  const referrerData =
+    referrerSnap.data();
+
+  const balanceBefore =
+    Number(referrerData.wallet || 0);
+
+  const bonusAmount = 100;
+
+  const balanceAfter =
+    balanceBefore + bonusAmount;
+
+  // CREDIT REFERRER
+  t.update(referrerRef, {
+    wallet:
+      admin.firestore.FieldValue.increment(
+        bonusAmount
+      )
+  });
+
+  const bonusRef =
+    db.collection("transactions").doc();
+
+  t.set(bonusRef, {
+
+    userId:
+      referrerRef.id,
+
+    email:
+      referrerData.email || "",
+
+    fullName:
+      referrerData.fullName || "",
+
+    type:
+      "referral_bonus",
+
+    category:
+      "referral",
+
+    title:
+      "Referral Bonus",
+
+    amount:
+      bonusAmount,
+
+    balanceBefore,
+
+    balanceAfter,
+
+    status:
+      "success",
+
+    description:
+      `Referral bonus from ${userData.fullName || email}`,
+
+    createdAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  });
+
+  // MARK BONUS PAID
+  t.update(userRef, {
+    referralBonusPaid: true
+  });
+
+}
 
     });
 
