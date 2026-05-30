@@ -129,15 +129,68 @@ if (amount >= 800) {
         wallet: admin.firestore.FieldValue.increment(100)
       });
 
-      // SAVE TRANSACTION
-      await db.collection("transactions").add({
-        userId: referrerRef.id,
-        type: "referral_bonus",
-        amount: 100,
-        status: "success",
-        description: `Referral bonus from ${email}`,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+
+      
+
+// SAVE TRANSACTION
+const referrerSnap =
+  await referrerRef.get();
+
+const referrerData =
+  referrerSnap.data();
+
+const bonusAmount = 100;
+
+const bonusBefore =
+  Number(referrerData.wallet || 0);
+
+const bonusAfter =
+  bonusBefore + bonusAmount;
+
+await referrerRef.update({
+  wallet:
+    admin.firestore.FieldValue.increment(100)
+});
+
+await db.collection("transactions").add({
+
+  userId:
+    referrerRef.id,
+
+  email:
+    referrerData.email || "",
+
+  fullName:
+    referrerData.fullName || "",
+
+  type:
+    "referral_bonus",
+
+  category:
+    "referral",
+
+  title:
+    "Referral Bonus",
+
+  amount:
+    bonusAmount,
+
+  balanceBefore:
+    bonusBefore,
+
+  balanceAfter:
+    bonusAfter,
+
+  status:
+    "success",
+
+  description:
+    `Referral bonus from ${email}`,
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
 
       // MARK PAID
       await userRef.update({
@@ -148,40 +201,53 @@ if (amount >= 800) {
 }
 
 
-// SAVE TRANSACTION
-await db.collection(
-  "transactions"
-).add({
 
-  userId: userDoc.id,
+    
+
+// SAVE TRANSACTION
+await db.collection("transactions").add({
+
+  userId:
+    userDoc.id,
 
   email,
 
+  fullName:
+    userData.fullName || "",
+
+  type:
+    "funding",
+
+  category:
+    "wallet",
+
+  title:
+    "Wallet Funding",
+
   amount,
 
-  type: "fund",
+  balanceBefore:
+    currentBalance,
 
-  status: "successful",
+  balanceAfter:
+    newBalance,
+
+  status:
+    "success",
 
   flwRef,
 
   paymentType:
-    data.payment_type ||
-
-    "bank_transfer",
+    data.payment_type || "bank_transfer",
 
   reference:
-    data.tx_ref ||
-
-    flwRef,
+    data.tx_ref || flwRef,
 
   description:
     "Wallet funded via bank transfer",
 
   createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
+    admin.firestore.FieldValue.serverTimestamp()
 
 });
 
