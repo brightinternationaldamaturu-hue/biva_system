@@ -521,8 +521,22 @@ if(
     phoneNumber:
       phone,
 
+    title:
+      `${networkMap[String(network_id)]} Data Purchase`,
+    
+    network:
+        networkMap[
+          String(network_id)
+        ] || "Unknown",
+
+    network_id,
+
+    data_plan,
+
     plan:
-      selectedPlan.plan_name,
+        selectedPlan.plan_name ||
+        selectedPlan.name ||
+        "Data Plan",
 
     price:
       sellingAmount,
