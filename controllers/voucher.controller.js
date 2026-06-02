@@ -244,7 +244,7 @@ const balanceAfter =
 const cashback =
 
   Math.floor(
-    amountToCharge * 0.10
+    amountToCharge * 0.05
   );
 
 
