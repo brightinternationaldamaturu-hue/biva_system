@@ -257,7 +257,7 @@ const balanceAfter =
   plan:
     desc,
 
-  amount:
+  price:
     amountToCharge,
 
   txId:
