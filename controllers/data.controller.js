@@ -497,6 +497,50 @@ if(
           sellingAmount * 0.01
         );
 
+
+      // ===============================
+      // Send Email Notification
+      // ===============================
+
+ await axios.post(
+  
+  "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+  {
+    fullName:
+      userData.fullName || "",
+
+    email:
+      userData.email || "",
+
+    phone:
+      userData.phone || "",
+
+    type:
+      "Data Purchase",
+
+    network,
+
+    phoneNumber:
+      phone,
+
+    plan:
+      selectedPlan.plan_name,
+
+    price:
+      sellingAmount,
+
+    txId:
+      request_id,
+
+    balanceBefore,
+
+    balanceAfter,
+
+    cashback
+  }
+);
+
+
       await userRef.update({
 
         cashbackBalance:
