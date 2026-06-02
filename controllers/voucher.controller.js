@@ -339,6 +339,45 @@ const balanceAfter =
 
 
 
+    await sendSalesNotification({
+
+  fullName:
+    userData.fullName || "",
+
+  email:
+    userData.email || "",
+
+  phone:
+    userData.phone || "",
+
+  type:
+    "Voucher Purchase",
+
+  plan:
+    desc,
+
+  amount:
+    amountToCharge,
+
+  voucherCode:
+    voucherCode,
+
+  txId:
+    request_id,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  cashback:
+    Math.floor(
+      amountToCharge * 0.10
+    )
+
+});
+
+
+
   await sendAdminNotification({
 
   type: "voucher",
@@ -399,42 +438,6 @@ const cashback =
   Math.floor(
     amountToCharge * 0.10
   );
-
-
-
-
- await sendSalesNotification({
-
-  fullName:
-    userData.fullName || "",
-
-  email:
-    userData.email || "",
-
-  phone:
-    userData.phone || "",
-
-  type:
-    "Voucher Purchase",
-
-  plan:
-    desc,
-
-  price:
-    amountToCharge,
-
-  voucherCode,
-
-  cashback,
-
-  txId:
-    request_id,
-
-  balanceBefore,
-
-  balanceAfter
-
-});
 
 
 
