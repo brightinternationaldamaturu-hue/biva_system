@@ -361,6 +361,64 @@ await transactionRef.set({
 
       });
 
+
+      try{
+
+  await axios.post(
+
+    "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+
+    {
+
+      fullName:
+        userData.fullName || "",
+
+      email:
+        userData.email || "",
+
+      phone:
+        userData.phone || "",
+
+      type:
+        "Airtime Purchase",
+
+      network,
+
+      phoneNumber:
+        phone,
+
+      plan:
+        `₦${amountToCharge} ${network} Airtime`,
+
+      price:
+        amountToCharge,
+
+      txId:
+        request_id,
+
+      balanceBefore,
+
+      balanceAfter,
+
+      cashback
+
+    }
+
+  );
+
+}
+
+catch(err){
+
+  console.log(
+    "MAKE AIRTIME ERROR:",
+    err.message
+  );
+
+}
+
+
+
       // SAVE CASHBACK TX
 
       await db.collection(
