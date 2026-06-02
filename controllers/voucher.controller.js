@@ -232,6 +232,9 @@ const balanceAfter =
 
     });
 
+
+
+
     // =========================
     // GENERATE VOUCHER
     // =========================
@@ -266,10 +269,13 @@ const balanceAfter =
   balanceBefore,
 
   balanceAfter,
+  
+  cashback,
 
       }
 
     );
+
 
     const result = response.data;
 
@@ -351,36 +357,6 @@ const balanceAfter =
 
     });
 
-
-
-
-  await sendSalesNotification({
-
-  fullName:
-    userData.fullName || "",
-
-  email:
-    userData.email || "",
-
-  phone:
-    userData.phone || "",
-
-  type:
-    "Voucher Purchase",
-
-  plan:
-    desc,
-
-  amount:
-    amountToCharge,
-
-  txId:
-    request_id,
-
-  balanceBefore,
-
-  balanceAfter,
-});
 
 
 
