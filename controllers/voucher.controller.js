@@ -242,15 +242,38 @@ const balanceAfter =
 
       {
 
-        plan: desc,
+  fullName:
+    userData.fullName || "",
 
-        price: amountToCharge,
+  email:
+    userData.email || "",
 
-        email:
-          userData.email,
+  phone:
+    userData.phone || "",
 
-        txId:
-          request_id
+  type:
+    "Voucher Purchase",
+
+  plan:
+    desc,
+
+  amount:
+    amountToCharge,
+
+  voucherCode:
+    voucherCode,
+
+  txId:
+    request_id,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  cashback:
+    Math.floor(
+      amountToCharge * 0.10
+    )
 
       }
 
@@ -336,45 +359,6 @@ const balanceAfter =
 
     });
 
-
-
-
-    await sendSalesNotification({
-
-  fullName:
-    userData.fullName || "",
-
-  email:
-    userData.email || "",
-
-  phone:
-    userData.phone || "",
-
-  type:
-    "Voucher Purchase",
-
-  plan:
-    desc,
-
-  amount:
-    amountToCharge,
-
-  voucherCode:
-    voucherCode,
-
-  txId:
-    request_id,
-
-  balanceBefore,
-
-  balanceAfter,
-
-  cashback:
-    Math.floor(
-      amountToCharge * 0.10
-    )
-
-});
 
 
 
