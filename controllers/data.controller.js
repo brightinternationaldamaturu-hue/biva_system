@@ -518,8 +518,6 @@ if(
     type:
       "Data Purchase",
 
-    network,
-
     phoneNumber:
       phone,
 
