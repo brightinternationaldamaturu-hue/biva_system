@@ -243,6 +243,62 @@ await setDoc(
 
 );
 
+
+
+
+try{
+
+  await fetch(
+
+    "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+
+    {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":
+        "application/json"
+      },
+
+      body:JSON.stringify({
+
+        type:
+          "New Signup",
+
+        fullName,
+
+        email,
+
+        referralCode,
+
+        referredBy,
+
+        createdAt:
+          new Date()
+          .toISOString()
+
+      })
+
+    }
+
+  );
+
+}
+
+catch(err){
+
+  console.log(
+    "SIGNUP MAKE ERROR:",
+    err
+  );
+
+}
+
+
+
+
+
       // SUCCESS
       showSuccess(
         "Account created successfully"
