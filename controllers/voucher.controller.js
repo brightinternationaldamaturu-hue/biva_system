@@ -234,6 +234,19 @@ const balanceAfter =
 
 
 
+// =========================
+// CASHBACK
+// =========================
+
+// 10% cashback
+
+const cashback =
+
+  Math.floor(
+    amountToCharge * 0.10
+  );
+
+
 
     // =========================
     // GENERATE VOUCHER
@@ -405,21 +418,6 @@ const balanceAfter =
   }
 
 });
-
-
-
-
-    // =========================
-// CASHBACK
-// =========================
-
-// 10% cashback
-
-const cashback =
-
-  Math.floor(
-    amountToCharge * 0.10
-  );
 
 
 
