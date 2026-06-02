@@ -236,26 +236,38 @@ const balanceAfter =
     // GENERATE VOUCHER
     // =========================
 
-    const response = await axios.post(
+const response = await axios.post(
 
-      "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+  "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
 
-      {
+  {
 
-        plan: desc,
+    fullName:
+      userData.fullName || "",
 
-        price: amountToCharge,
+    email:
+      userData.email || "",
 
-        email:
-          userData.email,
+    phone:
+      userData.phone || "",
 
-        txId:
-          request_id
+    plan:
+      desc,
 
-      }
+    price:
+      amountToCharge,
 
-    );
+    txId:
+      request_id,
 
+    balanceBefore,
+
+    balanceAfter
+
+  }
+
+);
+    
     const result = response.data;
 
     console.log(
