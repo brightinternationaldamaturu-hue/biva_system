@@ -236,38 +236,26 @@ const balanceAfter =
     // GENERATE VOUCHER
     // =========================
 
-const response = await axios.post(
+    const response = await axios.post(
 
-  "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+      "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
 
-  {
+      {
 
-    fullName:
-      userData.fullName || "",
+        plan: desc,
 
-    email:
-      userData.email || "",
+        price: amountToCharge,
 
-    phone:
-      userData.phone || "",
+        email:
+          userData.email,
 
-    plan:
-      desc,
+        txId:
+          request_id
 
-    price:
-      amountToCharge,
+      }
 
-    txId:
-      request_id,
+    );
 
-    balanceBefore,
-
-    balanceAfter
-
-  }
-
-);
-    
     const result = response.data;
 
     console.log(
@@ -351,45 +339,6 @@ const response = await axios.post(
 
 
 
-    await sendSalesNotification({
-
-  fullName:
-    userData.fullName || "",
-
-  email:
-    userData.email || "",
-
-  phone:
-    userData.phone || "",
-
-  type:
-    "Voucher Purchase",
-
-  plan:
-    desc,
-
-  amount:
-    amountToCharge,
-
-  voucherCode:
-    voucherCode,
-
-  txId:
-    request_id,
-
-  balanceBefore,
-
-  balanceAfter,
-
-  cashback:
-    Math.floor(
-      amountToCharge * 0.10
-    )
-
-});
-
-
-
   await sendAdminNotification({
 
   type: "voucher",
@@ -450,6 +399,45 @@ const cashback =
   Math.floor(
     amountToCharge * 0.10
   );
+
+
+
+
+ await sendSalesNotification({
+
+  fullName:
+    userData.fullName || "",
+
+  email:
+    userData.email || "",
+
+  phone:
+    userData.phone || "",
+
+  type:
+    "Voucher Purchase",
+
+  plan:
+    desc,
+
+  price:
+    amountToCharge,
+
+  voucherCode,
+
+  cashback,
+
+  txId:
+    request_id,
+
+  balanceBefore,
+
+  balanceAfter
+
+});
+
+
+
 
 // ADD TO USER
 
