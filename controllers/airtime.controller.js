@@ -5,6 +5,33 @@ const { sendAdminNotification } = require( "../js/utils/adminNotification" );
 
 
 exports.buyAirtime = async (req, res) => {
+  const authHeader =
+  req.headers.authorization;
+
+if(
+  !authHeader ||
+  !authHeader.startsWith("Bearer ")
+){
+
+  return res.status(401).json({
+    error:"Unauthorized"
+  });
+
+}
+
+const token =
+  authHeader.split("Bearer ")[1];
+
+const decoded =
+
+  await admin.auth()
+  .verifyIdToken(token);
+
+const uid =
+  decoded.uid;
+
+  const email =
+  decoded.email;
 
   let amountToCharge = 0;
 
@@ -14,14 +41,13 @@ exports.buyAirtime = async (req, res) => {
 
   try {
 
-    const {
+const {
 
-      phone,
-      network,
-      amount,
-      email
+  phone,
+  network,
+  amount
 
-    } = req.body;
+} = req.body;
 
     // =========================
     // VALIDATION
@@ -31,8 +57,7 @@ exports.buyAirtime = async (req, res) => {
 
       !phone ||
       !network ||
-      !amount ||
-      !email
+      !amount 
 
     ) {
 
@@ -84,31 +109,33 @@ exports.buyAirtime = async (req, res) => {
     // USER
     // =========================
 
-    const snapshot = await db
-      .collection("users")
-      .where("email", "==", email)
-      .get();
+userRef =
+  db.collection("users")
+  .doc(uid);
 
-    if (snapshot.empty) {
+const userSnap =
+  await userRef.get();
 
-      return res.status(404).json({
+if(!userSnap.exists){
 
-        success: false,
+  return res.status(404).json({
 
-        error: "User not found"
+    success:false,
 
-      });
+    error:"User not found"
 
-    }
+  });
 
-    const userDoc =
-      snapshot.docs[0];
+}
 
-    userRef =
-      userDoc.ref;
+const userData =
+  userSnap.data();
 
-    const userData =
-      userDoc.data();
+const userDoc = {
+
+  id: uid
+
+};
 
     amountToCharge =
       Number(amount);
