@@ -277,9 +277,11 @@ await db.collection("transactions").add({
       reference:
       data.tx_ref || flwRef,
 
-      balanceBefore,
+      balanceBefore:
+      currentBalance,
 
-      balanceAfter,
+      balanceAfter:
+      newBalance,
 
       status:
       "success",
