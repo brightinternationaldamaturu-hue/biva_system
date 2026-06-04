@@ -108,6 +108,60 @@ t.set(txRef, {
 });
 
 
+
+
+
+try {
+
+  await axios.post(
+
+    "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+
+    {
+
+      fullName:
+        userData.fullName || "",
+
+      email,
+
+      phone:
+        userData.phone || "",
+
+      type:
+        "Wallet Funding",
+
+      amount,
+
+      txId:
+        tx_ref,
+
+      balanceBefore,
+
+      balanceAfter,
+
+      description:
+        "Wallet funded successfully"
+
+    }
+
+  );
+
+}
+
+catch(err){
+
+  console.log(
+    "MAKE FUNDING ERROR:",
+    err.message
+  );
+
+}
+
+
+
+
+
+
       
 
       // 👉 REFERRAL BONUS
