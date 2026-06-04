@@ -249,6 +249,65 @@ await db.collection("transactions").add({
 });
 
 
+
+
+
+    try {
+
+  await axios.post(
+
+    "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+
+    {
+
+      fullName:
+        userData.fullName || "",
+
+      email,
+
+      phone:
+        userData.phone || "",
+
+      type:
+        "Wallet Funding",
+
+      amount,
+
+      reference:
+      data.tx_ref || flwRef,
+
+      balanceBefore,
+
+      balanceAfter,
+      status:
+      "success",
+        
+      createdAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+      description:
+        "Wallet funded successfully"
+
+    }
+
+  );
+
+}
+
+catch(err){
+
+  console.log(
+    "MAKE FUNDING ERROR:",
+    err.message
+  );
+
+}
+
+
+
+
+    
+
 // ==========================
 // ADMIN NOTIFICATION
 // ==========================
