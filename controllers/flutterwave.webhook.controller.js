@@ -279,11 +279,12 @@ await db.collection("transactions").add({
       balanceBefore,
 
       balanceAfter,
+
       status:
       "success",
         
       createdAt:
-      admin.firestore.FieldValue.serverTimestamp()
+      admin.firestore.FieldValue.serverTimestamp(),
 
       description:
         "Wallet funded successfully"
