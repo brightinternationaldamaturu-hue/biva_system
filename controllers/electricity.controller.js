@@ -212,8 +212,7 @@ exports.buyElectricity = async (
     Number(buyAmount);
 
 
-    const balanceBefore = Number(user.wallet || 0);
-    const balanceAfter = balanceBefore - amount;
+
 
     if(amount < 100){
 
@@ -257,6 +256,10 @@ exports.buyElectricity = async (
 
     const user =
     snap.data();
+
+
+    const balanceBefore = Number(user.wallet || 0);
+    const balanceAfter = balanceBefore - amount;
 
 
     // CHECK WALLET
