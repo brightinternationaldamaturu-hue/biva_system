@@ -25,10 +25,28 @@ async(req,res)=>{
 
     }
 
-    await db
-    .collection("users")
-    .doc(userId)
-    .delete();
+const userRef =
+db.collection("users")
+.doc(userId);
+
+const snap =
+await userRef.get();
+
+if(!snap.exists){
+
+  return res.status(404)
+  .json({
+
+    success:false,
+
+    error:"User not found"
+
+  });
+
+}
+
+await userRef.delete();
+    
 
     await admin
     .auth()
