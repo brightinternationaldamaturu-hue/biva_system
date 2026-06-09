@@ -137,6 +137,92 @@ const userDoc = {
 
 };
 
+
+
+// =========================
+// DAILY AIRTIME LIMIT
+// =========================
+
+const startOfDay =
+new Date();
+
+startOfDay.setHours(
+  0,
+  0,
+  0,
+  0
+);
+
+const airtimeToday =
+await db.collection(
+  "transactions"
+)
+.where(
+  "userId",
+  "==",
+  uid
+)
+.where(
+  "type",
+  "==",
+  "airtime"
+)
+.where(
+  "createdAt",
+  ">=",
+  startOfDay
+)
+.get();
+
+let totalToday = 0;
+
+airtimeToday.forEach(doc => {
+
+  const tx =
+  doc.data();
+
+  if(
+
+    tx.status !== "failed" &&
+
+    tx.status !== "refunded"
+
+  ){
+
+    totalToday +=
+    Number(
+      tx.amount || 0
+    );
+
+  }
+
+});
+
+if(
+
+  totalToday +
+
+  Number(amount)
+
+  > 5000
+
+){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "Daily airtime limit of ₦5,000 exceeded"
+
+  });
+
+}
+
+
+
+
+
     amountToCharge =
       Number(amount);
 
