@@ -163,13 +163,24 @@ return res.json({
 
   success:true,
 
-  message:
-    "Internet subscription successful",
+  planId,
 
-  request_id,
+  planName:
+    plan.name,
 
   amount:
-    amountToCharge
+    plan.price,
+
+  wallet,
+
+  speed:
+    plan.speed,
+
+  devices:
+    plan.devices,
+
+  duration:
+    plan.duration
 
 });
 
