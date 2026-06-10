@@ -40,28 +40,129 @@ try {
   const plan =
     planSnap.data();
 
-  return res.json({
 
-    success:true,
+    const userRef =
+  db.collection("users")
+  .doc(userId);
 
-    planId,
+const userSnap =
+  await userRef.get();
 
-    planName:
-      plan.name,
+if(!userSnap.exists){
 
-    amount:
-      plan.price,
+  return res.status(404).json({
+    success:false,
+    error:"User not found"
+  });
 
-    speed:
-      plan.speed,
+}
 
-    devices:
-      plan.devices,
+const userData =
+  userSnap.data();
 
-    duration:
-      plan.duration
+const wallet =
+  Number(userData.wallet || 0);
+
+if(wallet < Number(plan.price)){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:"Insufficient balance",
+
+    wallet,
+
+    required:
+      plan.price
 
   });
+
+}
+
+
+const amountToCharge =
+  Number(plan.price);
+
+const balanceBefore =
+  wallet;
+
+const balanceAfter =
+  balanceBefore - amountToCharge;
+
+const request_id =
+  "INTERNET_" + Date.now();
+
+const transactionRef =
+  db.collection("transactions")
+  .doc(request_id);
+
+await transactionRef.set({
+
+  request_id,
+
+  userId,
+
+  email:
+    userData.email || "",
+
+  fullName:
+    userData.fullName || "",
+
+  type:"internet",
+
+  category:"internet",
+
+  title:
+    `${plan.name} Internet`,
+
+  amount:
+    amountToCharge,
+
+  plan:
+    plan.name,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  status:"pending",
+
+  refunded:false,
+
+  provider:"BIVA",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+return res.json({
+
+  success:true,
+
+  planId,
+
+  planName:
+    plan.name,
+
+  amount:
+    plan.price,
+
+  wallet,
+
+  speed:
+    plan.speed,
+
+  devices:
+    plan.devices,
+
+  duration:
+    plan.duration
+
+});
 
 }
 catch(err){
