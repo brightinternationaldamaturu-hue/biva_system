@@ -26,6 +26,7 @@ app.use("/api/account", accountRoutes );
 app.use("/api", require("./routes/voucher.routes"));
 app.use("/", cashbackRoutes);
 app.use( "/api", require("./routes/virtualaccount.routes"));
+app.use("/api/internet", require("./routes/internet.routes"));
 
 
 // FRONTEND
@@ -66,4 +67,3 @@ console.log("ENV LOADED:", {
 app.get("/test", (req, res) => {
   res.send("Backend working successfully");
 });
-
