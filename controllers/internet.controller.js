@@ -196,6 +196,59 @@ await db.collection(
 
 
 
+//Cashback//
+
+
+const cashback =
+Math.floor(
+  amountToCharge * 0.05
+);
+
+
+await userRef.update({
+
+  cashbackBalance:
+    admin.firestore
+    .FieldValue
+    .increment(cashback)
+
+});
+
+
+
+await db.collection(
+  "transactions"
+).add({
+
+  userId,
+
+  email:
+    userData.email,
+
+  type:"cashback",
+
+  category:"cashback",
+
+  title:
+    "Internet Cashback",
+
+  amount:
+    cashback,
+
+  status:"success",
+
+  description:
+    `5% cashback from ${plan.name} Internet subscription`,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+
 
 await transactionRef.update({
 
@@ -207,6 +260,8 @@ await transactionRef.update({
     .serverTimestamp()
 
 });
+
+
 
 return res.json({
 
@@ -221,9 +276,13 @@ return res.json({
   amount:
     amountToCharge,
 
+  cashback,
+
   request_id
 
 });
+
+
 
 }
 catch(err){
