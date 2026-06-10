@@ -29,6 +29,7 @@ app.use( "/api", require("./routes/virtualaccount.routes"));
 app.use("/api/internet", require("./routes/internet.routes"));
 app.use("/api", require("./routes/device.routes"));
 app.use( "/api",require("./routes/subscription.routes"));
+app.use("/api", require("./routes/omada.routes"));
 
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
