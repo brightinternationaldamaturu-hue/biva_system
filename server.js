@@ -29,7 +29,6 @@ app.use( "/api", require("./routes/virtualaccount.routes"));
 app.use("/api/internet", require("./routes/internet.routes"));
 app.use("/api", require("./routes/device.routes"));
 
-
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
 
