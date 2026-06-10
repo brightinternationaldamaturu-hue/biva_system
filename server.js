@@ -27,6 +27,7 @@ app.use("/api", require("./routes/voucher.routes"));
 app.use("/", cashbackRoutes);
 app.use( "/api", require("./routes/virtualaccount.routes"));
 app.use("/api/internet", require("./routes/internet.routes"));
+app.use("/api", require("./routes/device.routes"));
 
 
 // FRONTEND
