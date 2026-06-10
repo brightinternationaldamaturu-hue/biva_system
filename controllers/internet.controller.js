@@ -4,7 +4,7 @@ require("../config/firebase");
 exports.subscribeInternet =
 async (req, res) => {
 
-try{
+try {
 
   const {
     userId,
@@ -21,9 +21,46 @@ try{
     });
   }
 
+  const planRef =
+    db.collection("wifiPlans")
+    .doc(planId);
+
+  const planSnap =
+    await planRef.get();
+
+  if(!planSnap.exists){
+
+    return res.status(404).json({
+      success:false,
+      error:"Plan not found"
+    });
+
+  }
+
+  const plan =
+    planSnap.data();
+
   return res.json({
+
     success:true,
-    message:"Internet subscription endpoint working"
+
+    planId,
+
+    planName:
+      plan.name,
+
+    amount:
+      plan.price,
+
+    speed:
+      plan.speed,
+
+    devices:
+      plan.devices,
+
+    duration:
+      plan.duration
+
   });
 
 }
