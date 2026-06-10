@@ -28,6 +28,7 @@ app.use("/", cashbackRoutes);
 app.use( "/api", require("./routes/virtualaccount.routes"));
 app.use("/api/internet", require("./routes/internet.routes"));
 app.use("/api", require("./routes/device.routes"));
+app.use( "/api",require("./routes/subscription.routes"));
 
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
@@ -62,7 +63,6 @@ console.log("ENV LOADED:", {
       : "MISSING"
 
 });
-
 
 
 app.get("/test", (req, res) => {
