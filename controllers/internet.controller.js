@@ -139,28 +139,37 @@ await transactionRef.set({
 
 });
 
+await userRef.update({
+
+  wallet:
+    admin.firestore
+    .FieldValue
+    .increment(-amountToCharge)
+
+});
+
+await transactionRef.update({
+
+  status:"success",
+
+  completedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
 return res.json({
 
   success:true,
 
-  planId,
+  message:
+    "Internet subscription successful",
 
-  planName:
-    plan.name,
+  request_id,
 
   amount:
-    plan.price,
-
-  wallet,
-
-  speed:
-    plan.speed,
-
-  devices:
-    plan.devices,
-
-  duration:
-    plan.duration
+    amountToCharge
 
 });
 
