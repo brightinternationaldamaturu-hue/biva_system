@@ -5,14 +5,20 @@ const router =
 express.Router();
 
 const {
-  addDevice
+  registerDevice,
+  validateDevice
 } = require(
   "../controllers/device.controller"
 );
 
 router.post(
-  "/device/add",
-  addDevice
+  "/register",
+  registerDevice
+);
+
+router.post(
+  "/validate",
+  validateDevice
 );
 
 module.exports =
