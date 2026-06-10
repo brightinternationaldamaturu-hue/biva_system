@@ -7,6 +7,9 @@ const app = express();
 const electricityRoutes = require("./routes/electricity.routes");
 const cashbackRoutes = require("./routes/cashback.routes");
 const accountRoutes = require("./routes/account.routes");
+const deviceRoutes = require("./routes/device.routes");
+
+
 
 
 // MIDDLEWARE
@@ -30,6 +33,7 @@ app.use("/api/internet", require("./routes/internet.routes"));
 app.use("/api", require("./routes/device.routes"));
 app.use( "/api",require("./routes/subscription.routes"));
 app.use("/api", require("./routes/omada.routes"));
+app.use("/api/device", deviceRoutes);
 
 // FRONTEND
 app.use(express.static(path.join(__dirname, "public")));
