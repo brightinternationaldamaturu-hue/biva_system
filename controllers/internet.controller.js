@@ -81,6 +81,46 @@ if(wallet < Number(plan.price)){
 }
 
 
+
+
+const existingSubscription =
+  await db
+  .collection("subscriptions")
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+if(
+  !existingSubscription.empty
+){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "You already have an active subscription"
+
+  });
+
+}
+
+
+
+
+
+
+
+
+
 const amountToCharge =
   Number(plan.price);
 
@@ -138,6 +178,10 @@ await transactionRef.set({
     .serverTimestamp()
 
 });
+
+
+
+
 
 await userRef.update({
 
