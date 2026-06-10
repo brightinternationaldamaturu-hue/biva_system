@@ -148,6 +148,55 @@ await userRef.update({
 
 });
 
+
+const expiryDate = new Date();
+
+expiryDate.setDate(
+  expiryDate.getDate() +
+  Number(plan.duration)
+);
+
+
+
+
+
+await db.collection(
+  "subscriptions"
+).add({
+
+  userId,
+
+  planId,
+
+  planName:
+    plan.name,
+
+  amount:
+    amountToCharge,
+
+  speed:
+    plan.speed,
+
+  devices:
+    plan.devices,
+
+  duration:
+    plan.duration,
+
+  status:"active",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp(),
+
+  expiryDate
+
+});
+
+
+
+
 await transactionRef.update({
 
   status:"success",
