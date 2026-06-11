@@ -388,22 +388,18 @@ await db
 
 const clientsResponse =
   await axios.get(
-
-    `${process.env.OMADA_URL}/openapi/v1/${process.env.OMADA_ID}/sites/6a141d2551fe3972e45dc6a9/clients?pageSize=100&page=1`,
-
-    {
-      headers:{
-        Authorization:
-          `AccessToken=${await getAccessToken()}`
-      },
-
-      httpsAgent:
-        new (require("https").Agent)({
-          rejectUnauthorized:false
-        })
-    }
-
+    "http://192.168.1.141:5050/omada/clients"
   );
+
+
+
+  console.log(
+  JSON.stringify(
+    clientsResponse.data,
+    null,
+    2
+  )
+);
 
 
 
