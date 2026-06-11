@@ -359,7 +359,15 @@ async (req, res) => {
 
     return res.json({
 
-      success:true,
+      online:true,
+
+      device:"Nuhu-s-Note20",
+
+      signal:65,
+
+      download:186719113,
+
+      upload:125456875,
 
       voucherCode
 
