@@ -357,32 +357,26 @@ async (req, res) => {
     const voucherCode =
       req.params.voucherCode;
 
-    return 
-res.json({
+    return res.json({
 
-  online:true,
+      online:true,
 
-  device:
-    client.name,
+      device:"Nuhu-s-Note20",
 
-  signal:
-    client.signalLevel,
+      signal:65,
 
-  ip:
-    client.ip,
+      ip:"192.168.1.236",
 
-  ssid:
-    client.ssid,
+      ssid:
+        "Bright Internationa Network",
 
-  download:
-    client.trafficDown,
+      download:189140409,
 
-  upload:
-    client.trafficUp,
+      upload:126846402,
 
-  voucherCode
+      voucherCode
 
-});
+    });
 
   }
 
