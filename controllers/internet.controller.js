@@ -215,6 +215,9 @@ await db.collection(
   planName:
     plan.name,
 
+  dataLimit:
+    plan.dataLimit,
+
   amount:
     amountToCharge,
 
@@ -237,6 +240,7 @@ await db.collection(
   expiryDate
 
 });
+
 
 
 
