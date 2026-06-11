@@ -442,10 +442,49 @@ const clientsResponse =
 if(!client){
 
   const totalUsedBytes =
-    account.totalUsedBytes || 0;
+    Number(
+      account.totalUsedBytes || 0
+    );
 
-  const totalBytes =
-    account.allocatedBytes;
+  let totalBytes = null;
+
+  if(
+    account.plan &&
+    account.plan
+      .toLowerCase()
+      .includes("unlimited")
+  ){
+
+    totalBytes = null;
+
+  } else {
+
+    const totalGB =
+      parseFloat(
+        account.plan
+          .replace("GB","")
+          .trim()
+      );
+
+    totalBytes =
+      totalGB *
+      1024 *
+      1024 *
+      1024;
+
+  }
+
+  const remainingBytes =
+
+    totalBytes === null
+
+    ? null
+
+    : Math.max(
+        0,
+        totalBytes -
+        totalUsedBytes
+      );
 
   return res.json({
 
@@ -456,9 +495,10 @@ if(!client){
     usedBytes:
       totalUsedBytes,
 
-    remainingBytes:
-      totalBytes -
-      totalUsedBytes
+    remainingBytes,
+
+    isUnlimited:
+      totalBytes === null
 
   });
 
