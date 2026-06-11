@@ -373,6 +373,9 @@ await db
 
   plan: desc,
 
+  totalUsedBytes: 0,
+  lastTrafficBytes: 0,
+
   amount:
     amountToCharge,
 
