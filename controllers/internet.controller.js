@@ -383,37 +383,22 @@ if(accountSnapshot.empty){
 
 }
 
+const accountDoc =
+  accountSnapshot.docs[0];
+
 const account =
-  accountSnapshot.docs[0].data();
+  accountDoc.data();
 
+await accountDoc.ref.update({
 
-await db
-.collection("internetAccounts")
-.where(
-  "voucherCode",
-  "==",
-  voucherCode
-)
-.get()
-.then(snapshot => {
+  activated:true,
 
-  snapshot.forEach(doc => {
-
-    doc.ref.update({
-
-      activated:true,
-
-      lastSeen:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
-
-    });
-
-  });
+  lastSeen:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
 
 });
-
 
 
 const clientsResponse =
@@ -466,64 +451,82 @@ const clientsResponse =
 
 }
 
-
-
-  const totalGB =
-  parseFloat(
-    account.plan
-      .replace("GB","")
-      .trim()
-  );
-
-const totalBytes =
-  totalGB *
-  1024 *
-  1024 *
-  1024;
-
 const usedBytes =
   (client.trafficDown || 0) +
   (client.trafficUp || 0);
 
+
+
+let totalBytes = null;
+
+if(
+  account.plan
+    .toLowerCase()
+    .includes("unlimited")
+){
+
+  totalBytes = null;
+
+}else{
+
+  const totalGB =
+    parseFloat(
+      account.plan
+        .replace("GB","")
+        .trim()
+    );
+
+  totalBytes =
+    totalGB *
+    1024 *
+    1024 *
+    1024;
+
+}
+
+
+
 const remainingBytes =
-  Math.max(
-    0,
-    totalBytes - usedBytes
-  );
+
+  totalBytes === null
+
+  ? null
+
+  : Math.max(
+      0,
+      totalBytes - usedBytes
+    );
 
 
-  
+
 
 return res.json({
 
-  online:
-    client.active,
+  online: client.active,
 
-  device:
-    client.name,
+  device: client.name,
 
-  signal:
-    client.signalLevel,
+  signal: client.signalLevel,
 
-  ip:
-    client.ip,
+  ip: client.ip,
 
-  ssid:
-    client.ssid,
+  ssid: client.ssid,
 
-  download:
-    client.trafficDown,
+  download: client.trafficDown,
 
-  upload:
-    client.trafficUp,
+  upload: client.trafficUp,
 
   usedBytes,
 
   remainingBytes,
 
+  isUnlimited:
+    totalBytes === null,
+
   voucherCode
 
 });
+
 
 
   }
