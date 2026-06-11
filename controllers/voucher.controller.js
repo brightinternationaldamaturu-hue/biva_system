@@ -11,25 +11,24 @@ const { sendSalesNotification } = require( "../js/utils/sendSalesNotification");
 
 const voucherPlans = [
 
-  {price:150, desc:'1GB'},
-  {price:300, desc:'2GB'},
-  {price:450, desc:'3GB'},
-  {price:500, desc:'4GB'},
-  {price:600, desc:'6GB'},
-  {price:700, desc:'7GB'},
-  {price:800, desc:'8GB'},
-  {price:1000, desc:'10GB'},
-  {price:1500, desc:'15GB'},
-  {price:2000, desc:'20GB'},
-  {price:2500, desc:'25GB'},
-  {price:3600, desc:'36GB'},
-  {price:6500, desc:'65GB'},
-  {price:10000, desc:'100GB'},
-  {price:11000, desc:'120GB'},
-  {price:13000, desc:'150GB'},
-  {price:15000, desc:'200GB'},
-  { price:5500, desc:"Mobile Unlimited" },
-  {price:28000, desc:'Home/Business Unlimited'}
+  { price:150, desc:"1GB" },
+  { price:300, desc:"2GB" },
+  { price:450, desc:"3GB" },
+  { price:600, desc:"4GB" },
+  { price:900, desc:"6GB" },
+  { price:1050, desc:"7GB" },
+  { price:1200, desc:"8GB" },
+  { price:1500, desc:"10GB" },
+  { price:2250, desc:"15GB" },
+  { price:3000, desc:"20GB" },
+  { price:3750, desc:"25GB" },
+  { price:5400, desc:"36GB" },
+  { price:9750, desc:"65GB" },
+  { price:15000, desc:"100GB" },
+  { price:16500, desc:"120GB" },
+  { price:17500, desc:"150GB" },
+  { price:25000, desc:"200GB" },
+  { price:30000, desc:"Unlimited" }
 
 ];
 
@@ -244,7 +243,7 @@ const balanceAfter =
 const cashback =
 
   Math.floor(
-    amountToCharge * 0.05
+    amountToCharge * 0.10
   );
 
 
@@ -316,8 +315,35 @@ const cashback =
     }
 
     const voucherCode =
-
       result.voucher;
+
+
+
+
+      await db
+.collection("internetAccounts")
+.add({
+
+  userId,
+
+  voucherCode,
+
+  plan: desc,
+
+  amount:
+    amountToCharge,
+
+  status:"active",
+
+  activated:false,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
 
     // =========================
     // SAVE VOUCHER
