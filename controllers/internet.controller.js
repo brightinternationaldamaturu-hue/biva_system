@@ -713,17 +713,16 @@ transaction.update(
   }
 );
 
+  }
+);
+
+
+
 const updatedDoc =
   await accountDoc.ref.get();
 
 const updatedData =
   updatedDoc.data();
-
-
-
-  }
-);
-
 
 
 let totalBytes = null;
@@ -764,7 +763,9 @@ const remainingBytes =
   : Math.max(
       0,
       totalBytes -
-      totalUsedBytes
+      Number(
+        updatedData.totalUsedBytes || 0
+      )
     );
 
 
@@ -783,13 +784,13 @@ return res.json({
   ssid: client.ssid,
 
   download:
-  updatedData.totalDownloadBytes || 0,
+    updatedData.totalDownloadBytes || 0,
 
   upload:
-  updatedData.totalUploadBytes || 0,
+    updatedData.totalUploadBytes || 0,
 
   usedBytes:
-  updatedData.totalUsedBytes || 0,
+    updatedData.totalUsedBytes || 0,
 
   remainingBytes,
 
