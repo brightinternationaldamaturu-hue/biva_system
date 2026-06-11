@@ -3,7 +3,8 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  subscribeInternet
+  subscribeInternet,
+  getInternetStatus
 } = require(
   "../controllers/internet.controller"
 );
@@ -11,6 +12,12 @@ const {
 router.post(
   "/subscribe",
   subscribeInternet
+);
+
+
+router.get(
+  "/status/:voucherCode",
+  getInternetStatus
 );
 
 module.exports = router;
