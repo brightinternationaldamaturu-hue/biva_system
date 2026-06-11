@@ -1,5 +1,5 @@
-const { db, admin } =
-require("../config/firebase");
+const { db, admin } = require("../config/firebase");
+const axios = require("axios");
 
 exports.subscribeInternet =
 async (req, res) => {
@@ -384,26 +384,91 @@ await db
 
 });
 
-    return res.json({
 
-      online:true,
 
-      device:"Nuhu-s-Note20",
+const clientsResponse =
+  await axios.get(
 
-      signal:65,
+    `${process.env.OMADA_URL}/openapi/v1/${process.env.OMADA_ID}/sites/6a141d2551fe3972e45dc6a9/clients?pageSize=100&page=1`,
 
-      ip:"192.168.1.236",
+    {
+      headers:{
+        Authorization:
+          `AccessToken=${await getAccessToken()}`
+      },
 
-      ssid:
-        "Bright Internationa Network",
+      httpsAgent:
+        new (require("https").Agent)({
+          rejectUnauthorized:false
+        })
+    }
 
-      download:189140409,
+  );
 
-      upload:126846402,
 
-      voucherCode
 
-    });
+  const clients =
+  clientsResponse.data
+  .result
+  .data;
+
+
+
+  const client =
+  clients.find(c =>
+
+    c.authInfo &&
+    c.authInfo.some(
+
+      auth =>
+        auth.info ===
+        voucherCode
+
+    )
+
+  );
+
+
+
+  if(!client){
+
+  return res.json({
+
+    online:false,
+
+    voucherCode
+
+  });
+
+}
+
+
+return res.json({
+
+  online:
+    client.active,
+
+  device:
+    client.name,
+
+  signal:
+    client.signalLevel,
+
+  ip:
+    client.ip,
+
+  ssid:
+    client.ssid,
+
+  download:
+    client.trafficDown,
+
+  upload:
+    client.trafficUp,
+
+  voucherCode
+
+});
 
   }
 
