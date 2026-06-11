@@ -357,21 +357,32 @@ async (req, res) => {
     const voucherCode =
       req.params.voucherCode;
 
-    return res.json({
+    return 
+res.json({
 
-      online:true,
+  online:true,
 
-      device:"Nuhu-s-Note20",
+  device:
+    client.name,
 
-      signal:65,
+  signal:
+    client.signalLevel,
 
-      download:186719113,
+  ip:
+    client.ip,
 
-      upload:125456875,
+  ssid:
+    client.ssid,
 
-      voucherCode
+  download:
+    client.trafficDown,
 
-    });
+  upload:
+    client.trafficUp,
+
+  voucherCode
+
+});
 
   }
 
