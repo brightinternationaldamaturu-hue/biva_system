@@ -451,9 +451,100 @@ const clientsResponse =
 
 }
 
-const usedBytes =
-  (client.trafficDown || 0) +
-  (client.trafficUp || 0);
+const currentTrafficBytes =
+  Number(client.trafficDown || 0) +
+  Number(client.trafficUp || 0);
+
+const previousTrafficBytes =
+  Number(account.lastTrafficBytes || 0);
+
+const previousUsedBytes =
+  Number(account.totalUsedBytes || 0);
+
+let increment = 0;
+
+if (
+  currentTrafficBytes >=
+  previousTrafficBytes
+) {
+
+  increment =
+    currentTrafficBytes -
+    previousTrafficBytes;
+
+} else {
+
+  // Omada session reset
+  increment =
+    currentTrafficBytes;
+
+}
+
+const totalUsedBytes =
+  previousUsedBytes +
+  increment;
+
+
+await db.runTransaction(
+  async (transaction) => {
+
+    const freshDoc =
+      await transaction.get(
+        accountDoc.ref
+      );
+
+    const freshData =
+      freshDoc.data();
+
+    const previousTraffic =
+      Number(
+        freshData.lastTrafficBytes || 0
+      );
+
+    const previousUsed =
+      Number(
+        freshData.totalUsedBytes || 0
+      );
+
+    let increment = 0;
+
+    if (
+      currentTrafficBytes >=
+      previousTraffic
+    ) {
+
+      increment =
+        currentTrafficBytes -
+        previousTraffic;
+
+    } else {
+
+      increment =
+        currentTrafficBytes;
+
+    }
+
+    transaction.update(
+      accountDoc.ref,
+      {
+
+        totalUsedBytes:
+          previousUsed +
+          increment,
+
+        lastTrafficBytes:
+          currentTrafficBytes,
+
+        lastSeen:
+          admin.firestore
+            .FieldValue
+            .serverTimestamp()
+
+      }
+    );
+
+  }
+);
 
 
 
@@ -494,7 +585,8 @@ const remainingBytes =
 
   : Math.max(
       0,
-      totalBytes - usedBytes
+      totalBytes -
+      totalUsedBytes
     );
 
 
@@ -516,7 +608,7 @@ return res.json({
 
   upload: client.trafficUp,
 
-  usedBytes,
+  usedBytes: totalUsedBytes,
 
   remainingBytes,
 
