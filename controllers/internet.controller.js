@@ -341,3 +341,42 @@ catch(err){
 }
 
 };
+
+
+
+
+
+
+
+
+exports.getInternetStatus =
+async (req, res) => {
+
+  try {
+
+    const voucherCode =
+      req.params.voucherCode;
+
+    return res.json({
+
+      success:true,
+
+      voucherCode
+
+    });
+
+  }
+
+  catch(err){
+
+    return res.status(500).json({
+
+      success:false,
+
+      error:err.message
+
+    });
+
+  }
+
+};
