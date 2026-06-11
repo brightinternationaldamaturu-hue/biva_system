@@ -11,14 +11,57 @@ const { sendSalesNotification } = require( "../js/utils/sendSalesNotification");
 
 const voucherPlans = [
 
-  { price:150, desc:"1GB" },
-  { price:300, desc:"2GB" },
-  { price:450, desc:"3GB" },
-  { price:600, desc:"4GB" },
-  { price:900, desc:"6GB" },
-  { price:1050, desc:"7GB" },
-  { price:1200, desc:"8GB" },
-  { price:1500, desc:"10GB" },
+  {
+    price:150,
+    desc:"1GB",
+    dataLimit:1073741824
+  },
+
+  {
+    price:300,
+    desc:"2GB",
+    dataLimit:2147483648
+  },
+
+  {
+    price:450,
+    desc:"3GB",
+    dataLimit:3221225472
+  },
+
+  {
+    price:600,
+    desc:"4GB",
+    dataLimit:4294967296
+  },
+
+  {
+    price:900,
+    desc:"6GB",
+    dataLimit:6442450944
+  },
+
+  {
+    price:1050,
+    desc:"7GB",
+    dataLimit:7516192768
+  },
+
+  {
+    price:1200,
+    desc:"8GB",
+    dataLimit:8589934592
+  },
+
+  {
+    price:1500,
+    desc:"10GB",
+    dataLimit:10737418240
+  },
+
+
+
+
   { price:2250, desc:"15GB" },
   { price:3000, desc:"20GB" },
   { price:3750, desc:"25GB" },
@@ -320,7 +363,7 @@ const cashback =
 
 
 
-      await db
+await db
 .collection("internetAccounts")
 .add({
 
@@ -333,6 +376,14 @@ const cashback =
   amount:
     amountToCharge,
 
+  dataLimit:
+    selectedPlan.dataLimit,
+
+  usedBytes:0,
+
+  remainingBytes:
+    selectedPlan.dataLimit,
+
   status:"active",
 
   activated:false,
@@ -343,6 +394,8 @@ const cashback =
     .serverTimestamp()
 
 });
+
+
 
 
     // =========================
