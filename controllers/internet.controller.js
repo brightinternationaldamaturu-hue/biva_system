@@ -360,6 +360,32 @@ exports.getInternetStatus = async (req, res) => {
     const voucherCode =
       req.params.voucherCode;
 
+const accountSnapshot =
+  await db
+    .collection("internetAccounts")
+    .where(
+      "voucherCode",
+      "==",
+      voucherCode
+    )
+    .limit(1)
+    .get();
+
+if(accountSnapshot.empty){
+
+  return res.status(404).json({
+
+    success:false,
+
+    error:"Voucher not found"
+
+  });
+
+}
+
+const account =
+  accountSnapshot.docs[0].data();
+
 
 await db
 .collection("internetAccounts")
@@ -428,7 +454,6 @@ const clientsResponse =
   );
 
 
-
   if(!client){
 
   return res.json({
@@ -441,6 +466,33 @@ const clientsResponse =
 
 }
 
+
+
+  const totalGB =
+  parseFloat(
+    account.plan
+      .replace("GB","")
+      .trim()
+  );
+
+const totalBytes =
+  totalGB *
+  1024 *
+  1024 *
+  1024;
+
+const usedBytes =
+  (client.trafficDown || 0) +
+  (client.trafficUp || 0);
+
+const remainingBytes =
+  Math.max(
+    0,
+    totalBytes - usedBytes
+  );
+
+
+  
 
 return res.json({
 
@@ -465,9 +517,14 @@ return res.json({
   upload:
     client.trafficUp,
 
+  usedBytes,
+
+  remainingBytes,
+
   voucherCode
 
 });
+
 
   }
 
