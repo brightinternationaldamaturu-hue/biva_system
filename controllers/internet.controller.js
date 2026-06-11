@@ -439,17 +439,31 @@ const clientsResponse =
   );
 
 
-  if(!client){
+if(!client){
+
+  const totalUsedBytes =
+    account.totalUsedBytes || 0;
+
+  const totalBytes =
+    account.allocatedBytes;
 
   return res.json({
 
     online:false,
 
-    voucherCode
+    voucherCode,
+
+    usedBytes:
+      totalUsedBytes,
+
+    remainingBytes:
+      totalBytes -
+      totalUsedBytes
 
   });
 
 }
+
 
 const currentTrafficBytes =
   Number(client.trafficDown || 0) +
