@@ -486,21 +486,39 @@ if(!client){
         totalUsedBytes
       );
 
-  return res.json({
+return res.json({
 
-    online:false,
+  online:false,
 
-    voucherCode,
+  voucherCode,
 
-    usedBytes:
-      totalUsedBytes,
+  device:
+    account.lastDevice || "-",
 
-    remainingBytes,
+  ip:
+    account.lastIp || "-",
 
-    isUnlimited:
-      totalBytes === null
+  signal:
+    account.lastSignal || 0,
 
-  });
+  ssid:
+    account.lastSSID || "-",
+
+  download:
+    account.lastDownload || 0,
+
+  upload:
+    account.lastUpload || 0,
+
+  usedBytes:
+    totalUsedBytes,
+
+  remainingBytes,
+
+  isUnlimited:
+    totalBytes === null
+
+});
 
 }
 
@@ -578,24 +596,42 @@ await db.runTransaction(
 
     }
 
-    transaction.update(
-      accountDoc.ref,
-      {
+transaction.update(
+  accountDoc.ref,
+  {
 
-        totalUsedBytes:
-          previousUsed +
-          increment,
+    totalUsedBytes:
+      previousUsed +
+      increment,
 
-        lastTrafficBytes:
-          currentTrafficBytes,
+    lastTrafficBytes:
+      currentTrafficBytes,
 
-        lastSeen:
-          admin.firestore
-            .FieldValue
-            .serverTimestamp()
+    lastDownload:
+      client.trafficDown || 0,
 
-      }
-    );
+    lastUpload:
+      client.trafficUp || 0,
+
+    lastDevice:
+      client.name || "",
+
+    lastIp:
+      client.ip || "",
+
+    lastSignal:
+      client.signalLevel || 0,
+
+    lastSSID:
+      client.ssid || "",
+
+    lastSeen:
+      admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
+  }
+);
 
   }
 );
