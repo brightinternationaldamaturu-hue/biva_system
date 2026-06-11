@@ -349,13 +349,40 @@ catch(err){
 
 
 
-exports.getInternetStatus =
-async (req, res) => {
+exports.getInternetStatus = async (req, res) => {
 
   try {
 
     const voucherCode =
       req.params.voucherCode;
+
+
+await db
+.collection("internetAccounts")
+.where(
+  "voucherCode",
+  "==",
+  voucherCode
+)
+.get()
+.then(snapshot => {
+
+  snapshot.forEach(doc => {
+
+    doc.ref.update({
+
+      activated:true,
+
+      lastSeen:
+        admin.firestore
+        .FieldValue
+        .serverTimestamp()
+
+    });
+
+  });
+
+});
 
     return res.json({
 
