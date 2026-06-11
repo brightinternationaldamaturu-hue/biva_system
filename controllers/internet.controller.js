@@ -388,9 +388,8 @@ await db
 
 const clientsResponse =
   await axios.get(
-    "https://biva-backend-ezvu.onrender.com//omada/clients"
+    "https://enterprises-caused-role-deaf.trycloudflare.com/omada/clients"
   );
-
 
 
   console.log(
