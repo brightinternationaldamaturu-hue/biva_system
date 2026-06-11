@@ -505,10 +505,10 @@ return res.json({
     account.lastSSID || "-",
 
   download:
-    account.lastDownload || 0,
+  account.totalDownloadBytes || 0,
 
   upload:
-    account.lastUpload || 0,
+  account.totalUploadBytes || 0,
 
   usedBytes:
     totalUsedBytes,
@@ -521,6 +521,12 @@ return res.json({
 });
 
 }
+
+const currentDownloadBytes =
+  Number(client.trafficDown || 0);
+
+const currentUploadBytes =
+  Number(client.trafficUp || 0);
 
 
 const currentTrafficBytes =
@@ -578,7 +584,67 @@ await db.runTransaction(
         freshData.totalUsedBytes || 0
       );
 
+
+const previousDownload =
+  Number(
+    freshData.lastDownloadBytes || 0
+  );
+
+const previousUpload =
+  Number(
+    freshData.lastUploadBytes || 0
+  );
+
+const totalDownload =
+  Number(
+    freshData.totalDownloadBytes || 0
+  );
+
+const totalUpload =
+  Number(
+    freshData.totalUploadBytes || 0
+  );
+
+
     let increment = 0;
+    let downloadIncrement = 0;
+
+if(
+  currentDownloadBytes >=
+  previousDownload
+){
+
+  downloadIncrement =
+    currentDownloadBytes -
+    previousDownload;
+
+}else{
+
+  // Omada reset
+  downloadIncrement =
+    currentDownloadBytes;
+
+}
+
+
+let uploadIncrement = 0;
+
+if(
+  currentUploadBytes >=
+  previousUpload
+){
+
+  uploadIncrement =
+    currentUploadBytes -
+    previousUpload;
+
+}else{
+
+  // Omada reset
+  uploadIncrement =
+    currentUploadBytes;
+
+}
 
     if (
       currentTrafficBytes >=
@@ -594,7 +660,7 @@ await db.runTransaction(
       increment =
         currentTrafficBytes;
 
-    }
+    } 
 
 transaction.update(
   accountDoc.ref,
@@ -604,8 +670,22 @@ transaction.update(
       previousUsed +
       increment,
 
+    totalDownloadBytes:
+      totalDownload +
+      downloadIncrement,
+
+    totalUploadBytes:
+      totalUpload +
+      uploadIncrement,
+
     lastTrafficBytes:
       currentTrafficBytes,
+
+    lastDownloadBytes:
+      currentDownloadBytes,
+
+    lastUploadBytes:
+      currentUploadBytes,
 
     lastDownload:
       client.trafficDown || 0,
@@ -632,6 +712,14 @@ transaction.update(
 
   }
 );
+
+const updatedDoc =
+  await accountDoc.ref.get();
+
+const updatedData =
+  updatedDoc.data();
+
+
 
   }
 );
@@ -694,11 +782,14 @@ return res.json({
 
   ssid: client.ssid,
 
-  download: client.trafficDown,
+  download:
+  updatedData.totalDownloadBytes || 0,
 
-  upload: client.trafficUp,
+  upload:
+  updatedData.totalUploadBytes || 0,
 
-  usedBytes: totalUsedBytes,
+  usedBytes:
+  updatedData.totalUsedBytes || 0,
 
   remainingBytes,
 
