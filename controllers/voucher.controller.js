@@ -30,31 +30,31 @@ const voucherPlans = [
   },
 
   {
-    price:600,
+    price:500,
     desc:"4GB",
     dataLimit:4294967296
   },
 
   {
-    price:900,
+    price:600,
     desc:"6GB",
     dataLimit:6442450944
   },
 
   {
-    price:1050,
+    price:700,
     desc:"7GB",
     dataLimit:7516192768
   },
 
   {
-    price:1200,
+    price:800,
     desc:"8GB",
     dataLimit:8589934592
   },
 
   {
-    price:1500,
+    price:1000,
     desc:"10GB",
     dataLimit:10737418240
   },
