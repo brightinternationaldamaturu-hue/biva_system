@@ -388,7 +388,7 @@ await db
 
 const clientsResponse =
   await axios.get(
-    "http://192.168.1.141:5050/omada/clients"
+    "https://biva-backend-ezvu.onrender.com//omada/clients"
   );
 
 
