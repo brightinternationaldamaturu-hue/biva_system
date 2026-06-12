@@ -1,4 +1,5 @@
 const cron = require("node-cron");
+const axios = require("axios");
 const { db } = require("../config/firebase");
 
 function startInternetUsageSync() {
@@ -16,6 +17,21 @@ function startInternetUsageSync() {
       console.log(
         `📶 Active Internet Accounts: ${activeAccounts.size}`
       );
+
+
+      const clientsResponse =
+  await axios.get(
+    "https://enterprises-caused-role-deaf.trycloudflare.com/omada/clients"
+  );
+
+const clients =
+  clientsResponse.data.result.data;
+
+console.log(
+  `📡 Omada Clients: ${clients.length}`
+);
+
+
 
     } catch (err) {
 
