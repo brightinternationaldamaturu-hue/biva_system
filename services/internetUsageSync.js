@@ -59,18 +59,8 @@ if (
     `✅ Voucher ${voucherCode} is online`
   );
 
-  console.log(
-    `⬇️ Download: ${record.trafficDown}`
-  );
 
-console.log(
-  `⬆️ Upload: ${record.upload}`
-);
-
-
-
-
-const totalDownloadBytes =
+  const totalDownloadBytes =
   Number(record.download || 0);
 
 const totalUploadBytes =
@@ -143,15 +133,6 @@ if (
 
   });
 
-  await db
-    .collection("internetProfiles")
-    .doc(account.userId)
-    .update({
-
-      status: "expired"
-
-    });
-
   console.log(
     `🚫 Voucher ${voucherCode} expired`
   );
@@ -171,15 +152,6 @@ else {
 
   });
 
-  await db
-    .collection("internetProfiles")
-    .doc(account.userId)
-    .update({
-
-      status: "active"
-
-    });
-
 }
 
 
@@ -195,22 +167,30 @@ const profileSnap =
 
 if (profileSnap.exists) {
 
-  await profileRef.update({
+await profileRef.update({
 
-    totalUsedBytes,
+  totalUsedBytes,
 
-    remainingBytes,
+  remainingBytes,
 
-    lastConnectedIp:
-      record.ip || "",
+  status:
+    (
+      remainingBytes <= 0 ||
+      record.valid === false
+    )
+      ? "expired"
+      : "active",
 
-    lastConnectedMac:
-      record.mac || "",
+  lastConnectedIp:
+    record.ip || "",
 
-    updatedAt:
-      new Date()
+  lastConnectedMac:
+    record.mac || "",
 
-  });
+  updatedAt:
+    new Date()
+
+});
 
   console.log(
     `👤 Profile Updated ${account.userId}`
