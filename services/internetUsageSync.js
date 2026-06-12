@@ -30,7 +30,7 @@ const records =
 
 
 console.log(
-  `📡 Omada Clients: ${clients.length}`
+  `📡 Omada Records: ${records.length}`
 );
 
 for (const accountDoc of activeAccounts.docs) {
@@ -60,13 +60,12 @@ if (
   );
 
   console.log(
-    `⬇️ Download: ${client.trafficDown}`
+    `⬇️ Download: ${record.trafficDown}`
   );
 
-  console.log(
-    `⬆️ Upload: ${client.trafficUp}`
-  );
-
+console.log(
+  `⬆️ Upload: ${record.upload}`
+);
 
 
 
@@ -93,7 +92,7 @@ console.log(
 );
 
 console.log(
-  `⬆️ Upload: ${totalUploadBytes}`
+  `⬇️ Download: ${record.download}`
 );
 
 console.log(
@@ -184,28 +183,7 @@ else {
 }
 
 
-  if (newRemainingBytes <= 0) {
-
-  await accountDoc.ref.update({
-
-    status: "expired"
-
-  });
-
-  await db
-    .collection("internetProfiles")
-    .doc(account.userId)
-    .update({
-
-      status: "expired"
-
-    });
-
-  console.log(
-    `🚫 Voucher ${voucherCode} expired`
-  );
-
-}
+  
 
 
 await db
