@@ -403,7 +403,7 @@ await accountDoc.ref.update({
 
 const clientsResponse =
   await axios.get(
-    "https://enterprises-caused-role-deaf.trycloudflare.com/omada/clients"
+    "https://further-investigations-seconds-cake.trycloudflare.com/omada/clients"
   );
 
 
