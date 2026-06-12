@@ -110,6 +110,33 @@ console.log(
   `📊 Increment: ${increment}`
 );
 
+
+await accountDoc.ref.update({
+
+  totalUsedBytes:
+    Number(account.totalUsedBytes || 0)
+    + increment,
+
+  remainingBytes:
+    Math.max(
+      0,
+      Number(account.dataLimit || 0)
+      -
+      (
+        Number(account.totalUsedBytes || 0)
+        + increment
+      )
+    ),
+
+  lastTrafficBytes:
+    currentTrafficBytes
+
+});
+
+console.log(
+  "💾 Account Updated"
+);
+
 }
   
   
