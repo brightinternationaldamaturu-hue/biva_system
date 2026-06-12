@@ -8,11 +8,10 @@ function startInternetUsageSync() {
 
     try {
 
-      const activeAccounts =
-        await db
-          .collection("internetAccounts")
-          .where("status", "==", "active")
-          .get();
+const activeAccounts =
+  await db
+    .collection("internetAccounts")
+    .get();
 
       console.log(
         `📶 Active Internet Accounts: ${activeAccounts.size}`
