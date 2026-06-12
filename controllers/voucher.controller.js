@@ -511,6 +511,7 @@ await profileRef.set({
   lastConnectedIp: "",
 
   status: "active",
+  omadaValid: true,
 
   createdAt:
     admin.firestore.FieldValue.serverTimestamp(),
