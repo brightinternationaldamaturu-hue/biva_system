@@ -82,7 +82,7 @@ console.log(
 );
 
 console.log(
-  `⬇️ Download: ${record.download}`
+  `⬆️ Upload: ${totalUploadBytes}`
 );
 
 console.log(
