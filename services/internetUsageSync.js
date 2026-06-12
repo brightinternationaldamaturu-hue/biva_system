@@ -72,6 +72,19 @@ if(client){
   Number(client.trafficDown || 0) +
   Number(client.trafficUp || 0);
 
+
+
+  console.log(
+  `🗄️ Previous Traffic: ${account.lastTrafficBytes || 0}`
+);
+
+console.log(
+  `🌐 Current Traffic: ${currentTrafficBytes}`
+);
+
+
+
+
 const previousTrafficBytes =
   Number(account.lastTrafficBytes || 0);
 
