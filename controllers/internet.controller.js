@@ -735,6 +735,31 @@ const updatedData =
   updatedDoc.data();
 
 
+
+  const profileRef =
+  db.collection("internetProfiles")
+  .doc(account.userId);
+
+await profileRef.update({
+
+  totalUsedBytes:
+    updatedData.totalUsedBytes || 0,
+
+  remainingBytes:
+    updatedData.remainingBytes || 0,
+
+  lastConnectedIp:
+    client.ip || "",
+
+  lastConnectedMac:
+    client.mac || "",
+
+  updatedAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
+
+
 let totalBytes = null;
 
 if(
