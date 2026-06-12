@@ -8,6 +8,7 @@ const electricityRoutes = require("./routes/electricity.routes");
 const cashbackRoutes = require("./routes/cashback.routes");
 const accountRoutes = require("./routes/account.routes");
 const deviceRoutes = require("./routes/device.routes");
+const { startInternetUsageSync} = require("./services/internetUsageSync");
 
 
 
@@ -52,6 +53,8 @@ app.listen(PORT, () => {
   console.log(
     `🚀 Server running on port ${PORT}`
   );
+
+  startInternetUsageSync();
 
 });
 
