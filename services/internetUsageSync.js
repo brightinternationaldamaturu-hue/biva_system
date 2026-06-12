@@ -31,6 +31,44 @@ console.log(
   `📡 Omada Clients: ${clients.length}`
 );
 
+activeAccounts.forEach(accountDoc => {
+
+  const account =
+    accountDoc.data();
+
+  const voucherCode =
+    account.voucherCode;
+
+  const client =
+    clients.find(c =>
+
+      c.authInfo &&
+      c.authInfo.some(
+
+        auth =>
+          auth.info ===
+          voucherCode
+
+      )
+
+    );
+
+  if(client){
+
+    console.log(
+      `✅ Voucher ${voucherCode} is online`
+    );
+
+  } else {
+
+    console.log(
+      `❌ Voucher ${voucherCode} is offline`
+    );
+
+  }
+
+});
+
 
 
     } catch (err) {
