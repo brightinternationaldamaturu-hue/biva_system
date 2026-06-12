@@ -11,6 +11,11 @@ function startInternetUsageSync() {
 const activeAccounts =
   await db
     .collection("internetAccounts")
+    .where(
+      "status",
+      "==",
+      "active"
+    )
     .get();
 
       console.log(
