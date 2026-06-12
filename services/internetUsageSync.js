@@ -186,10 +186,16 @@ else {
   
 
 
-await db
-  .collection("internetProfiles")
-  .doc(account.userId)
-  .update({
+const profileRef =
+  db.collection("internetProfiles")
+    .doc(account.userId);
+
+const profileSnap =
+  await profileRef.get();
+
+if (profileSnap.exists) {
+
+  await profileRef.update({
 
     totalUsedBytes,
 
@@ -206,9 +212,17 @@ await db
 
   });
 
-console.log(
-  `👤 Profile Updated ${account.userId}`
-);
+  console.log(
+    `👤 Profile Updated ${account.userId}`
+  );
+
+} else {
+
+  console.log(
+    `⚠️ Missing Profile ${account.userId}`
+  );
+
+}
 
 
 
