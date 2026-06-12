@@ -133,6 +133,49 @@ await accountDoc.ref.update({
 
 });
 
+
+
+
+const newTotalUsedBytes =
+  Number(account.totalUsedBytes || 0)
+  + increment;
+
+const newRemainingBytes =
+  Math.max(
+    0,
+    Number(account.dataLimit || 0)
+    - newTotalUsedBytes
+  );
+
+await db
+  .collection("internetProfiles")
+  .doc(account.userId)
+  .update({
+
+    totalUsedBytes:
+      newTotalUsedBytes,
+
+    remainingBytes:
+      newRemainingBytes,
+
+    lastConnectedIp:
+      client.ip || "",
+
+    lastConnectedMac:
+      client.mac || "",
+
+    updatedAt:
+      new Date()
+
+  });
+
+console.log(
+  `👤 Profile Updated ${account.userId}`
+);
+
+
+
+
 console.log(
   "💾 Account Updated"
 );
