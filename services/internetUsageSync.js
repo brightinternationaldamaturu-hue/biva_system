@@ -67,6 +67,36 @@ if(client){
     `⬆️ Upload: ${client.trafficUp}`
   );
 
+
+  const currentTrafficBytes =
+  Number(client.trafficDown || 0) +
+  Number(client.trafficUp || 0);
+
+const previousTrafficBytes =
+  Number(account.lastTrafficBytes || 0);
+
+let increment = 0;
+
+if (
+  currentTrafficBytes >=
+  previousTrafficBytes
+) {
+
+  increment =
+    currentTrafficBytes -
+    previousTrafficBytes;
+
+} else {
+
+  increment =
+    currentTrafficBytes;
+
+}
+
+console.log(
+  `📊 Increment: ${increment}`
+);
+
 }
   
   
