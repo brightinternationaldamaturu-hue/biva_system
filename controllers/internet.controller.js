@@ -670,6 +670,16 @@ transaction.update(
       previousUsed +
       increment,
 
+
+remainingBytes:
+  freshData.dataLimit
+    ? Math.max(
+        0,
+        Number(freshData.dataLimit) -
+        (previousUsed + increment)
+      )
+    : null,
+
     totalDownloadBytes:
       totalDownload +
       downloadIncrement,
