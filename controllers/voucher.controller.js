@@ -61,17 +61,66 @@ const voucherPlans = [
 
 
 
+  { 
+  price: 2250,
+  desc: "15GB",
+  dataLimit: 16106127360
+},
 
-  { price:2250, desc:"15GB" },
-  { price:3000, desc:"20GB" },
-  { price:3750, desc:"25GB" },
-  { price:5400, desc:"36GB" },
-  { price:9750, desc:"65GB" },
-  { price:15000, desc:"100GB" },
-  { price:16500, desc:"120GB" },
-  { price:17500, desc:"150GB" },
-  { price:25000, desc:"200GB" },
-  { price:30000, desc:"Unlimited" }
+{
+  price: 3000,
+  desc: "20GB",
+  dataLimit: 21474836480
+},
+
+{
+  price: 3750,
+  desc: "25GB",
+  dataLimit: 26843545600
+},
+
+{
+  price: 5400,
+  desc: "36GB",
+  dataLimit: 38654705664
+},
+
+{
+  price: 9750,
+  desc: "65GB",
+  dataLimit: 69793218560
+},
+
+{
+  price: 15000,
+  desc: "100GB",
+  dataLimit: 107374182400
+},
+
+{
+  price: 16500,
+  desc: "120GB",
+  dataLimit: 128849018880
+},
+
+{
+  price: 17500,
+  desc: "150GB",
+  dataLimit: 161061273600
+},
+
+{
+  price: 25000,
+  desc: "200GB",
+  dataLimit: 214748364800
+},
+
+{
+  price: 30000,
+  desc: "Unlimited",
+  dataLimit: null,
+  validityDays: 30
+}
 
 ];
 
@@ -367,6 +416,18 @@ await db
 .collection("internetAccounts")
 .add({
 
+  expiryDate:
+  selectedPlan.validityDays
+    ? new Date(
+        Date.now() +
+        selectedPlan.validityDays *
+        24 *
+        60 *
+        60 *
+        1000
+      )
+    : null,
+
   userId,
 
   voucherCode,
@@ -399,9 +460,132 @@ await db
     admin.firestore
     .FieldValue
     .serverTimestamp()
+  
 
 });
 
+
+
+
+const profileRef =
+  db.collection("internetProfiles")
+  .doc(userId);
+
+const profileSnap =
+  await profileRef.get();
+
+if (!profileSnap.exists) {
+
+
+
+await profileRef.set({
+
+  userId,
+
+  totalPurchasedBytes:
+    selectedPlan.dataLimit || 0,
+
+  totalUsedBytes: 0,
+
+  remainingBytes:
+    selectedPlan.dataLimit || 0,
+
+  isUnlimited:
+    selectedPlan.dataLimit === null,
+
+  expiryDate:
+    selectedPlan.validityDays
+      ? new Date(
+          Date.now() +
+          selectedPlan.validityDays *
+          24 * 60 * 60 * 1000
+        )
+      : null,
+
+  activeVoucherCode:
+    voucherCode,
+
+  lastConnectedMac: "",
+
+  lastConnectedIp: "",
+
+  status: "active",
+
+  createdAt:
+    admin.firestore.FieldValue.serverTimestamp(),
+
+  updatedAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
+
+}
+
+else {
+
+if (selectedPlan.dataLimit === null) {
+
+  const expiryDate = new Date();
+
+  expiryDate.setDate(
+    expiryDate.getDate() + 30
+  );
+
+  await profileRef.update({
+
+    totalPurchasedBytes: 0,
+
+    totalUsedBytes: 0,
+
+    remainingBytes: 0,
+
+    isUnlimited: true,
+
+    activeVoucherCode:
+      voucherCode,
+
+    expiryDate,
+
+    status: "active",
+
+    updatedAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  });
+
+} else {
+
+
+
+await profileRef.update({
+
+  totalPurchasedBytes:
+    admin.firestore.FieldValue.increment(
+      selectedPlan.dataLimit
+    ),
+
+  remainingBytes:
+    admin.firestore.FieldValue.increment(
+      selectedPlan.dataLimit
+    ),
+
+  isUnlimited: false,
+
+  expiryDate: null,
+
+  activeVoucherCode:
+    voucherCode,
+
+  status: "active",
+
+  updatedAt:
+    admin.firestore.FieldValue.serverTimestamp()
+
+});
+
+}
+
+}
 
 
 
