@@ -440,9 +440,12 @@ await db
   lastTrafficBytes: 0,
   lastDownloadBytes: 0,
   lastUploadBytes: 0,
+  downloadBytes: 0,
+  uploadBytes: 0,
+  omadaValid: true,
 
   amount:
-    amountToCharge,
+  amountToCharge,
 
   dataLimit:
     selectedPlan.dataLimit,
