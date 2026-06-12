@@ -124,8 +124,7 @@ console.log(
 
 
 if (
-  remainingBytes <= 0 ||
-  record.valid === false
+  remainingBytes <= 0
 ) {
 
   await accountDoc.ref.update({
