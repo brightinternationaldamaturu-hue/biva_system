@@ -147,6 +147,31 @@ const newRemainingBytes =
     - newTotalUsedBytes
   );
 
+
+  if (newRemainingBytes <= 0) {
+
+  await accountDoc.ref.update({
+
+    status: "expired"
+
+  });
+
+  await db
+    .collection("internetProfiles")
+    .doc(account.userId)
+    .update({
+
+      status: "expired"
+
+    });
+
+  console.log(
+    `🚫 Voucher ${voucherCode} expired`
+  );
+
+}
+
+
 await db
   .collection("internetProfiles")
   .doc(account.userId)
