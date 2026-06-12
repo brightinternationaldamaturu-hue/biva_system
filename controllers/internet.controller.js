@@ -403,7 +403,7 @@ await accountDoc.ref.update({
 
 const clientsResponse =
   await axios.get(
-    "https://further-investigations-seconds-cake.trycloudflare.com/omada/clients"
+    "https://enterprises-caused-role-deaf.trycloudflare.com/omada/clients"
   );
 
 
@@ -847,6 +847,127 @@ return res.json({
       success:false,
 
       error:err.message
+
+    });
+
+  }
+
+};
+
+
+
+
+
+
+
+exports.authorizeClient = async (req, res) => {
+
+  try {
+
+    const {
+      userId,
+      clientMac
+    } = req.body;
+
+    if (
+      !userId ||
+      !clientMac
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "Missing userId or clientMac"
+
+      });
+
+    }
+
+    const profileRef =
+      db.collection("internetProfiles")
+        .doc(userId);
+
+    const profileSnap =
+      await profileRef.get();
+
+    if (!profileSnap.exists) {
+
+      return res.status(404).json({
+
+        success: false,
+
+        error:
+          "Internet profile not found"
+
+      });
+
+    }
+
+    const profile =
+      profileSnap.data();
+
+    if (
+      profile.status !== "active"
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "Internet plan expired"
+
+      });
+
+    }
+
+    if (
+      Number(profile.remainingBytes || 0) <= 0
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "No remaining data"
+
+      });
+
+    }
+
+    const response =
+      await axios.post(
+
+        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+
+        {
+          clientMac
+        }
+
+      );
+
+    return res.json({
+
+      success: true,
+
+      data:
+        response.data
+
+    });
+
+  }
+
+  catch (err) {
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+        err.message
 
     });
 
