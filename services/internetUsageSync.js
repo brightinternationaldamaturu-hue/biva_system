@@ -124,8 +124,49 @@ console.log(
 
 
 if (
+
+  account.status !== "expired" &&
+
   remainingBytes <= 0
+
 ) {
+
+if (
+  record.id
+) {
+
+  try {
+
+    await axios.post(
+
+      "https://further-investigations-seconds-cake.trycloudflare.com/omada/disconnect-client",
+
+      {
+
+        authId:
+          record.id
+
+      }
+
+    );
+
+    console.log(
+      `🔌 Disconnected ${voucherCode}`
+    );
+
+  }
+
+  catch(err){
+
+    console.log(
+      `❌ Disconnect Failed ${voucherCode}`
+    );
+
+  }
+
+}
+
+
 
   await accountDoc.ref.update({
 
@@ -175,13 +216,10 @@ await profileRef.update({
 
   remainingBytes,
 
-  status:
-    (
-      remainingBytes <= 0 ||
-      record.valid === false
-    )
-      ? "expired"
-      : "active",
+status:
+  remainingBytes <= 0
+    ? "expired"
+    : "active",
 
   lastConnectedIp:
     record.ip || "",
