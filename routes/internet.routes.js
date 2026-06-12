@@ -4,7 +4,8 @@ const router = express.Router();
 
 const {
   subscribeInternet,
-  getInternetStatus
+  getInternetStatus,
+  authorizeClient
 } = require(
   "../controllers/internet.controller"
 );
@@ -19,5 +20,15 @@ router.get(
   "/status/:voucherCode",
   getInternetStatus
 );
+
+
+
+router.post(
+  "/authorize-client",
+  authorizeClient
+);
+
+
+
 
 module.exports = router;
