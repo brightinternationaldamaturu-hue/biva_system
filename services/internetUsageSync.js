@@ -31,7 +31,7 @@ console.log(
   `📡 Omada Clients: ${clients.length}`
 );
 
-activeAccounts.forEach(accountDoc => {
+for (const accountDoc of activeAccounts.docs) {
 
   const account =
     accountDoc.data();
@@ -148,7 +148,7 @@ console.log(
 
   }
 
-});
+}
 
 
 
