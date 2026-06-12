@@ -119,6 +119,10 @@ await accountDoc.ref.update({
 
 
 
+console.log(
+  `🔍 Omada Valid: ${record.valid}`
+);
+
 
 if (
   remainingBytes <= 0 ||
