@@ -53,13 +53,24 @@ activeAccounts.forEach(accountDoc => {
 
     );
 
-  if(client){
+if(client){
 
-    console.log(
-      `✅ Voucher ${voucherCode} is online`
-    );
+  console.log(
+    `✅ Voucher ${voucherCode} is online`
+  );
 
-  } else {
+  console.log(
+    `⬇️ Download: ${client.trafficDown}`
+  );
+
+  console.log(
+    `⬆️ Upload: ${client.trafficUp}`
+  );
+
+}
+  
+  
+  else {
 
     console.log(
       `❌ Voucher ${voucherCode} is offline`
