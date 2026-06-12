@@ -19,13 +19,15 @@ function startInternetUsageSync() {
       );
 
 
-      const clientsResponse =
+const recordsResponse =
   await axios.get(
-    "https://further-investigations-seconds-cake.trycloudflare.com/omada/clients"
+    "https://further-investigations-seconds-cake.trycloudflare.com/omada/authed-records"
   );
 
-const clients =
-  clientsResponse.data.result.data;
+const records =
+  recordsResponse.data.result.data;
+
+
 
 console.log(
   `📡 Omada Clients: ${clients.length}`
@@ -39,21 +41,19 @@ for (const accountDoc of activeAccounts.docs) {
   const voucherCode =
     account.voucherCode;
 
-  const client =
-    clients.find(c =>
+const record =
+  records.find(
 
-      c.authInfo &&
-      c.authInfo.some(
+    r =>
+      r.voucherCode ===
+      voucherCode
 
-        auth =>
-          auth.info ===
-          voucherCode
+  );
 
-      )
-
-    );
-
-if(client){
+if (
+  record &&
+  record.voucherCode
+){
 
   console.log(
     `✅ Voucher ${voucherCode} is online`
@@ -68,84 +68,120 @@ if(client){
   );
 
 
-  const currentTrafficBytes =
-  Number(client.trafficDown || 0) +
-  Number(client.trafficUp || 0);
 
 
 
-  console.log(
-  `🗄️ Previous Traffic: ${account.lastTrafficBytes || 0}`
+const totalDownloadBytes =
+  Number(record.download || 0);
+
+const totalUploadBytes =
+  Number(record.upload || 0);
+
+const totalUsedBytes =
+  totalDownloadBytes +
+  totalUploadBytes;
+
+const remainingBytes =
+  Math.max(
+    0,
+    Number(account.dataLimit || 0)
+    - totalUsedBytes
+  );
+
+console.log(
+  `⬇️ Download: ${totalDownloadBytes}`
 );
 
 console.log(
-  `🌐 Current Traffic: ${currentTrafficBytes}`
+  `⬆️ Upload: ${totalUploadBytes}`
 );
-
-
-
-
-const previousTrafficBytes =
-  Number(account.lastTrafficBytes || 0);
-
-let increment = 0;
-
-if (
-  currentTrafficBytes >=
-  previousTrafficBytes
-) {
-
-  increment =
-    currentTrafficBytes -
-    previousTrafficBytes;
-
-} else {
-
-  increment =
-    currentTrafficBytes;
-
-}
 
 console.log(
-  `📊 Increment: ${increment}`
+  `📊 Used: ${totalUsedBytes}`
 );
+
+console.log(
+  `📦 Remaining: ${remainingBytes}`
+);
+
+
+
+
+
 
 
 await accountDoc.ref.update({
 
-  totalUsedBytes:
-    Number(account.totalUsedBytes || 0)
-    + increment,
+  totalDownloadBytes,
 
-  remainingBytes:
-    Math.max(
-      0,
-      Number(account.dataLimit || 0)
-      -
-      (
-        Number(account.totalUsedBytes || 0)
-        + increment
-      )
-    ),
+  totalUploadBytes,
 
-  lastTrafficBytes:
-    currentTrafficBytes
+  totalUsedBytes,
+
+  remainingBytes,
+
+  omadaValid:
+    record.valid === true,
+
+  updatedAt:
+    new Date()
 
 });
 
 
 
 
-const newTotalUsedBytes =
-  Number(account.totalUsedBytes || 0)
-  + increment;
+if (
+  remainingBytes <= 0 ||
+  record.valid === false
+) {
 
-const newRemainingBytes =
-  Math.max(
-    0,
-    Number(account.dataLimit || 0)
-    - newTotalUsedBytes
+  await accountDoc.ref.update({
+
+    status: "expired",
+
+    omadaValid: false
+
+  });
+
+  await db
+    .collection("internetProfiles")
+    .doc(account.userId)
+    .update({
+
+      status: "expired"
+
+    });
+
+  console.log(
+    `🚫 Voucher ${voucherCode} expired`
   );
+
+}
+
+
+
+
+else {
+
+  await accountDoc.ref.update({
+
+    status: "active",
+
+    omadaValid: true
+
+  });
+
+  await db
+    .collection("internetProfiles")
+    .doc(account.userId)
+    .update({
+
+      status: "active"
+
+    });
+
+}
 
 
   if (newRemainingBytes <= 0) {
@@ -177,17 +213,15 @@ await db
   .doc(account.userId)
   .update({
 
-    totalUsedBytes:
-      newTotalUsedBytes,
+    totalUsedBytes,
 
-    remainingBytes:
-      newRemainingBytes,
+    remainingBytes,
 
     lastConnectedIp:
-      client.ip || "",
+      record.ip || "",
 
     lastConnectedMac:
-      client.mac || "",
+      record.mac || "",
 
     updatedAt:
       new Date()
@@ -210,9 +244,9 @@ console.log(
   
   else {
 
-    console.log(
-      `❌ Voucher ${voucherCode} is offline`
-    );
+console.log(
+  `⚠️ Voucher ${voucherCode} not found in Omada records`
+);
 
   }
 
