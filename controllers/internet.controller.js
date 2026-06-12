@@ -360,483 +360,79 @@ exports.getInternetStatus = async (req, res) => {
     const voucherCode =
       req.params.voucherCode;
 
-const accountSnapshot =
-  await db
-    .collection("internetAccounts")
-    .where(
-      "voucherCode",
-      "==",
-      voucherCode
-    )
-    .limit(1)
-    .get();
+    const snapshot =
+      await db
+        .collection(
+          "internetAccounts"
+        )
+        .where(
+          "voucherCode",
+          "==",
+          voucherCode
+        )
+        .limit(1)
+        .get();
 
-if(accountSnapshot.empty){
+    if(snapshot.empty){
 
-  return res.status(404).json({
+      return res.status(404).json({
 
-    success:false,
+        success:false,
 
-    error:"Voucher not found"
+        error:
+          "Voucher not found"
 
-  });
+      });
 
-}
+    }
 
-const accountDoc =
-  accountSnapshot.docs[0];
+    const account =
+      snapshot.docs[0].data();
 
-const account =
-  accountDoc.data();
+    return res.json({
 
-await accountDoc.ref.update({
+      success:true,
 
-  activated:true,
+      online:
+        account.status ===
+        "active",
 
-  lastSeen:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
+      status:
+        account.status,
 
-});
+      voucherCode,
 
+      download:
+        Number(
+          account.totalDownloadBytes || 0
+        ),
 
-const clientsResponse =
-  await axios.get(
-    "https://enterprises-caused-role-deaf.trycloudflare.com/omada/clients"
-  );
+      upload:
+        Number(
+          account.totalUploadBytes || 0
+        ),
 
+      usedBytes:
+        Number(
+          account.totalUsedBytes || 0
+        ),
 
-  console.log(
-  JSON.stringify(
-    clientsResponse.data,
-    null,
-    2
-  )
-);
+      remainingBytes:
+        Number(
+          account.remainingBytes || 0
+        ),
 
+      signal: 0,
 
+      device: "-",
 
-  const clients =
-  clientsResponse.data
-  .result
-  .data;
+      ip: "-",
 
+      ssid: "-",
 
+      isUnlimited:false
 
-  const client =
-  clients.find(c =>
-
-    c.authInfo &&
-    c.authInfo.some(
-
-      auth =>
-        auth.info ===
-        voucherCode
-
-    )
-
-  );
-
-
-if(!client){
-
-  const totalUsedBytes =
-    Number(
-      account.totalUsedBytes || 0
-    );
-
-  let totalBytes = null;
-
-  if(
-    account.plan &&
-    account.plan
-      .toLowerCase()
-      .includes("unlimited")
-  ){
-
-    totalBytes = null;
-
-  } else {
-
-    const totalGB =
-      parseFloat(
-        account.plan
-          .replace("GB","")
-          .trim()
-      );
-
-    totalBytes =
-      totalGB *
-      1024 *
-      1024 *
-      1024;
-
-  }
-
-  const remainingBytes =
-
-    totalBytes === null
-
-    ? null
-
-    : Math.max(
-        0,
-        totalBytes -
-        totalUsedBytes
-      );
-
-return res.json({
-
-  online:false,
-
-  voucherCode,
-
-  device:
-    account.lastDevice || "-",
-
-  ip:
-    account.lastIp || "-",
-
-  signal:
-    account.lastSignal || 0,
-
-  ssid:
-    account.lastSSID || "-",
-
-  download:
-  account.totalDownloadBytes || 0,
-
-  upload:
-  account.totalUploadBytes || 0,
-
-  usedBytes:
-    totalUsedBytes,
-
-  remainingBytes,
-
-  isUnlimited:
-    totalBytes === null
-
-});
-
-}
-
-const currentDownloadBytes =
-  Number(client.trafficDown || 0);
-
-const currentUploadBytes =
-  Number(client.trafficUp || 0);
-
-
-const currentTrafficBytes =
-  Number(client.trafficDown || 0) +
-  Number(client.trafficUp || 0);
-
-const previousTrafficBytes =
-  Number(account.lastTrafficBytes || 0);
-
-const previousUsedBytes =
-  Number(account.totalUsedBytes || 0);
-
-let increment = 0;
-
-if (
-  currentTrafficBytes >=
-  previousTrafficBytes
-) {
-
-  increment =
-    currentTrafficBytes -
-    previousTrafficBytes;
-
-} else {
-
-  // Omada session reset
-  increment =
-    currentTrafficBytes;
-
-}
-
-const totalUsedBytes =
-  previousUsedBytes +
-  increment;
-
-
-await db.runTransaction(
-  async (transaction) => {
-
-    const freshDoc =
-      await transaction.get(
-        accountDoc.ref
-      );
-
-    const freshData =
-      freshDoc.data();
-
-    const previousTraffic =
-      Number(
-        freshData.lastTrafficBytes || 0
-      );
-
-    const previousUsed =
-      Number(
-        freshData.totalUsedBytes || 0
-      );
-
-
-const previousDownload =
-  Number(
-    freshData.lastDownloadBytes || 0
-  );
-
-const previousUpload =
-  Number(
-    freshData.lastUploadBytes || 0
-  );
-
-const totalDownload =
-  Number(
-    freshData.totalDownloadBytes || 0
-  );
-
-const totalUpload =
-  Number(
-    freshData.totalUploadBytes || 0
-  );
-
-
-    let increment = 0;
-    let downloadIncrement = 0;
-
-if(
-  currentDownloadBytes >=
-  previousDownload
-){
-
-  downloadIncrement =
-    currentDownloadBytes -
-    previousDownload;
-
-}else{
-
-  // Omada reset
-  downloadIncrement =
-    currentDownloadBytes;
-
-}
-
-
-let uploadIncrement = 0;
-
-if(
-  currentUploadBytes >=
-  previousUpload
-){
-
-  uploadIncrement =
-    currentUploadBytes -
-    previousUpload;
-
-}else{
-
-  // Omada reset
-  uploadIncrement =
-    currentUploadBytes;
-
-}
-
-    if (
-      currentTrafficBytes >=
-      previousTraffic
-    ) {
-
-      increment =
-        currentTrafficBytes -
-        previousTraffic;
-
-    } else {
-
-      increment =
-        currentTrafficBytes;
-
-    } 
-
-transaction.update(
-  accountDoc.ref,
-  {
-
-    totalUsedBytes:
-      previousUsed +
-      increment,
-
-
-remainingBytes:
-  freshData.dataLimit
-    ? Math.max(
-        0,
-        Number(freshData.dataLimit) -
-        (previousUsed + increment)
-      )
-    : null,
-
-    totalDownloadBytes:
-      totalDownload +
-      downloadIncrement,
-
-    totalUploadBytes:
-      totalUpload +
-      uploadIncrement,
-
-    lastTrafficBytes:
-      currentTrafficBytes,
-
-    lastDownloadBytes:
-      currentDownloadBytes,
-
-    lastUploadBytes:
-      currentUploadBytes,
-
-    lastDownload:
-      client.trafficDown || 0,
-
-    lastUpload:
-      client.trafficUp || 0,
-
-    lastDevice:
-      client.name || "",
-
-    lastIp:
-      client.ip || "",
-
-    lastSignal:
-      client.signalLevel || 0,
-
-    lastSSID:
-      client.ssid || "",
-
-    lastSeen:
-      admin.firestore
-        .FieldValue
-        .serverTimestamp()
-
-  }
-);
-
-  }
-);
-
-
-
-const updatedDoc =
-  await accountDoc.ref.get();
-
-const updatedData =
-  updatedDoc.data();
-
-
-
-  const profileRef =
-  db.collection("internetProfiles")
-  .doc(account.userId);
-
-await profileRef.update({
-
-  totalUsedBytes:
-    updatedData.totalUsedBytes || 0,
-
-  remainingBytes:
-    updatedData.remainingBytes || 0,
-
-  lastConnectedIp:
-    client.ip || "",
-
-  lastConnectedMac:
-    client.mac || "",
-
-  updatedAt:
-    admin.firestore.FieldValue.serverTimestamp()
-
-});
-
-
-let totalBytes = null;
-
-if(
-  account.plan
-    .toLowerCase()
-    .includes("unlimited")
-){
-
-  totalBytes = null;
-
-}else{
-
-  const totalGB =
-    parseFloat(
-      account.plan
-        .replace("GB","")
-        .trim()
-    );
-
-  totalBytes =
-    totalGB *
-    1024 *
-    1024 *
-    1024;
-
-}
-
-
-
-const remainingBytes =
-
-  totalBytes === null
-
-  ? null
-
-  : Math.max(
-      0,
-      totalBytes -
-      Number(
-        updatedData.totalUsedBytes || 0
-      )
-    );
-
-
-
-
-return res.json({
-
-  online: client.active,
-
-  device: client.name,
-
-  signal: client.signalLevel,
-
-  ip: client.ip,
-
-  ssid: client.ssid,
-
-  download:
-    updatedData.totalDownloadBytes || 0,
-
-  upload:
-    updatedData.totalUploadBytes || 0,
-
-  usedBytes:
-    updatedData.totalUsedBytes || 0,
-
-  remainingBytes,
-
-  isUnlimited:
-    totalBytes === null,
-
-  voucherCode
-
-});
-
-
+    });
 
   }
 
@@ -846,15 +442,14 @@ return res.json({
 
       success:false,
 
-      error:err.message
+      error:
+        err.message
 
     });
 
   }
 
 };
-
-
 
 
 
