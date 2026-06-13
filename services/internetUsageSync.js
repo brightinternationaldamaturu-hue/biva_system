@@ -198,36 +198,50 @@ if (
 
 ) {
 
-if (
-  record.id
-) {
+for(
 
-  try {
+  const device of
 
-    await axios.post(
+  accountRecords
 
-      "https://further-investigations-seconds-cake.trycloudflare.com/omada/disconnect-client",
+){
 
-      {
+  if(
+    device.id
+  ){
 
-        authId:
-          record.id
+    try{
 
-      }
+      await axios.post(
 
-    );
+        "https://further-investigations-seconds-cake.trycloudflare.com/omada/disconnect-client",
 
-console.log(
-  `🔌 Disconnected ${clientMac}`
-);
+        {
 
-  }
+          authId:
+            device.id
 
-  catch(err){
+        }
 
-    console.log(
-      `❌ Disconnect Failed ${voucherCode}`
-    );
+      );
+
+      console.log(
+
+        `🔌 Disconnected ${device.mac}`
+
+      );
+
+    }
+
+    catch(err){
+
+      console.log(
+
+        `❌ Disconnect Failed ${device.mac}`
+
+      );
+
+    }
 
   }
 
