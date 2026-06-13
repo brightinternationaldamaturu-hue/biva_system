@@ -43,12 +43,18 @@ for (const accountDoc of activeAccounts.docs) {
     accountDoc.data();
 
 
-    if(
-  !account.clientMac
+if(
+
+  !account.clientMacs ||
+
+  !account.clientMacs.length
+
 ){
 
   console.log(
+
     `⚠️ No MAC bound for ${accountDoc.id}`
+
   );
 
   continue;
@@ -57,27 +63,32 @@ for (const accountDoc of activeAccounts.docs) {
 
 
 
-const clientMac =
-  account.clientMac;
+const clientMacs =
+  account.clientMacs;
 
-const record =
-  records.find(
+const accountRecords =
+  records.filter(
 
     r =>
 
-      r.mac &&
-      clientMac &&
+      account.clientMacs.some(
 
-      r.mac.toUpperCase() ===
-      clientMac.toUpperCase()
+        mac =>
+
+          r.mac &&
+
+          r.mac.toUpperCase() ===
+
+          mac.toUpperCase()
+
+      )
 
   );
 
 
 
-if (
-  record &&
-  record.mac
+if(
+  accountRecords.length
 ){
 
 console.log(
@@ -85,11 +96,36 @@ console.log(
 );
 
 
-  const totalDownloadBytes =
-  Number(record.download || 0);
+const totalDownloadBytes =
+  accountRecords.reduce(
+
+    (sum,r)=>
+
+      sum +
+
+      Number(
+        r.download || 0
+      ),
+
+    0
+
+  );
 
 const totalUploadBytes =
-  Number(record.upload || 0);
+  accountRecords.reduce(
+
+    (sum,r)=>
+
+      sum +
+
+      Number(
+        r.upload || 0
+      ),
+
+    0
+
+  );
+  
 
 const totalUsedBytes =
   totalDownloadBytes +
