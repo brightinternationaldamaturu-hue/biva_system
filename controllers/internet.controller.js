@@ -577,8 +577,7 @@ exports.authorizeClient = async (req, res) => {
 
 
 
-exports.activateInternet =
-async (req, res) => {
+exports.activateInternet = async (req, res) => {
 
   try {
 
@@ -731,7 +730,11 @@ for(
         dataLimit:
           pending.dataLimit,
 
-        clientMac,
+        clientMacs:[
+  clientMac
+],
+
+maxDevices:8,
 
         totalDownloadBytes:0,
 
