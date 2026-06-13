@@ -503,6 +503,47 @@ exports.authorizeClient = async (req, res) => {
     const profile =
       profileSnap.data();
 
+
+      const accountSnap =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .limit(1)
+  .get();
+
+if(
+  accountSnap.empty
+){
+
+  return res.status(404).json({
+
+    success:false,
+
+    error:
+      "No active account"
+
+  });
+
+}
+
+const accountDoc =
+  accountSnap.docs[0];
+
+const account =
+  accountDoc.data();
+
+
     if (
       profile.status !== "active"
     ) {
@@ -532,6 +573,29 @@ exports.authorizeClient = async (req, res) => {
       });
 
     }
+
+
+    if(
+
+  !account.clientMacs.includes(
+    clientMac
+  )
+
+){
+
+  await accountDoc.ref.update({
+
+    clientMacs:
+
+      admin.firestore
+      .FieldValue
+      .arrayUnion(
+        clientMac
+      )
+
+  });
+
+}
 
     const response =
       await axios.post(
