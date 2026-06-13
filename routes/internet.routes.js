@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   subscribeInternet,
   getInternetStatus,
+  activateInternet,
   authorizeClient
 } = require(
   "../controllers/internet.controller"
@@ -16,11 +17,10 @@ router.post(
 );
 
 
-router.get(
-  "/status/:voucherCode",
-  getInternetStatus
+router.post(
+  "/activate",
+  activateInternet
 );
-
 
 
 router.post(
@@ -28,6 +28,12 @@ router.post(
   authorizeClient
 );
 
+
+
+router.get(
+  "/status/:voucherCode",
+  getInternetStatus
+);
 
 
 
