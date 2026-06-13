@@ -42,26 +42,47 @@ for (const accountDoc of activeAccounts.docs) {
   const account =
     accountDoc.data();
 
-  const voucherCode =
-    account.voucherCode;
+
+    if(
+  !account.clientMac
+){
+
+  console.log(
+    `⚠️ No MAC bound for ${accountDoc.id}`
+  );
+
+  continue;
+
+}
+
+
+
+const clientMac =
+  account.clientMac;
 
 const record =
   records.find(
 
     r =>
-      r.voucherCode ===
-      voucherCode
+
+      r.mac &&
+      clientMac &&
+
+      r.mac.toUpperCase() ===
+      clientMac.toUpperCase()
 
   );
+
+
 
 if (
   record &&
-  record.voucherCode
+  record.mac
 ){
 
-  console.log(
-    `✅ Voucher ${voucherCode} is online`
-  );
+console.log(
+  `✅ Device ${clientMac} is online`
+);
 
 
   const totalDownloadBytes =
@@ -262,7 +283,7 @@ console.log(
   else {
 
 console.log(
-  `⚠️ Voucher ${voucherCode} not found in Omada records`
+  `⚠️ Device ${clientMac} not found in Omada records`
 );
 
   }
