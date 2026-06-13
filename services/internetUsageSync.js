@@ -66,6 +66,9 @@ if(
 const clientMacs =
   account.clientMacs;
 
+  const clientMac =
+  clientMacs[0];
+
 const accountRecords =
   records.filter(
 
@@ -82,17 +85,19 @@ const accountRecords =
           mac.toUpperCase()
 
       )
+    
 
   );
 
-
+const record =
+  accountRecords[0];
 
 if(
   accountRecords.length
 ){
 
 console.log(
-  `✅ Device ${clientMac} is online`
+  `✅ ${accountRecords.length} device(s) online`
 );
 
 
@@ -125,7 +130,7 @@ const totalUploadBytes =
     0
 
   );
-  
+
 
 const totalUsedBytes =
   totalDownloadBytes +
