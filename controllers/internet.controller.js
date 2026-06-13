@@ -1,8 +1,7 @@
 const { db, admin } = require("../config/firebase");
 const axios = require("axios");
 
-exports.subscribeInternet =
-async (req, res) => {
+exports.subscribeInternet = async (req, res) => {
 
 try {
 
@@ -81,6 +80,165 @@ if(wallet < Number(plan.price)){
 }
 
 
+
+const profileRef =
+  db.collection(
+    "internetProfiles"
+  )
+  .doc(userId);
+
+const profileSnap =
+  await profileRef.get();
+
+if(
+  profileSnap.exists
+){
+
+  const accountSnap =
+    await db
+    .collection(
+      "internetAccounts"
+    )
+    .where(
+      "userId",
+      "==",
+      userId
+    )
+    .where(
+      "status",
+      "==",
+      "active"
+    )
+    .limit(1)
+    .get();
+
+  if(
+    !accountSnap.empty
+  ){
+
+    const accountDoc =
+      accountSnap.docs[0];
+
+    await accountDoc.ref.update({
+
+      dataLimit:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
+
+      remainingBytes:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
+
+      amount:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.price
+          )
+        ),
+
+      status:"active",
+
+      omadaValid:true
+
+    });
+
+    await profileRef.update({
+
+      remainingBytes:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
+
+      totalPurchasedBytes:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
+
+      status:"active"
+
+    });
+
+
+
+    const account =
+  accountDoc.data();
+
+if(
+  account.clientMacs &&
+  account.clientMacs.length
+){
+
+  for(
+    const mac of
+    account.clientMacs
+  ){
+
+    try{
+
+      await axios.post(
+
+        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+
+        {
+
+          clientMac: mac
+
+        }
+
+      );
+
+      console.log(
+        `✅ Reconnected ${mac}`
+      );
+
+    }
+
+    catch(err){
+
+      console.log(
+        `❌ Failed reconnect ${mac}`
+      );
+
+    }
+
+  }
+
+}
+
+    return res.json({
+
+      success:true,
+
+      topup:true,
+
+      message:
+        "Internet top-up successful"
+
+    });
+
+  }
+
+}
 
 
 const existingSubscription =
@@ -513,11 +671,6 @@ exports.authorizeClient = async (req, res) => {
     "userId",
     "==",
     userId
-  )
-  .where(
-    "status",
-    "==",
-    "active"
   )
   .limit(1)
   .get();
