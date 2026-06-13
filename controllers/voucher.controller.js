@@ -344,126 +344,12 @@ const cashback =
     // GENERATE VOUCHER
     // =========================
 
-    const response = await axios.post(
+const voucherCode =
 
-      "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
+  "BIVA-" +
 
-      {
+  Date.now();
 
-  fullName:
-    userData.fullName || "",
-
-  email:
-    userData.email || "",
-
-  phone:
-    userData.phone || "",
-
-  type:
-    "Voucher Purchase",
-
-  plan:
-    desc,
-
-  price:
-    amountToCharge,
-
-  txId:
-    request_id,
-
-  balanceBefore,
-
-  balanceAfter,
-  
-  cashback,
-
-      }
-
-    );
-
-
-    const result = response.data;
-
-    console.log(
-      "VOUCHER RESPONSE:",
-      result
-    );
-
-    // =========================
-    // CHECK RESPONSE
-    // =========================
-
-    if (
-
-      !result ||
-      !result.voucher
-
-    ) {
-
-      throw new Error(
-        "Voucher generation failed"
-      );
-
-    }
-
-    const voucherCode =
-      result.voucher;
-
-
-
-
-await db
-.collection("pendingInternetAccounts")
-.add({
-
-  expiryDate:
-  selectedPlan.validityDays
-    ? new Date(
-        Date.now() +
-        selectedPlan.validityDays *
-        24 *
-        60 *
-        60 *
-        1000
-      )
-    : null,
-
-  userId,
-
-  voucherCode,
-
-  plan: desc,
-
-  totalDownloadBytes: 0,
-  totalUploadBytes: 0,
-
-  lastTrafficBytes: 0,
-  lastDownloadBytes: 0,
-  lastUploadBytes: 0,
-  omadaValid: true,
-
-  amount:
-  amountToCharge,
-
-  dataLimit:
-    selectedPlan.dataLimit,
-
-  usedBytes:0,
-
-  remainingBytes:
-    selectedPlan.dataLimit,
-
-  status:"active",
-
-  activated:false,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-  
-
-});
 
 
 
@@ -511,7 +397,6 @@ await profileRef.set({
   lastConnectedIp: "",
 
   status: "active",
-  omadaValid: true,
 
   createdAt:
     admin.firestore.FieldValue.serverTimestamp(),
@@ -630,11 +515,8 @@ await profileRef.update({
 
       status:"success",
 
-      voucher:
-        voucherCode,
-
-      response:
-        result,
+      response:{ voucher: voucherCode },
+      
 
       completedAt:
         admin.firestore
