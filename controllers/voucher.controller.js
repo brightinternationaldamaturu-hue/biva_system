@@ -370,11 +370,6 @@ const activeAccountSnap =
     "==",
     userId
   )
-  .where(
-    "status",
-    "==",
-    "active"
-  )
   .limit(1)
   .get();
 
@@ -576,40 +571,39 @@ expiryDate:
 
 else {
 
-if (selectedPlan.dataLimit === null) {
+await profileRef.update({
 
-  const expiryDate = new Date();
+  totalPurchasedBytes:
+    admin.firestore
+    .FieldValue
+    .increment(
+      selectedPlan.dataLimit
+    ),
 
-  expiryDate.setDate(
-    expiryDate.getDate() + 30
-  );
+  remainingBytes:
+    admin.firestore
+    .FieldValue
+    .increment(
+      selectedPlan.dataLimit
+    ),
 
-  await profileRef.update({
+  activeVoucherCode:
+    voucherCode,
 
-    totalPurchasedBytes: 0,
+  expiryDate:
+    new Date(
+      Date.now() +
+      30 * 24 * 60 * 60 * 1000
+    ),
 
-    totalUsedBytes: 0,
+  status:"active",
 
-    remainingBytes: 0,
+  updatedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
 
-    isUnlimited: true,
-
-    activeVoucherCode:
-      voucherCode,
-
-    expiryDate,
-
-    status: "active",
-
-    updatedAt:
-      admin.firestore.FieldValue.serverTimestamp()
-
-  });
-
-} else {
-
-
-}
+});
 
 }
 
