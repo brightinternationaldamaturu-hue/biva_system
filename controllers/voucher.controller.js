@@ -489,7 +489,7 @@ await db.collection(
     purchaseType:"topup",
 
     message:
-      `${desc} added successfully`
+      `${desc} Top-up to your Balance`
 
   });
 
