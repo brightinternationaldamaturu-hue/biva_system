@@ -413,7 +413,7 @@ const cashback =
 
 
 await db
-.collection("internetAccounts")
+.collection("pendingInternetAccounts")
 .add({
 
   expiryDate:
