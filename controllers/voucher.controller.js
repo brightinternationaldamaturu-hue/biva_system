@@ -380,25 +380,29 @@ const activeAccountSnap =
   const accountDoc =
     activeAccountSnap.docs[0];
 
-  await accountDoc.ref.update({
+await accountDoc.ref.update({
 
-    dataLimit:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
+  dataLimit:
+    admin.firestore.FieldValue.increment(
+      planBytes
+    ),
 
-    remainingBytes:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
+  remainingBytes:
+    admin.firestore.FieldValue.increment(
+      planBytes
+    ),
 
-    expiryDate:
-      new Date(
-        Date.now() +
-        30 * 24 * 60 * 60 * 1000
-      )
+  status:"active",
 
-  });
+  omadaValid:true,
+
+  expiryDate:
+    new Date(
+      Date.now() +
+      30 * 24 * 60 * 60 * 1000
+    )
+
+});
 
   await profileRef.update({
 
@@ -422,6 +426,48 @@ const activeAccountSnap =
       admin.firestore.FieldValue.serverTimestamp()
 
   });
+
+
+
+
+  const account =
+  accountDoc.data();
+
+if(
+  account.clientMacs &&
+  account.clientMacs.length
+){
+
+  for(
+    const mac of
+    account.clientMacs
+  ){
+
+    try{
+
+      await axios.post(
+
+        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+
+        {
+          clientMac: mac
+        }
+
+      );
+
+    }
+
+    catch(err){
+
+      console.log(
+        err.message
+      );
+
+    }
+
+  }
+
+}
 
 
   await transactionRef.update({
