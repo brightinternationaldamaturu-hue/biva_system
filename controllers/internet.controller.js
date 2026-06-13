@@ -94,23 +94,22 @@ if(
   profileSnap.exists
 ){
 
-  const accountSnap =
-    await db
-    .collection(
-      "internetAccounts"
-    )
-    .where(
-      "userId",
-      "==",
-      userId
-    )
-    .where(
-      "status",
-      "==",
-      "active"
-    )
-    .limit(1)
-    .get();
+const accountSnap =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .orderBy(
+    "createdAt",
+    "desc"
+  )
+  .limit(1)
+  .get();
 
   if(
     !accountSnap.empty
@@ -118,6 +117,9 @@ if(
 
     const accountDoc =
       accountSnap.docs[0];
+
+      const account =
+  accountDoc.data();
 
     await accountDoc.ref.update({
 
@@ -154,34 +156,30 @@ if(
 
     });
 
-    await profileRef.update({
+await profileRef.update({
 
-      remainingBytes:
-        admin.firestore
-        .FieldValue
-        .increment(
-          Number(
-            plan.dataLimit
-          )
-        ),
+  activeVoucherCode:
+    account.voucherCode,
 
-      totalPurchasedBytes:
-        admin.firestore
-        .FieldValue
-        .increment(
-          Number(
-            plan.dataLimit
-          )
-        ),
+  remainingBytes:
+    admin.firestore
+    .FieldValue
+    .increment(
+      Number(plan.dataLimit)
+    ),
 
-      status:"active"
+  totalPurchasedBytes:
+    admin.firestore
+    .FieldValue
+    .increment(
+      Number(plan.dataLimit)
+    ),
 
-    });
+  status:"active"
 
+});
 
 
-    const account =
-  accountDoc.data();
 
 if(
   account.clientMacs &&
