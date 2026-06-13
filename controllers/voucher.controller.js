@@ -351,6 +351,34 @@ const voucherCode =
   Date.now();
 
 
+  await db
+  .collection(
+    "pendingInternetAccounts"
+  )
+  .add({
+
+    userId,
+
+    voucherCode,
+
+    plan:
+      desc,
+
+    dataLimit:
+      selectedPlan.dataLimit,
+
+    amount:
+      amountToCharge,
+
+    activated:false,
+
+    createdAt:
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
+  });
+
 
 
 
