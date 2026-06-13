@@ -569,3 +569,149 @@ exports.authorizeClient = async (req, res) => {
   }
 
 };
+
+
+
+
+
+
+
+
+exports.activateInternet =
+async (req, res) => {
+
+  try {
+
+    const {
+      userId,
+      clientMac
+    } = req.body;
+
+    if (
+      !userId ||
+      !clientMac
+    ) {
+
+      return res.status(400).json({
+
+        success:false,
+
+        error:
+          "Missing userId or clientMac"
+
+      });
+
+    }
+
+    const pendingSnap =
+      await db
+      .collection(
+        "pendingInternetAccounts"
+      )
+      .where(
+        "userId",
+        "==",
+        userId
+      )
+      .where(
+        "activated",
+        "==",
+        false
+      )
+      .limit(1)
+      .get();
+
+    if (
+      pendingSnap.empty
+    ) {
+
+      return res.status(404).json({
+
+        success:false,
+
+        error:
+          "No pending internet plan"
+
+      });
+
+    }
+
+    const pendingDoc =
+      pendingSnap.docs[0];
+
+    const pending =
+      pendingDoc.data();
+
+    await db
+      .collection(
+        "internetAccounts"
+      )
+      .add({
+
+        userId,
+
+        voucherCode:
+          pending.voucherCode,
+
+        plan:
+          pending.plan,
+
+        amount:
+          pending.amount,
+
+        dataLimit:
+          pending.dataLimit,
+
+        clientMac,
+
+        totalDownloadBytes:0,
+
+        totalUploadBytes:0,
+
+        totalUsedBytes:0,
+
+        remainingBytes:
+          pending.dataLimit,
+
+        status:"active",
+
+        activated:true,
+
+        createdAt:
+          admin.firestore
+          .FieldValue
+          .serverTimestamp()
+
+      });
+
+    await pendingDoc.ref.update({
+
+      activated:true
+
+    });
+
+    return res.json({
+
+      success:true,
+
+      message:
+        "Internet activated"
+
+    });
+
+  }
+
+  catch(err){
+
+    return res.status(500).json({
+
+      success:false,
+
+      error:
+        err.message
+
+    });
+
+  }
+
+};
