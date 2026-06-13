@@ -979,8 +979,10 @@ maxDevices:8,
 
         totalUsedBytes:0,
 
+        usageOffsetBytes:0,
+
         remainingBytes:
-          pending.dataLimit,
+        pending.dataLimit,
 
         status:"active",
 
