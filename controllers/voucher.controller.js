@@ -178,6 +178,12 @@ exports.buyVoucher = async (req, res) => {
         p => p.desc === desc
 
       );
+    
+    const planBytes =
+  Number(
+    selectedPlan.dataLimit || 0
+  );
+  
 
     if (!selectedPlan) {
 
@@ -350,6 +356,144 @@ const voucherCode =
 
   Date.now();
 
+  const profileRef =
+  db.collection("internetProfiles")
+  .doc(userId);
+
+const activeAccountSnap =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .limit(1)
+  .get();
+
+
+
+  if(!activeAccountSnap.empty){
+
+  const accountDoc =
+    activeAccountSnap.docs[0];
+
+  await accountDoc.ref.update({
+
+    dataLimit:
+      admin.firestore.FieldValue.increment(
+        planBytes
+      ),
+
+    remainingBytes:
+      admin.firestore.FieldValue.increment(
+        planBytes
+      ),
+
+    expiryDate:
+      new Date(
+        Date.now() +
+        30 * 24 * 60 * 60 * 1000
+      )
+
+  });
+
+  await profileRef.update({
+
+    totalPurchasedBytes:
+      admin.firestore.FieldValue.increment(
+        planBytes
+      ),
+
+    remainingBytes:
+      admin.firestore.FieldValue.increment(
+        planBytes
+      ),
+
+    expiryDate:
+      new Date(
+        Date.now() +
+        30 * 24 * 60 * 60 * 1000
+      ),
+
+    updatedAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  });
+
+
+  await transactionRef.update({
+
+  status:"success",
+
+  completedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+await userRef.update({
+
+  cashbackBalance:
+    admin.firestore
+    .FieldValue
+    .increment(cashback)
+
+});
+
+
+await db.collection(
+  "transactions"
+).add({
+
+  userId,
+
+  email:
+    userData.email,
+
+  type:"cashback",
+
+  category:"cashback",
+
+  title:"Voucher Cashback",
+
+  amount:cashback,
+
+  status:"success",
+
+  description:
+    `10% cashback from ${desc} top-up purchase`,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+
+  return res.json({
+
+    success:true,
+
+    purchaseType:"topup",
+
+    message:
+      `${desc} added successfully`
+
+  });
+
+}
 
   await db
   .collection(
@@ -382,9 +526,6 @@ const voucherCode =
 
 
 
-const profileRef =
-  db.collection("internetProfiles")
-  .doc(userId);
 
 const profileSnap =
   await profileRef.get();
@@ -408,14 +549,11 @@ await profileRef.set({
   isUnlimited:
     selectedPlan.dataLimit === null,
 
-  expiryDate:
-    selectedPlan.validityDays
-      ? new Date(
-          Date.now() +
-          selectedPlan.validityDays *
-          24 * 60 * 60 * 1000
-        )
-      : null,
+expiryDate:
+  new Date(
+    Date.now() +
+    30 * 24 * 60 * 60 * 1000
+  ),
 
   activeVoucherCode:
     voucherCode,
@@ -471,37 +609,9 @@ if (selectedPlan.dataLimit === null) {
 } else {
 
 
-
-await profileRef.update({
-
-  totalPurchasedBytes:
-    admin.firestore.FieldValue.increment(
-      selectedPlan.dataLimit
-    ),
-
-  remainingBytes:
-    admin.firestore.FieldValue.increment(
-      selectedPlan.dataLimit
-    ),
-
-  isUnlimited: false,
-
-  expiryDate: null,
-
-  activeVoucherCode:
-    voucherCode,
-
-  status: "active",
-
-  updatedAt:
-    admin.firestore.FieldValue.serverTimestamp()
-
-});
-
 }
 
 }
-
 
 
     // =========================
