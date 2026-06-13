@@ -131,10 +131,41 @@ const totalUploadBytes =
 
   );
 
-
-const totalUsedBytes =
+const rawUsedBytes =
   totalDownloadBytes +
   totalUploadBytes;
+
+  const usageOffsetBytes =
+  Number(
+    account.usageOffsetBytes || 0
+  );
+
+  if(
+  !account.usageOffsetBytes
+){
+
+  await accountDoc.ref.update({
+
+    usageOffsetBytes:
+      rawUsedBytes
+
+  });
+
+  console.log(
+    `📌 Usage Offset Saved: ${rawUsedBytes}`
+  );
+
+  continue;
+
+}
+
+
+const totalUsedBytes =
+  Math.max(
+    0,
+    rawUsedBytes -
+    usageOffsetBytes
+  );
 
 const remainingBytes =
   Math.max(
