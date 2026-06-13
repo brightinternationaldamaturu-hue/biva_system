@@ -176,9 +176,9 @@ if (
 
     );
 
-    console.log(
-      `🔌 Disconnected ${voucherCode}`
-    );
+console.log(
+  `🔌 Disconnected ${clientMac}`
+);
 
   }
 
@@ -202,11 +202,48 @@ if (
 
   });
 
-  console.log(
-    `🚫 Voucher ${voucherCode} expired`
-  );
+console.log(
+  `🚫 Device ${clientMac} expired`
+);
+
+
+
+  await db
+  .collection("subscriptions")
+  .where(
+    "userId",
+    "==",
+    account.userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get()
+  .then(async(snapshot)=>{
+
+    const batch =
+      db.batch();
+
+    snapshot.docs.forEach(doc=>{
+
+      batch.update(
+        doc.ref,
+        {
+          status:"expired"
+        }
+      );
+
+    });
+
+    await batch.commit();
+
+  });
 
 }
+
+
 
 
 
