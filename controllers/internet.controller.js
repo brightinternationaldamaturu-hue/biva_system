@@ -613,12 +613,16 @@ async (req, res) => {
         "==",
         userId
       )
-      .where(
-        "activated",
-        "==",
-        false
-      )
-      .limit(1)
+.where(
+  "activated",
+  "==",
+  false
+)
+.orderBy(
+  "createdAt",
+  "desc"
+)
+.limit(1)
       .get();
 
     if (
@@ -638,6 +642,71 @@ async (req, res) => {
 
     const pendingDoc =
       pendingSnap.docs[0];
+
+
+
+      const activeAccounts =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+for(
+  const account of
+  activeAccounts.docs
+){
+
+  await account.ref.update({
+
+    status:"expired",
+
+    omadaValid:false
+
+  });
+
+}
+
+
+
+const activeSubscriptions =
+  await db
+  .collection("subscriptions")
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+for(
+  const subscription of
+  activeSubscriptions.docs
+){
+
+  await subscription.ref.update({
+
+    status:"expired"
+
+  });
+
+}
+
 
     const pending =
       pendingDoc.data();
@@ -683,6 +752,33 @@ async (req, res) => {
           .serverTimestamp()
 
       });
+
+
+const profileRef =
+  db.collection(
+    "internetProfiles"
+  )
+  .doc(userId);
+
+await profileRef.set({
+
+  activeVoucherCode:
+    pending.voucherCode,
+
+  remainingBytes:
+    pending.dataLimit,
+
+  totalUsedBytes:0,
+
+  status:"active",
+
+  lastConnectedMac:
+    clientMac
+
+}, { merge:true });
+
+
+
 
     await pendingDoc.ref.update({
 
