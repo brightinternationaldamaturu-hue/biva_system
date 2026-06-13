@@ -577,6 +577,28 @@ const account =
 
     if(
 
+  account.clientMacs.length >=
+  account.maxDevices &&
+
+  !account.clientMacs.includes(
+    clientMac
+  )
+
+){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "Device limit reached"
+
+  });
+
+}
+
+    if(
+
   !account.clientMacs.includes(
     clientMac
   )
