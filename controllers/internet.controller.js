@@ -955,6 +955,14 @@ for(
 
         userId,
 
+        usageOffsetBytes: 0,
+
+        totalDownloadBytes: 0,
+
+        totalUploadBytes: 0,
+
+        totalUsedBytes: 0,
+
         voucherCode:
           pending.voucherCode,
 
