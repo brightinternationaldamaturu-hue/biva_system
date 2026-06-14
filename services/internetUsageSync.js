@@ -25,7 +25,7 @@ const activeAccounts =
 
 const recordsResponse =
   await axios.get(
-    "https://further-investigations-seconds-cake.trycloudflare.com/omada/authed-records"
+    "https://biva-omada-agent.onrender.com/omada/authed-records"
   );
 
 const records =
@@ -258,7 +258,7 @@ for(
 
       await axios.post(
 
-        "https://further-investigations-seconds-cake.trycloudflare.com/omada/disconnect-client",
+        "https://biva-omada-agent.onrender.com/omada/disconnect-client",
 
         {
 
