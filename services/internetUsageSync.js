@@ -140,25 +140,34 @@ const rawUsedBytes =
     account.usageOffsetBytes || 0
   );
 
-  if(
+if(
   !account.usageOffsetBytes
 ){
 
   await accountDoc.ref.update({
 
     usageOffsetBytes:
-      rawUsedBytes
+      rawUsedBytes,
+
+    totalDownloadBytes: 0,
+
+    totalUploadBytes: 0,
+
+    totalUsedBytes: 0
 
   });
-
-  console.log(
-    `📌 Usage Offset Saved: ${rawUsedBytes}`
-  );
 
   continue;
 
 }
 
+
+const totalDownloadBytesCurrent =
+  Math.max(
+    0,
+    totalDownloadBytes -
+    usageOffsetBytes
+  );
 
 const totalUsedBytes =
   Math.max(
@@ -198,7 +207,11 @@ console.log(
 
 await accountDoc.ref.update({
 
-  totalDownloadBytes,
+  totalDownloadBytes:
+    totalUsedBytes <= 0
+      ? 0
+      : totalDownloadBytes -
+        usageOffsetBytes,
 
   totalUploadBytes,
 
