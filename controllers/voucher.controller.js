@@ -447,7 +447,7 @@ if(
 
       await axios.post(
 
-        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+        "https://biva-omada-agent.onrender.com/omada/authorize-client",
 
         {
           clientMac: mac
