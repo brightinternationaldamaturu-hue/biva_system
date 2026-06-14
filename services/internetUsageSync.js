@@ -1,212 +1,278 @@
-const { db, admin } = require("../config/firebase");
+const cron = require("node-cron");
 const axios = require("axios");
+const { db } = require("../config/firebase");
 
-exports.subscribeInternet = async (req, res) => {
+function startInternetUsageSync() {
 
-try {
+  cron.schedule("* * * * *", async () => {
 
-  const {
-    userId,
-    planId
-  } = req.body;
+    try {
 
-  if(
-    !userId ||
-    !planId
-  ){
-    return res.status(400).json({
-      success:false,
-      error:"Missing fields"
-    });
-  }
+const activeAccounts =
+  await db
+    .collection("internetAccounts")
+    .where(
+      "status",
+      "==",
+      "active"
+    )
+    .get();
 
-  const planRef =
-    db.collection("wifiPlans")
-    .doc(planId);
-
-  const planSnap =
-    await planRef.get();
-
-  if(!planSnap.exists){
-
-    return res.status(404).json({
-      success:false,
-      error:"Plan not found"
-    });
-
-  }
-
-  const plan =
-    planSnap.data();
+      console.log(
+        `📶 Active Internet Accounts: ${activeAccounts.size}`
+      );
 
 
-    const userRef =
-  db.collection("users")
-  .doc(userId);
+const recordsResponse =
+  await axios.get(
+    "https://further-investigations-seconds-cake.trycloudflare.com/omada/authed-records"
+  );
 
-const userSnap =
-  await userRef.get();
-
-if(!userSnap.exists){
-
-  return res.status(404).json({
-    success:false,
-    error:"User not found"
-  });
-
-}
-
-const userData =
-  userSnap.data();
-
-const wallet =
-  Number(userData.wallet || 0);
-
-if(wallet < Number(plan.price)){
-
-  return res.status(400).json({
-
-    success:false,
-
-    error:"Insufficient balance",
-
-    wallet,
-
-    required:
-      plan.price
-
-  });
-
-}
+const records =
+  recordsResponse.data.result.data;
 
 
 
-const profileRef =
-  db.collection(
-    "internetProfiles"
-  )
-  .doc(userId);
+console.log(
+  `📡 Omada Records: ${records.length}`
+);
 
-const profileSnap =
-  await profileRef.get();
+for (const accountDoc of activeAccounts.docs) {
+
+  const account =
+    accountDoc.data();
+
 
 if(
-  profileSnap.exists
+
+  !account.clientMacs ||
+
+  !account.clientMacs.length
+
 ){
 
-const accountSnap =
-  await db
-  .collection(
-    "internetAccounts"
-  )
-  .where(
-    "userId",
-    "==",
-    userId
-  )
-  .orderBy(
-    "createdAt",
-    "desc"
-  )
-  .limit(1)
-  .get();
+  console.log(
 
-  if(
-    !accountSnap.empty
-  ){
+    `⚠️ No MAC bound for ${accountDoc.id}`
 
-    const accountDoc =
-      accountSnap.docs[0];
+  );
 
-      const account =
-  accountDoc.data();
+  continue;
 
-    await accountDoc.ref.update({
+}
 
-      dataLimit:
-        admin.firestore
-        .FieldValue
-        .increment(
-          Number(
-            plan.dataLimit
-          )
-        ),
 
-      remainingBytes:
-        admin.firestore
-        .FieldValue
-        .increment(
-          Number(
-            plan.dataLimit
-          )
-        ),
 
-      amount:
-        admin.firestore
-        .FieldValue
-        .increment(
-          Number(
-            plan.price
-          )
-        ),
+const clientMacs =
+  account.clientMacs;
 
-      status:"active",
+  const clientMac =
+  clientMacs[0];
 
-      omadaValid:true
+const accountRecords =
+  records.filter(
 
-    });
+    r =>
 
-await profileRef.update({
+      account.clientMacs.some(
 
-  activeVoucherCode:
-    account.voucherCode,
+        mac =>
 
-  remainingBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
-      Number(plan.dataLimit)
-    ),
+          r.mac &&
 
-  totalPurchasedBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
-      Number(plan.dataLimit)
-    ),
+          r.mac.toUpperCase() ===
 
-  status:"active"
+          mac.toUpperCase()
+
+      )
+    
+
+  );
+
+const record =
+  accountRecords[0];
+
+if(
+  accountRecords.length
+){
+
+console.log(
+  `✅ ${accountRecords.length} device(s) online`
+);
+
+
+const totalDownloadBytes =
+  accountRecords.reduce(
+
+    (sum,r)=>
+
+      sum +
+
+      Number(
+        r.download || 0
+      ),
+
+    0
+
+  );
+
+const totalUploadBytes =
+  accountRecords.reduce(
+
+    (sum,r)=>
+
+      sum +
+
+      Number(
+        r.upload || 0
+      ),
+
+    0
+
+  );
+
+const rawUsedBytes =
+  totalDownloadBytes +
+  totalUploadBytes;
+
+  const usageOffsetBytes =
+  Number(
+    account.usageOffsetBytes || 0
+  );
+
+if(
+  !account.usageOffsetBytes
+){
+
+  await accountDoc.ref.update({
+
+    usageOffsetBytes:
+      rawUsedBytes,
+
+    totalDownloadBytes: 0,
+
+    totalUploadBytes: 0,
+
+    totalUsedBytes: 0
+
+  });
+
+  continue;
+
+}
+
+
+const totalDownloadBytesCurrent =
+  Math.max(
+    0,
+    totalDownloadBytes -
+    usageOffsetBytes
+  );
+
+const totalUsedBytes =
+  Math.max(
+    0,
+    rawUsedBytes -
+    usageOffsetBytes
+  );
+
+const remainingBytes =
+  Math.max(
+    0,
+    Number(account.dataLimit || 0)
+    - totalUsedBytes
+  );
+
+console.log(
+  `⬇️ Download: ${totalDownloadBytes}`
+);
+
+console.log(
+  `⬆️ Upload: ${totalUploadBytes}`
+);
+
+console.log(
+  `📊 Used: ${totalUsedBytes}`
+);
+
+console.log(
+  `📦 Remaining: ${remainingBytes}`
+);
+
+
+
+
+
+
+
+await accountDoc.ref.update({
+
+  totalDownloadBytes:
+    totalUsedBytes <= 0
+      ? 0
+      : totalDownloadBytes -
+        usageOffsetBytes,
+
+  totalUploadBytes,
+
+  totalUsedBytes,
+
+  remainingBytes,
+
+  omadaValid:
+    record.valid === true,
+
+  updatedAt:
+    new Date()
 
 });
 
 
 
-if(
-  account.clientMacs &&
-  account.clientMacs.length
+console.log(
+  `🔍 Omada Valid: ${record.valid}`
+);
+
+
+if (
+
+  account.status !== "expired" &&
+
+  remainingBytes <= 0
+
+) {
+
+for(
+
+  const device of
+
+  accountRecords
+
 ){
 
-  for(
-    const mac of
-    account.clientMacs
+  if(
+    device.id
   ){
 
     try{
 
       await axios.post(
 
-        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+        "https://further-investigations-seconds-cake.trycloudflare.com/omada/disconnect-client",
 
         {
 
-          clientMac: mac
+          authId:
+            device.id
 
         }
 
       );
 
       console.log(
-        `✅ Reconnected ${mac}`
+
+        `🔌 Disconnected ${device.mac}`
+
       );
 
     }
@@ -214,7 +280,9 @@ if(
     catch(err){
 
       console.log(
-        `❌ Failed reconnect ${mac}`
+
+        `❌ Disconnect Failed ${device.mac}`
+
       );
 
     }
@@ -223,841 +291,156 @@ if(
 
 }
 
-    return res.json({
 
-      success:true,
-
-      topup:true,
-
-      message:
-        "Internet top-up successful"
-
-    });
-
-  }
-
-}
-
-
-const existingSubscription =
-  await db
-  .collection("subscriptions")
-  .where(
-    "userId",
-    "==",
-    userId
-  )
-  .where(
-    "status",
-    "==",
-    "active"
-  )
-  .get();
-
-if(
-  !existingSubscription.empty
-){
-
-  return res.status(400).json({
-
-    success:false,
-
-    error:
-      "You already have an active subscription"
-
-  });
-
-}
-
-
-
-
-
-
-
-
-
-const amountToCharge =
-  Number(plan.price);
-
-const balanceBefore =
-  wallet;
-
-const balanceAfter =
-  balanceBefore - amountToCharge;
-
-const request_id =
-  "INTERNET_" + Date.now();
-
-const transactionRef =
-  db.collection("transactions")
-  .doc(request_id);
-
-await transactionRef.set({
-
-  request_id,
-
-  userId,
-
-  email:
-    userData.email || "",
-
-  fullName:
-    userData.fullName || "",
-
-  type:"internet",
-
-  category:"internet",
-
-  title:
-    `${plan.name} Internet`,
-
-  amount:
-    amountToCharge,
-
-  plan:
-    plan.name,
-
-  balanceBefore,
-
-  balanceAfter,
-
-  status:"pending",
-
-  refunded:false,
-
-  provider:"BIVA",
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-
-
-
-await userRef.update({
-
-  wallet:
-    admin.firestore
-    .FieldValue
-    .increment(-amountToCharge)
-
-});
-
-
-const expiryDate = new Date();
-
-expiryDate.setDate(
-  expiryDate.getDate() +
-  Number(plan.duration)
-);
-
-
-
-
-
-await db.collection(
-  "subscriptions"
-).add({
-
-  userId,
-
-  planId,
-
-  planName:
-    plan.name,
-
-  dataLimit:
-    plan.dataLimit,
-
-  amount:
-    amountToCharge,
-
-  speed:
-    plan.speed,
-
-  devices:
-    plan.devices,
-
-  duration:
-    plan.duration,
-
-  status:"active",
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp(),
-
-  expiryDate
-
-});
-
-
-
-
-//Cashback//
-
-
-const cashback =
-Math.floor(
-  amountToCharge * 0.05
-);
-
-
-await userRef.update({
-
-  cashbackBalance:
-    admin.firestore
-    .FieldValue
-    .increment(cashback)
-
-});
-
-
-
-await db.collection(
-  "transactions"
-).add({
-
-  userId,
-
-  email:
-    userData.email,
-
-  type:"cashback",
-
-  category:"cashback",
-
-  title:
-    "Internet Cashback",
-
-  amount:
-    cashback,
-
-  status:"success",
-
-  description:
-    `5% cashback from ${plan.name} Internet subscription`,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-
-
-await transactionRef.update({
-
-  status:"success",
-
-  completedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-
-return res.json({
-
-  success:true,
-
-  message:
-    "Internet subscription successful",
-
-  planName:
-    plan.name,
-
-  amount:
-    amountToCharge,
-
-  cashback,
-
-  request_id
-
-});
-
-
-
-}
-catch(err){
-
-  console.log(err);
-
-  return res.status(500).json({
-    success:false,
-    error:err.message
-  });
-
-}
-
-};
-
-
-
-
-
-
-
-
-exports.getInternetStatus = async (req, res) => {
-
-  try {
-
-    const voucherCode =
-      req.params.voucherCode;
-
-    const snapshot =
-      await db
-        .collection(
-          "internetAccounts"
-        )
-        .where(
-          "voucherCode",
-          "==",
-          voucherCode
-        )
-        .limit(1)
-        .get();
-
-    if(snapshot.empty){
-
-      return res.status(404).json({
-
-        success:false,
-
-        error:
-          "Voucher not found"
-
-      });
-
-    }
-
-    const account =
-      snapshot.docs[0].data();
-
-    return res.json({
-
-      success:true,
-
-      online:
-        account.status ===
-        "active",
-
-      status:
-        account.status,
-
-      voucherCode,
-
-      download:
-        Number(
-          account.totalDownloadBytes || 0
-        ),
-
-      upload:
-        Number(
-          account.totalUploadBytes || 0
-        ),
-
-      usedBytes:
-        Number(
-          account.totalUsedBytes || 0
-        ),
-
-      remainingBytes:
-        Number(
-          account.remainingBytes || 0
-        ),
-
-      signal: 0,
-
-      device: "-",
-
-      ip: "-",
-
-      ssid: "-",
-
-      isUnlimited:false
-
-    });
-
-  }
-
-  catch(err){
-
-    return res.status(500).json({
-
-      success:false,
-
-      error:
-        err.message
-
-    });
-
-  }
-
-};
-
-
-
-
-
-exports.authorizeClient = async (req, res) => {
-
-  try {
-
-    const {
-      userId,
-      clientMac
-    } = req.body;
-
-    if (
-      !userId ||
-      !clientMac
-    ) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        error:
-          "Missing userId or clientMac"
-
-      });
-
-    }
-
-    const profileRef =
-      db.collection("internetProfiles")
-        .doc(userId);
-
-    const profileSnap =
-      await profileRef.get();
-
-    if (!profileSnap.exists) {
-
-      return res.status(404).json({
-
-        success: false,
-
-        error:
-          "Internet profile not found"
-
-      });
-
-    }
-
-    const profile =
-      profileSnap.data();
-
-
-      const accountSnap =
-  await db
-  .collection(
-    "internetAccounts"
-  )
-  .where(
-    "userId",
-    "==",
-    userId
-  )
-  .limit(1)
-  .get();
-
-if(
-  accountSnap.empty
-){
-
-  return res.status(404).json({
-
-    success:false,
-
-    error:
-      "No active account"
-
-  });
-
-}
-
-const accountDoc =
-  accountSnap.docs[0];
-
-const account =
-  accountDoc.data();
-
-
-    if (
-      profile.status !== "active"
-    ) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        error:
-          "Internet plan expired"
-
-      });
-
-    }
-
-    if (
-      Number(profile.remainingBytes || 0) <= 0
-    ) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        error:
-          "No remaining data"
-
-      });
-
-    }
-
-
-    if(
-
-  account.clientMacs.length >=
-  account.maxDevices &&
-
-  !account.clientMacs.includes(
-    clientMac
-  )
-
-){
-
-  return res.status(400).json({
-
-    success:false,
-
-    error:
-      "Device limit reached"
-
-  });
-
-}
-
-    if(
-
-  !account.clientMacs.includes(
-    clientMac
-  )
-
-){
 
   await accountDoc.ref.update({
 
-    clientMacs:
+    status: "expired",
 
-      admin.firestore
-      .FieldValue
-      .arrayUnion(
-        clientMac
-      )
+    omadaValid: false
 
   });
 
-}
-
-    const response =
-      await axios.post(
-
-        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
-
-        {
-          clientMac
-        }
-
-      );
-
-    return res.json({
-
-      success: true,
-
-      data:
-        response.data
-
-    });
-
-  }
-
-  catch (err) {
-
-    return res.status(500).json({
-
-      success: false,
-
-      error:
-        err.message
-
-    });
-
-  }
-
-};
+console.log(
+  `🚫 Device ${clientMac} expired`
+);
 
 
 
-
-
-
-
-
-exports.activateInternet = async (req, res) => {
-
-  try {
-
-    const {
-      userId,
-      clientMac
-    } = req.body;
-
-    if (
-      !userId ||
-      !clientMac
-    ) {
-
-      return res.status(400).json({
-
-        success:false,
-
-        error:
-          "Missing userId or clientMac"
-
-      });
-
-    }
-
-    const pendingSnap =
-      await db
-      .collection(
-        "pendingInternetAccounts"
-      )
-      .where(
-        "userId",
-        "==",
-        userId
-      )
-.where(
-  "activated",
-  "==",
-  false
-)
-.orderBy(
-  "createdAt",
-  "desc"
-)
-.limit(1)
-      .get();
-
-    if (
-      pendingSnap.empty
-    ) {
-
-      return res.status(404).json({
-
-        success:false,
-
-        error:
-          "No pending internet plan"
-
-      });
-
-    }
-
-    const pendingDoc =
-      pendingSnap.docs[0];
-
-
-
-      const activeAccounts =
-  await db
-  .collection(
-    "internetAccounts"
-  )
-  .where(
-    "userId",
-    "==",
-    userId
-  )
-  .where(
-    "status",
-    "==",
-    "active"
-  )
-  .get();
-
-for(
-  const account of
-  activeAccounts.docs
-){
-
-  await account.ref.update({
-
-    status:"expired",
-
-    omadaValid:false
-
-  });
-
-}
-
-
-
-const activeSubscriptions =
   await db
   .collection("subscriptions")
   .where(
     "userId",
     "==",
-    userId
+    account.userId
   )
   .where(
     "status",
     "==",
     "active"
   )
-  .get();
+  .get()
+  .then(async(snapshot)=>{
 
-for(
-  const subscription of
-  activeSubscriptions.docs
-){
+    const batch =
+      db.batch();
 
-  await subscription.ref.update({
+    snapshot.docs.forEach(doc=>{
 
-    status:"expired"
+      batch.update(
+        doc.ref,
+        {
+          status:"expired"
+        }
+      );
+
+    });
+
+    await batch.commit();
 
   });
 
 }
 
 
-    const pending =
-      pendingDoc.data();
 
-    await db
-      .collection(
-        "internetAccounts"
-      )
-      .add({
 
-        userId,
 
-        usageOffsetBytes: 0,
 
-        totalDownloadBytes: 0,
+else {
 
-        totalUploadBytes: 0,
+  await accountDoc.ref.update({
 
-        totalUsedBytes: 0,
+    status: "active",
 
-        voucherCode:
-          pending.voucherCode,
+    omadaValid: true
 
-        plan:
-          pending.plan,
+  });
 
-        amount:
-          pending.amount,
+}
 
-        dataLimit:
-          pending.dataLimit,
 
-        clientMacs:[
-  clientMac
-],
-
-maxDevices:8,
-
-        totalDownloadBytes:0,
-
-        totalUploadBytes:0,
-
-        totalUsedBytes:0,
-
-        usageOffsetBytes:0,
-
-        remainingBytes:
-        pending.dataLimit,
-
-        status:"active",
-
-        activated:true,
-
-        createdAt:
-          admin.firestore
-          .FieldValue
-          .serverTimestamp()
-
-      });
+  
 
 
 const profileRef =
-  db.collection(
-    "internetProfiles"
-  )
-  .doc(userId);
+  db.collection("internetProfiles")
+    .doc(account.userId);
 
-await profileRef.set({
+const profileSnap =
+  await profileRef.get();
 
-  activeVoucherCode:
-    pending.voucherCode,
+if (profileSnap.exists) {
 
-  remainingBytes:
-    pending.dataLimit,
+await profileRef.update({
 
-  totalUsedBytes:0,
+  totalUsedBytes,
 
-  status:"active",
+  remainingBytes,
+
+status:
+  remainingBytes <= 0
+    ? "expired"
+    : "active",
+
+  lastConnectedIp:
+    record.ip || "",
 
   lastConnectedMac:
-    clientMac
+    record.mac || "",
 
-}, { merge:true });
+  updatedAt:
+    new Date()
+
+});
+
+  console.log(
+    `👤 Profile Updated ${account.userId}`
+  );
+
+} else {
+
+  console.log(
+    `⚠️ Missing Profile ${account.userId}`
+  );
+
+}
 
 
 
 
-    await pendingDoc.ref.update({
+console.log(
+  "💾 Account Updated"
+);
 
-      activated:true
+}
+  
+  
+  else {
 
-    });
-
-    return res.json({
-
-      success:true,
-
-      message:
-        "Internet activated"
-
-    });
+console.log(
+  `⚠️ Device ${clientMac} not found in Omada records`
+);
 
   }
 
-  catch(err){
+}
 
-    return res.status(500).json({
 
-      success:false,
 
-      error:
+    } catch (err) {
+
+      console.error(
+        "SYNC ERROR:",
         err.message
+      );
 
-    });
+    }
 
-  }
+  });
 
+}
+
+module.exports = {
+  startInternetUsageSync
 };
