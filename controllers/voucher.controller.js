@@ -447,7 +447,7 @@ if(
 
       await axios.post(
 
-        "https://further-investigations-seconds-cake.trycloudflare.com/omada/authorize-client",
+        "https://morrison-moon-packets-portsmouth.trycloudflare.com/omada/authorize-client",
 
         {
           clientMac: mac
