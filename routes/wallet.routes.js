@@ -17,6 +17,13 @@ router.post(
   walletController.creditWallet
 );
 
+
+router.post(
+  "/transfer",
+  walletController.transferWallet
+);
+
+
 // GET WALLET
 router.get(
   "/wallet/:uid",
