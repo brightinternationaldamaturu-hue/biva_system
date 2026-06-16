@@ -370,102 +370,119 @@ try{
 
   // SENDER
 
-  const senderRef =
-    db.collection("users")
-    .doc(senderId);
+const request_id =
+  "TRF_" + Date.now();
 
-  const senderSnap =
-    await senderRef.get();
+const balanceBefore =
+  Number(sender.wallet || 0);
 
-  if(!senderSnap.exists){
+const balanceAfter =
+  balanceBefore - transferAmount;
 
-    return res.status(404).json({
+await db.collection("transactions")
+.add({
 
-      success:false,
-      error:"Sender not found"
+  request_id,
 
-    });
+  userId: senderId,
 
-  }
+  email:
+    sender.email || "",
 
-  const sender =
-    senderSnap.data();
+  fullName:
+    sender.fullName || "",
 
-  if(
+  type: "transfer",
 
-    String(sender.transactionPin)
-    !== String(pin)
+  category: "transfer",
 
-  ){
+  title:
+    `Transfer to ${recipient.fullName}`,
 
-    return res.status(400).json({
+  amount:
+    transferAmount,
 
-      success:false,
-      error:"Invalid PIN"
+  balanceBefore,
 
-    });
+  balanceAfter,
 
-  }
+  recipientName:
+    recipient.fullName,
 
-  if(
+  recipientPhone:
+    recipient.phone,
 
-    Number(sender.wallet || 0)
-    < transferAmount
+  status: "success",
 
-  ){
+  provider: "BIVA",
 
-    return res.status(400).json({
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
 
-      success:false,
-      error:"Insufficient balance"
+});
 
-    });
-
-  }
 
   // RECIPIENT
 
-  const recipientQuery =
-    await db
-    .collection("users")
-    .where(
-      "phone",
-      "==",
-      recipientPhone
-    )
-    .limit(1)
-    .get();
+const receiverBalanceBefore =
+  Number(recipient.wallet || 0);
 
-  if(recipientQuery.empty){
+const receiverBalanceAfter =
+  receiverBalanceBefore +
+  transferAmount;
 
-    return res.status(404).json({
+await db.collection("transactions")
+.add({
 
-      success:false,
-      error:"Recipient not found"
+  request_id,
 
-    });
+  userId: recipientId,
 
-  }
+  email:
+    recipient.email || "",
 
-  const recipientDoc =
-    recipientQuery.docs[0];
+  fullName:
+    recipient.fullName || "",
 
-  const recipientId =
-    recipientDoc.id;
+  type:
+    "transfer_received",
 
-  const recipient =
-    recipientDoc.data();
+  category:
+    "transfer",
 
-  if(recipientId === senderId){
+  title:
+    `Transfer from ${sender.fullName}`,
 
-    return res.status(400).json({
+  amount:
+    transferAmount,
 
-      success:false,
-      error:"Cannot transfer to yourself"
+  balanceBefore:
+    receiverBalanceBefore,
 
-    });
+  balanceAfter:
+    receiverBalanceAfter,
 
-  }
+  senderName:
+    sender.fullName,
+
+  senderPhone:
+    sender.phone,
+
+  status:
+    "success",
+
+  provider:
+    "BIVA",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
 
   // WALLET MOVEMENT
 
