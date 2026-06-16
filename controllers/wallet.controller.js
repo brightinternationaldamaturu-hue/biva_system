@@ -336,14 +336,11 @@ try{
 
   } = req.body;
 
-  if(
-
-    !senderId ||
-    !recipientPhone ||
-    !amount ||
-    !pin
-
-  ){
+if(
+  !senderId ||
+  !recipientPhone ||
+  !amount
+){
 
     return res.status(400).json({
 
