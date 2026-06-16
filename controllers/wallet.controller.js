@@ -626,3 +626,70 @@ catch(err){
 }
 
 };
+
+
+
+
+
+
+
+
+exports.validateRecipient = async (req, res) => {
+
+  try{
+
+    const { phone } = req.body;
+
+    const snapshot =
+      await db
+      .collection("users")
+      .where(
+        "phone",
+        "==",
+        phone
+      )
+      .limit(1)
+      .get();
+
+    if(snapshot.empty){
+
+      return res.json({
+
+        success:false,
+
+        error:"Recipient not found"
+
+      });
+
+    }
+
+    const user =
+      snapshot.docs[0].data();
+
+    return res.json({
+
+      success:true,
+
+      fullName:
+        user.fullName,
+
+      phone:
+        user.phone
+
+    });
+
+  }
+
+  catch(err){
+
+    return res.status(500).json({
+
+      success:false,
+
+      error:err.message
+
+    });
+
+  }
+
+};
