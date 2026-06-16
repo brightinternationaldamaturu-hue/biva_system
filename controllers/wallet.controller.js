@@ -314,3 +314,263 @@ exports.getWallet = async (req, res) => {
   }
 
 };
+
+
+
+
+
+
+
+
+
+exports.transferWallet = async (req, res) => {
+
+try{
+
+  const {
+
+    senderId,
+    recipientPhone,
+    amount,
+    pin
+
+  } = req.body;
+
+  if(
+
+    !senderId ||
+    !recipientPhone ||
+    !amount ||
+    !pin
+
+  ){
+
+    return res.status(400).json({
+
+      success:false,
+      error:"Missing fields"
+
+    });
+
+  }
+
+  const transferAmount =
+    Number(amount);
+
+  if(transferAmount <= 0){
+
+    return res.status(400).json({
+
+      success:false,
+      error:"Invalid amount"
+
+    });
+
+  }
+
+  // SENDER
+
+  const senderRef =
+    db.collection("users")
+    .doc(senderId);
+
+  const senderSnap =
+    await senderRef.get();
+
+  if(!senderSnap.exists){
+
+    return res.status(404).json({
+
+      success:false,
+      error:"Sender not found"
+
+    });
+
+  }
+
+  const sender =
+    senderSnap.data();
+
+  if(
+
+    String(sender.transactionPin)
+    !== String(pin)
+
+  ){
+
+    return res.status(400).json({
+
+      success:false,
+      error:"Invalid PIN"
+
+    });
+
+  }
+
+  if(
+
+    Number(sender.wallet || 0)
+    < transferAmount
+
+  ){
+
+    return res.status(400).json({
+
+      success:false,
+      error:"Insufficient balance"
+
+    });
+
+  }
+
+  // RECIPIENT
+
+  const recipientQuery =
+    await db
+    .collection("users")
+    .where(
+      "phone",
+      "==",
+      recipientPhone
+    )
+    .limit(1)
+    .get();
+
+  if(recipientQuery.empty){
+
+    return res.status(404).json({
+
+      success:false,
+      error:"Recipient not found"
+
+    });
+
+  }
+
+  const recipientDoc =
+    recipientQuery.docs[0];
+
+  const recipientId =
+    recipientDoc.id;
+
+  const recipient =
+    recipientDoc.data();
+
+  if(recipientId === senderId){
+
+    return res.status(400).json({
+
+      success:false,
+      error:"Cannot transfer to yourself"
+
+    });
+
+  }
+
+  // WALLET MOVEMENT
+
+  await senderRef.update({
+
+    wallet:
+      admin.firestore
+      .FieldValue
+      .increment(
+        -transferAmount
+      )
+
+  });
+
+  await db
+    .collection("users")
+    .doc(recipientId)
+    .update({
+
+      wallet:
+        admin.firestore
+        .FieldValue
+        .increment(
+          transferAmount
+        )
+
+    });
+
+  // SENDER TX
+
+  await db.collection(
+    "transactions"
+  ).add({
+
+    userId:senderId,
+
+    type:"transfer",
+
+    category:"transfer",
+
+    title:
+      `Transfer to ${recipient.fullName}`,
+
+    amount:
+      transferAmount,
+
+    status:"success",
+
+    createdAt:
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
+  });
+
+  // RECEIVER TX
+
+  await db.collection(
+    "transactions"
+  ).add({
+
+    userId:recipientId,
+
+    type:"transfer_received",
+
+    category:"transfer",
+
+    title:
+      `Transfer from ${sender.fullName}`,
+
+    amount:
+      transferAmount,
+
+    status:"success",
+
+    createdAt:
+      admin.firestore
+      .FieldValue
+      .serverTimestamp()
+
+  });
+
+  return res.json({
+
+    success:true,
+
+    message:
+      "Transfer successful",
+
+    recipient:
+      recipient.fullName
+
+  });
+
+}
+catch(err){
+
+  return res.status(500).json({
+
+    success:false,
+
+    error:err.message
+
+  });
+
+}
+
+};
