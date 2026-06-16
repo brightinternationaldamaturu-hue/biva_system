@@ -24,6 +24,12 @@ router.post(
 );
 
 
+router.post(
+  "/validate-recipient",
+  walletController.validateRecipient
+);
+
+
 // GET WALLET
 router.get(
   "/wallet/:uid",
