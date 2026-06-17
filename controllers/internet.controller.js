@@ -1,227 +1,57 @@
-const axios = require("axios");
 const { db, admin } = require("../config/firebase");
-const { sendAdminNotification } = require( "../js/utils/adminNotification" );
-const { sendSalesNotification } = require( "../js/utils/sendSalesNotification");
+const axios = require("axios");
+
+exports.subscribeInternet = async (req, res) => {
+
+try {
+
+  const {
+    userId,
+    planId
+  } = req.body;
+
+  if(
+    !userId ||
+    !planId
+  ){
+    return res.status(400).json({
+      success:false,
+      error:"Missing fields"
+    });
+  }
+
+  const planRef =
+    db.collection("wifiPlans")
+    .doc(planId);
+
+  const planSnap =
+    await planRef.get();
+
+  if(!planSnap.exists){
+
+    return res.status(404).json({
+      success:false,
+      error:"Plan not found"
+    });
+
+  }
+
+  const plan =
+    planSnap.data();
 
 
-
-// ===============================
-// OFFICIAL VOUCHER PLANS
-// ===============================
-
-const voucherPlans = [
-
-  {
-    price:150,
-    desc:"1GB",
-    dataLimit:1073741824
-  },
-
-  {
-    price:300,
-    desc:"2GB",
-    dataLimit:2147483648
-  },
-
-  {
-    price:450,
-    desc:"3GB",
-    dataLimit:3221225472
-  },
-
-  {
-    price:500,
-    desc:"4GB",
-    dataLimit:4294967296
-  },
-
-  {
-    price:600,
-    desc:"6GB",
-    dataLimit:6442450944
-  },
-
-  {
-    price:700,
-    desc:"7GB",
-    dataLimit:7516192768
-  },
-
-  {
-    price:800,
-    desc:"8GB",
-    dataLimit:8589934592
-  },
-
-  {
-    price:1000,
-    desc:"10GB",
-    dataLimit:10737418240
-  },
-
-
-
-  { 
-  price: 2250,
-  desc: "15GB",
-  dataLimit: 16106127360
-},
-
-{
-  price: 3000,
-  desc: "20GB",
-  dataLimit: 21474836480
-},
-
-{
-  price: 3750,
-  desc: "25GB",
-  dataLimit: 26843545600
-},
-
-{
-  price: 5400,
-  desc: "36GB",
-  dataLimit: 38654705664
-},
-
-{
-  price: 9750,
-  desc: "65GB",
-  dataLimit: 69793218560
-},
-
-{
-  price: 15000,
-  desc: "100GB",
-  dataLimit: 107374182400
-},
-
-{
-  price: 16500,
-  desc: "120GB",
-  dataLimit: 128849018880
-},
-
-{
-  price: 17500,
-  desc: "150GB",
-  dataLimit: 161061273600
-},
-
-{
-  price: 25000,
-  desc: "200GB",
-  dataLimit: 214748364800
-},
-
-{
-  price: 30000,
-  desc: "Unlimited",
-  dataLimit: null,
-  validityDays: 30
-}
-
-];
-
-
-// ===============================
-// BUY VOUCHER
-// ===============================
-
-exports.buyVoucher = async (req, res) => {
-
-  let amountToCharge = 0;
-
-  let userRef = null;
-
-  let transactionRef = null;
-
-  try {
-
-const {
-
-  userId,
-  desc,
-  recipientPhone
-
-} = req.body;
-
-    // =========================
-    // VALIDATION
-    // =========================
-
-    if (
-
-      !userId ||
-      !desc
-
-    ) {
-
-      return res.status(400).json({
-
-        success:false,
-
-        error:"Missing fields"
-
-      });
-
-    }
-
-    // =========================
-    // FIND PLAN
-    // =========================
-
-    const selectedPlan =
-
-      voucherPlans.find(
-
-        p => p.desc === desc
-
-      );
-    
-    const planBytes =
-  Number(
-    selectedPlan.dataLimit || 0
-  );
-  
-
-    if (!selectedPlan) {
-
-      return res.status(400).json({
-
-        success:false,
-
-        error:"Invalid voucher plan"
-
-      });
-
-    }
-
-amountToCharge =
-  Number(selectedPlan.price);
-
-// =========================
-// USER
-// =========================
-
-userRef =
-
+    const userRef =
   db.collection("users")
   .doc(userId);
 
 const userSnap =
-
   await userRef.get();
 
-if (!userSnap.exists) {
+if(!userSnap.exists){
 
   return res.status(404).json({
-
     success:false,
-
     error:"User not found"
-
   });
 
 }
@@ -229,270 +59,127 @@ if (!userSnap.exists) {
 const userData =
   userSnap.data();
 
+const wallet =
+  Number(userData.wallet || 0);
 
-  // =========================
-// BENEFICIARY
-// =========================
+if(wallet < Number(plan.price)){
 
-let beneficiaryId =
-  userId;
+  return res.status(400).json({
 
-let beneficiaryName =
-  userData.fullName;
+    success:false,
 
-if(recipientPhone){
+    error:"Insufficient balance",
 
-  const recipientQuery =
-    await db
-    .collection("users")
-    .where(
-      "phone",
-      "==",
-      recipientPhone
-    )
-    .limit(1)
-    .get();
+    wallet,
 
-  if(recipientQuery.empty){
+    required:
+      plan.price
 
-    return res.status(404).json({
-
-      success:false,
-
-      error:
-        "Recipient not found"
-
-    });
-
-  }
-
-  beneficiaryId =
-    recipientQuery.docs[0].id;
-
-  beneficiaryName =
-    recipientQuery.docs[0]
-    .data()
-    .fullName;
+  });
 
 }
 
-// =========================
-// BALANCE SNAPSHOT
-// =========================
-
-const balanceBefore =
-  Number(userData.wallet || 0);
-
-const balanceAfter =
-  balanceBefore - amountToCharge;
-
-    // =========================
-    // BALANCE CHECK
-    // =========================
-
-    if (
-
-      Number(userData.wallet || 0) <
-      amountToCharge
-
-    ) {
-
-      return res.status(400).json({
-
-        success:false,
-
-        error:"Insufficient balance"
-
-      });
-
-    }
-
-    // =========================
-    // REQUEST ID
-    // =========================
-
-    const request_id =
-
-      "VOUCHER_" + Date.now();
-
-    // =========================
-    // CREATE PENDING TX
-    // =========================
-
-    transactionRef =
-
-      db.collection("transactions")
-      .doc(request_id);
-
-    await transactionRef.set({
-
-      request_id,
-
-      userId,
-
-      email:
-        userData.email || "",
-
-      fullName:
-        userData.fullName || "",
-      
-        recipientPhone:
-  recipientPhone || "",
-
-recipientName:
-  recipientPhone
-    ? beneficiaryName
-    : "",
-
-      type:"voucher",
-
-      category:"voucher",
-
-      title:
-
-recipientPhone
-
-? `${desc} purchased for ${beneficiaryName}`
-
-: `${desc} Voucher`,
-
-      amount:
-        amountToCharge,
-
-      plan:
-        desc,
-        
-      balanceBefore,
-      balanceAfter,
-      status:"pending",
 
 
-      refunded:false,
+const profileRef =
+  db.collection(
+    "internetProfiles"
+  )
+  .doc(userId);
 
-      provider:"BIVA",
+const profileSnap =
+  await profileRef.get();
 
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
+if(
+  profileSnap.exists
+){
 
-    });
-
-    // =========================
-    // DEDUCT WALLET
-    // =========================
-
-    await userRef.update({
-
-      wallet:
-        admin.firestore
-        .FieldValue
-        .increment(-amountToCharge)
-
-    });
-
-
-
-// =========================
-// CASHBACK
-// =========================
-
-// 10% cashback
-
-const cashback =
-
-  Math.floor(
-    amountToCharge * 0.10
-  );
-
-
-
-    // =========================
-    // GENERATE VOUCHER
-    // =========================
-
-const voucherCode =
-
-  "BIVA-" +
-
-  Date.now();
-
-  const profileRef =
-  db.collection("internetProfiles")
-  .doc(beneficiaryId);
-
-const activeAccountSnap =
+const accountSnap =
   await db
   .collection(
     "internetAccounts"
   )
-.where(
-  "userId",
-  "==",
-  beneficiaryId
-)
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .orderBy(
+    "createdAt",
+    "desc"
+  )
   .limit(1)
   .get();
 
+  if(
+    !accountSnap.empty
+  ){
 
+    const accountDoc =
+      accountSnap.docs[0];
 
-  if(!activeAccountSnap.empty){
+      const account =
+  accountDoc.data();
 
-  const accountDoc =
-    activeAccountSnap.docs[0];
+    await accountDoc.ref.update({
 
-await accountDoc.ref.update({
+      dataLimit:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
 
-  dataLimit:
-    admin.firestore.FieldValue.increment(
-      planBytes
-    ),
+      remainingBytes:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.dataLimit
+          )
+        ),
+
+      amount:
+        admin.firestore
+        .FieldValue
+        .increment(
+          Number(
+            plan.price
+          )
+        ),
+
+      status:"active",
+
+      omadaValid:true
+
+    });
+
+await profileRef.update({
+
+  activeVoucherCode:
+    account.voucherCode,
 
   remainingBytes:
-    admin.firestore.FieldValue.increment(
-      planBytes
+    admin.firestore
+    .FieldValue
+    .increment(
+      Number(plan.dataLimit)
     ),
 
-  status:"active",
+  totalPurchasedBytes:
+    admin.firestore
+    .FieldValue
+    .increment(
+      Number(plan.dataLimit)
+    ),
 
-  omadaValid:true,
-
-  expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    )
+  status:"active"
 
 });
 
-  await profileRef.update({
 
-    totalPurchasedBytes:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
-
-    remainingBytes:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
-
-    expiryDate:
-      new Date(
-        Date.now() +
-        30 * 24 * 60 * 60 * 1000
-      ),
-
-    updatedAt:
-      admin.firestore.FieldValue.serverTimestamp()
-
-  });
-
-
-
-
-  const account =
-  accountDoc.data();
 
 if(
   account.clientMacs &&
@@ -511,9 +198,15 @@ if(
         "https://portal.biva.ng/omada/authorize-client",
 
         {
+
           clientMac: mac
+
         }
 
+      );
+
+      console.log(
+        `✅ Reconnected ${mac}`
       );
 
     }
@@ -521,7 +214,7 @@ if(
     catch(err){
 
       console.log(
-        err.message
+        `❌ Failed reconnect ${mac}`
       );
 
     }
@@ -530,17 +223,190 @@ if(
 
 }
 
+    return res.json({
 
-  await transactionRef.update({
+      success:true,
 
-  status:"success",
+      topup:true,
 
-  completedAt:
+      message:
+        "Internet top-up successful"
+
+    });
+
+  }
+
+}
+
+
+const existingSubscription =
+  await db
+  .collection("subscriptions")
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+if(
+  !existingSubscription.empty
+){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "You already have an active subscription"
+
+  });
+
+}
+
+
+
+
+
+
+
+
+
+const amountToCharge =
+  Number(plan.price);
+
+const balanceBefore =
+  wallet;
+
+const balanceAfter =
+  balanceBefore - amountToCharge;
+
+const request_id =
+  "INTERNET_" + Date.now();
+
+const transactionRef =
+  db.collection("transactions")
+  .doc(request_id);
+
+await transactionRef.set({
+
+  request_id,
+
+  userId,
+
+  email:
+    userData.email || "",
+
+  fullName:
+    userData.fullName || "",
+
+  type:"internet",
+
+  category:"internet",
+
+  title:
+    `${plan.name} Internet`,
+
+  amount:
+    amountToCharge,
+
+  plan:
+    plan.name,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  status:"pending",
+
+  refunded:false,
+
+  provider:"BIVA",
+
+  createdAt:
     admin.firestore
     .FieldValue
     .serverTimestamp()
 
 });
+
+
+
+
+
+await userRef.update({
+
+  wallet:
+    admin.firestore
+    .FieldValue
+    .increment(-amountToCharge)
+
+});
+
+
+const expiryDate = new Date();
+
+expiryDate.setDate(
+  expiryDate.getDate() +
+  Number(plan.duration)
+);
+
+
+
+
+
+await db.collection(
+  "subscriptions"
+).add({
+
+  userId,
+
+  planId,
+
+  planName:
+    plan.name,
+
+  dataLimit:
+    plan.dataLimit,
+
+  amount:
+    amountToCharge,
+
+  speed:
+    plan.speed,
+
+  devices:
+    plan.devices,
+
+  duration:
+    plan.duration,
+
+  status:"active",
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp(),
+
+  expiryDate
+
+});
+
+
+
+
+//Cashback//
+
+
+const cashback =
+Math.floor(
+  amountToCharge * 0.05
+);
 
 
 await userRef.update({
@@ -551,6 +417,7 @@ await userRef.update({
     .increment(cashback)
 
 });
+
 
 
 await db.collection(
@@ -566,14 +433,16 @@ await db.collection(
 
   category:"cashback",
 
-  title:"Voucher Cashback",
+  title:
+    "Internet Cashback",
 
-  amount:cashback,
+  amount:
+    cashback,
 
   status:"success",
 
   description:
-    `10% cashback from ${desc} top-up purchase`,
+    `5% cashback from ${plan.name} Internet subscription`,
 
   createdAt:
     admin.firestore
@@ -584,317 +453,140 @@ await db.collection(
 
 
 
-  return res.json({
 
-    success:true,
+await transactionRef.update({
 
-    purchaseType:"topup",
+  status:"success",
 
-    message:
-      `${desc} Top-up to your Balance`
-
-  });
-
-}
-
-  await db
-  .collection(
-    "pendingInternetAccounts"
-  )
-  .add({
-
-    userId:
-  beneficiaryId,
-
-    voucherCode,
-
-    plan:
-      desc,
-
-    dataLimit:
-      selectedPlan.dataLimit,
-
-    amount:
-      amountToCharge,
-
-    activated:false,
-
-    createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
-
-  });
-
-
-
-
-
-const profileSnap =
-  await profileRef.get();
-
-if (!profileSnap.exists) {
-
-
-
-await profileRef.set({
-
-  userId:
-    beneficiaryId,
-
-  totalPurchasedBytes:
-    selectedPlan.dataLimit || 0,
-
-  totalUsedBytes: 0,
-
-  remainingBytes:
-    selectedPlan.dataLimit || 0,
-
-  isUnlimited:
-    selectedPlan.dataLimit === null,
-
-expiryDate:
-  new Date(
-    Date.now() +
-    30 * 24 * 60 * 60 * 1000
-  ),
-
-  activeVoucherCode:
-    voucherCode,
-
-  lastConnectedMac: "",
-
-  lastConnectedIp: "",
-
-  status: "active",
-
-  createdAt:
-    admin.firestore.FieldValue.serverTimestamp(),
-
-  updatedAt:
-    admin.firestore.FieldValue.serverTimestamp()
-
-});
-
-}
-
-else {
-
-await profileRef.update({
-
-  totalPurchasedBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
-      selectedPlan.dataLimit
-    ),
-
-  remainingBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
-      selectedPlan.dataLimit
-    ),
-
-  activeVoucherCode:
-    voucherCode,
-
-  expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    ),
-
-  status:"active",
-
-  updatedAt:
+  completedAt:
     admin.firestore
     .FieldValue
     .serverTimestamp()
 
 });
 
-}
 
 
-    // =========================
-    // SAVE VOUCHER
-    // =========================
+return res.json({
 
-    await db.collection("vouchers")
-    .doc(voucherCode)
-    .set({
+  success:true,
 
-      code:
-        voucherCode,
+  message:
+    "Internet subscription successful",
 
-      plan:
-        desc,
-
-      amount:
-        amountToCharge,
-
-      used:false,
-
-      userId,
-
-      email:
-        userData.email,
-
-        beneficiaryId,
-
-recipientPhone:
-  recipientPhone || "",
-
-recipientName:
-  recipientPhone
-    ? beneficiaryName
-    : "",
-
-      createdAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
-
-    });
-
-    // =========================
-    // SUCCESS TX
-    // =========================
-
-    await transactionRef.update({
-
-      status:"success",
-
-      response:{ voucher: voucherCode },
-      
-
-      completedAt:
-        admin.firestore
-        .FieldValue
-        .serverTimestamp()
-
-    });
-
-
-
-
-  await sendAdminNotification({
-
-  type: "voucher",
-
-  title:
-    `${userData.fullName} generated ₦${amountToCharge} Voucher`,
+  planName:
+    plan.name,
 
   amount:
     amountToCharge,
 
-  reference:
-    request_id,
+  cashback,
 
-  user: {
-
-    userId,
-
-    fullName:
-      userData.fullName,
-
-    email:
-      userData.email
-
-  },
-
-  extra: {
-
-    voucher:
-      voucherCode,
-
-    plan:
-      desc,
-
-    email:
-      userData.email,
-
-    amount:
-      amountToCharge,
-
-    transactionType:
-      "voucher"
-
-  }
+  request_id
 
 });
 
 
 
+}
+catch(err){
 
-// ADD TO USER
+  console.log(err);
 
-await userRef.update({
+  return res.status(500).json({
+    success:false,
+    error:err.message
+  });
 
-  cashbackBalance:
-    admin.firestore
-    .FieldValue
-    .increment(cashback)
+}
 
-});
-
-// SAVE CASHBACK TX
-
-await db.collection(
-  "transactions"
-).add({
-
-  userId,
-
-  email: userData.email,
-
-  type: "cashback",
-
-  category: "cashback",
-
-  title: "Voucher Cashback",
-
-  amount: cashback,
-
-  status: "success",
-
-  description:
-    `10% cashback from ${desc} voucher purchase`,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
+};
 
 
-    // =========================
-    // RESPONSE
-    // =========================
+
+
+
+
+
+
+exports.getInternetStatus = async (req, res) => {
+
+  try {
+
+    const voucherCode =
+      req.params.voucherCode;
+
+    const snapshot =
+      await db
+        .collection(
+          "internetAccounts"
+        )
+        .where(
+          "voucherCode",
+          "==",
+          voucherCode
+        )
+        .limit(1)
+        .get();
+
+    if(snapshot.empty){
+
+      return res.status(404).json({
+
+        success:false,
+
+        error:
+          "Voucher not found"
+
+      });
+
+    }
+
+    const account =
+      snapshot.docs[0].data();
 
     return res.json({
 
-  success:true,
+      success:true,
 
-  beneficiaryName,
+      online:
+        account.status ===
+        "active",
 
-  message:
+      status:
+        account.status,
 
-recipientPhone
+      voucherCode,
 
-? `${desc} successfully purchased for ${beneficiaryName}`
+      download:
+        Number(
+          account.totalDownloadBytes || 0
+        ),
 
-: `Voucher generated successfully. Cashback ₦${cashback} earned 🎉`,
+      upload:
+        Number(
+          account.totalUploadBytes || 0
+        ),
 
-      voucher:
-        voucherCode,
+      usedBytes:
+        Number(
+          account.totalUsedBytes || 0
+        ),
 
-      cashback,
+      remainingBytes:
+        Number(
+          account.remainingBytes || 0
+        ),
 
-      amount:
-        amountToCharge
+      signal: 0,
+
+      device: "-",
+
+      ip: "-",
+
+      ssid: "-",
+
+      isUnlimited:false
 
     });
 
@@ -902,90 +594,467 @@ recipientPhone
 
   catch(err){
 
-    console.log(
-      "VOUCHER ERROR:",
-      err.message
-    );
+    return res.status(500).json({
 
-    // =========================
-    // REFUND
-    // =========================
+      success:false,
 
-    try {
+      error:
+        err.message
 
-      if (
+    });
 
-        userRef &&
-        transactionRef &&
-        amountToCharge > 0
+  }
 
-      ) {
+};
 
-        const txSnap =
 
-          await transactionRef.get();
 
-        const txData =
-          txSnap.data();
 
-        if (
 
-          txData &&
-          txData.refunded !== true &&
-          txData.status !== "success"
+exports.authorizeClient = async (req, res) => {
 
-        ) {
+  try {
 
-          // MARK FAILED
+    const {
+      userId,
+      clientMac
+    } = req.body;
 
-          await transactionRef.update({
+    if (
+      !userId ||
+      !clientMac
+    ) {
 
-            status:"failed",
+      return res.status(400).json({
 
-            refunded:true,
+        success: false,
 
-            failureReason:
-              err.message || "Unknown error",
+        error:
+          "Missing userId or clientMac"
 
-            failedAt:
-              admin.firestore
-              .FieldValue
-              .serverTimestamp()
+      });
 
-          });
+    }
 
-          // REFUND
+    const profileRef =
+      db.collection("internetProfiles")
+        .doc(userId);
 
-          await userRef.update({
+    const profileSnap =
+      await profileRef.get();
 
-            wallet:
-              admin.firestore
-              .FieldValue
-              .increment(amountToCharge)
+    if (!profileSnap.exists) {
 
-          });
+      return res.status(404).json({
 
+        success: false,
+
+        error:
+          "Internet profile not found"
+
+      });
+
+    }
+
+    const profile =
+      profileSnap.data();
+
+
+      const accountSnap =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .limit(1)
+  .get();
+
+if(
+  accountSnap.empty
+){
+
+  return res.status(404).json({
+
+    success:false,
+
+    error:
+      "No active account"
+
+  });
+
+}
+
+const accountDoc =
+  accountSnap.docs[0];
+
+const account =
+  accountDoc.data();
+
+
+    if (
+      profile.status !== "active"
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "Internet plan expired"
+
+      });
+
+    }
+
+    if (
+      Number(profile.remainingBytes || 0) <= 0
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error:
+          "No remaining data"
+
+      });
+
+    }
+
+
+    if(
+
+  account.clientMacs.length >=
+  account.maxDevices &&
+
+  !account.clientMacs.includes(
+    clientMac
+  )
+
+){
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "Device limit reached"
+
+  });
+
+}
+
+    if(
+
+  !account.clientMacs.includes(
+    clientMac
+  )
+
+){
+
+  await accountDoc.ref.update({
+
+    clientMacs:
+
+      admin.firestore
+      .FieldValue
+      .arrayUnion(
+        clientMac
+      )
+
+  });
+
+}
+
+    const response =
+      await axios.post(
+
+        "https://portal.biva.ng/omada/authorize-client",
+
+        {
+          clientMac
         }
 
-      }
-
-    }
-
-    catch(refundErr){
-
-      console.log(
-        "REFUND ERROR:",
-        refundErr.message
       );
 
+    return res.json({
+
+      success: true,
+
+      data:
+        response.data
+
+    });
+
+  }
+
+  catch (err) {
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+        err.message
+
+    });
+
+  }
+
+};
+
+
+
+
+
+
+
+
+exports.activateInternet = async (req, res) => {
+
+  try {
+
+    const {
+      userId,
+      clientMac
+    } = req.body;
+
+    if (
+      !userId ||
+      !clientMac
+    ) {
+
+      return res.status(400).json({
+
+        success:false,
+
+        error:
+          "Missing userId or clientMac"
+
+      });
+
     }
+
+    const pendingSnap =
+      await db
+      .collection(
+        "pendingInternetAccounts"
+      )
+      .where(
+        "userId",
+        "==",
+        userId
+      )
+.where(
+  "activated",
+  "==",
+  false
+)
+.orderBy(
+  "createdAt",
+  "desc"
+)
+.limit(1)
+      .get();
+
+    if (
+      pendingSnap.empty
+    ) {
+
+      return res.status(404).json({
+
+        success:false,
+
+        error:
+          "No pending internet plan"
+
+      });
+
+    }
+
+    const pendingDoc =
+      pendingSnap.docs[0];
+
+
+
+      const activeAccounts =
+  await db
+  .collection(
+    "internetAccounts"
+  )
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+for(
+  const account of
+  activeAccounts.docs
+){
+
+  await account.ref.update({
+
+    status:"expired",
+
+    omadaValid:false
+
+  });
+
+}
+
+
+
+const activeSubscriptions =
+  await db
+  .collection("subscriptions")
+  .where(
+    "userId",
+    "==",
+    userId
+  )
+  .where(
+    "status",
+    "==",
+    "active"
+  )
+  .get();
+
+for(
+  const subscription of
+  activeSubscriptions.docs
+){
+
+  await subscription.ref.update({
+
+    status:"expired"
+
+  });
+
+}
+
+
+    const pending =
+      pendingDoc.data();
+
+    await db
+      .collection(
+        "internetAccounts"
+      )
+      .add({
+
+        userId,
+
+        usageOffsetBytes: 0,
+
+        totalDownloadBytes: 0,
+
+        totalUploadBytes: 0,
+
+        totalUsedBytes: 0,
+
+        voucherCode:
+          pending.voucherCode,
+
+        plan:
+          pending.plan,
+
+        amount:
+          pending.amount,
+
+        dataLimit:
+          pending.dataLimit,
+
+        clientMacs:[
+  clientMac
+],
+
+maxDevices:8,
+
+        totalDownloadBytes:0,
+
+        totalUploadBytes:0,
+
+        totalUsedBytes:0,
+
+        usageOffsetBytes:0,
+
+        remainingBytes:
+        pending.dataLimit,
+
+        status:"active",
+
+        activated:true,
+
+        createdAt:
+          admin.firestore
+          .FieldValue
+          .serverTimestamp()
+
+      });
+
+
+const profileRef =
+  db.collection(
+    "internetProfiles"
+  )
+  .doc(userId);
+
+await profileRef.set({
+
+  activeVoucherCode:
+    pending.voucherCode,
+
+  remainingBytes:
+    pending.dataLimit,
+
+  totalUsedBytes:0,
+
+  status:"active",
+
+  lastConnectedMac:
+    clientMac
+
+}, { merge:true });
+
+
+
+
+    await pendingDoc.ref.update({
+
+      activated:true
+
+    });
+
+    return res.json({
+
+      success:true,
+
+      message:
+        "Internet activated"
+
+    });
+
+  }
+
+  catch(err){
 
     return res.status(500).json({
 
       success:false,
 
       error:
-        err.message || "Voucher failed"
+        err.message
 
     });
 
