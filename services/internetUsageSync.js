@@ -25,7 +25,7 @@ const activeAccounts =
 
 const recordsResponse =
   await axios.get(
-    "https://morrison-moon-packets-portsmouth.trycloudflare.com/omada/authed-records"
+    "https://portal.biva.ng/omada/authed-records"
   );
 
 const records =
@@ -258,7 +258,7 @@ for(
 
       await axios.post(
 
-        "https://morrison-moon-packets-portsmouth.trycloudflare.com/omada/disconnect-client",
+        "https://portal.biva.ng/omada/disconnect-client",
 
         {
 
