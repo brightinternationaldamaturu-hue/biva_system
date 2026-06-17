@@ -139,12 +139,13 @@ exports.buyVoucher = async (req, res) => {
 
   try {
 
-    const {
+const {
 
-      userId,
-      desc
+  userId,
+  desc,
+  recipientPhone
 
-    } = req.body;
+} = req.body;
 
     // =========================
     // VALIDATION
@@ -228,6 +229,53 @@ if (!userSnap.exists) {
 const userData =
   userSnap.data();
 
+
+  // =========================
+// BENEFICIARY
+// =========================
+
+let beneficiaryId =
+  userId;
+
+let beneficiaryName =
+  userData.fullName;
+
+if(recipientPhone){
+
+  const recipientQuery =
+    await db
+    .collection("users")
+    .where(
+      "phone",
+      "==",
+      recipientPhone
+    )
+    .limit(1)
+    .get();
+
+  if(recipientQuery.empty){
+
+    return res.status(404).json({
+
+      success:false,
+
+      error:
+        "Recipient not found"
+
+    });
+
+  }
+
+  beneficiaryId =
+    recipientQuery.docs[0].id;
+
+  beneficiaryName =
+    recipientQuery.docs[0]
+    .data()
+    .fullName;
+
+}
+
 // =========================
 // BALANCE SNAPSHOT
 // =========================
@@ -287,13 +335,26 @@ const balanceAfter =
 
       fullName:
         userData.fullName || "",
+      
+        recipientPhone:
+  recipientPhone || "",
+
+recipientName:
+  recipientPhone
+    ? beneficiaryName
+    : "",
 
       type:"voucher",
 
       category:"voucher",
 
       title:
-        `${desc} Voucher`,
+
+recipientPhone
+
+? `${desc} purchased for ${beneficiaryName}`
+
+: `${desc} Voucher`,
 
       amount:
         amountToCharge,
@@ -358,18 +419,18 @@ const voucherCode =
 
   const profileRef =
   db.collection("internetProfiles")
-  .doc(userId);
+  .doc(beneficiaryId);
 
 const activeAccountSnap =
   await db
   .collection(
     "internetAccounts"
   )
-  .where(
-    "userId",
-    "==",
-    userId
-  )
+.where(
+  "userId",
+  "==",
+  beneficiaryId
+)
   .limit(1)
   .get();
 
@@ -542,7 +603,8 @@ await db.collection(
   )
   .add({
 
-    userId,
+    userId:
+  beneficiaryId,
 
     voucherCode,
 
@@ -577,7 +639,8 @@ if (!profileSnap.exists) {
 
 await profileRef.set({
 
-  userId,
+  userId:
+    beneficiaryId,
 
   totalPurchasedBytes:
     selectedPlan.dataLimit || 0,
@@ -677,6 +740,16 @@ await profileRef.update({
 
       email:
         userData.email,
+
+        beneficiaryId,
+
+recipientPhone:
+  recipientPhone || "",
+
+recipientName:
+  recipientPhone
+    ? beneficiaryName
+    : "",
 
       createdAt:
         admin.firestore
@@ -803,10 +876,17 @@ await db.collection(
 
     return res.json({
 
-      success:true,
+  success:true,
 
-      message:
-        `Voucher generated successfully. Cashback ₦${cashback} earned 🎉`,
+  beneficiaryName,
+
+  message:
+
+recipientPhone
+
+? `${desc} successfully purchased for ${beneficiaryName}`
+
+: `Voucher generated successfully. Cashback ₦${cashback} earned 🎉`,
 
       voucher:
         voucherCode,
