@@ -508,7 +508,7 @@ if(
 
       await axios.post(
 
-        "https://morrison-moon-packets-portsmouth.trycloudflare.com/omada/authorize-client",
+        "https://portal.biva.ng/omada/authorize-client",
 
         {
           clientMac: mac
