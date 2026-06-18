@@ -38,26 +38,7 @@ exports.getPlans = async (req, res) => {
         0
       );
 
-      let profit = 0;
-
-      if (basePrice <= 300) {
-        profit = 13;
-      }
-      else if (basePrice <= 1000) {
-        profit = 50;
-      }
-      else if (basePrice <= 2000) {
-        profit = 65;
-      }
-      else if (basePrice <= 3500) {
-        profit = 100;
-      }
-      else if (basePrice <= 5000) {
-        profit = 150;
-      }
-      else {
-        profit = 200;
-      }
+      const profit = Math.ceil(basePrice * 0.0825);
 
       const selling_price =
         basePrice + profit;
@@ -228,26 +209,7 @@ exports.buyData = async (req, res) => {
       0
     );
 
-    let profit = 0;
-
-    if (originalAmount <= 300) {
-      profit = 13;
-    }
-    else if (originalAmount <= 1000) {
-      profit = 50;
-    }
-    else if (originalAmount <= 2000) {
-      profit = 65;
-    }
-    else if (originalAmount <= 3500) {
-      profit = 100;
-    }
-    else if (originalAmount <= 5000) {
-      profit = 150;
-    }
-    else {
-      profit = 200;
-    }
+const profit = Math.ceil(originalAmount * 0.0825);
 
     sellingAmount =
       originalAmount + profit;
@@ -521,17 +483,7 @@ if(
     phoneNumber:
       phone,
 
-    title:
-      `${networkMap[String(network_id)]} Data Purchase`,
-    
-    network:
-        networkMap[
-          String(network_id)
-        ] || "Unknown",
-
     network_id,
-
-    data_plan,
 
     plan:
         selectedPlan.plan_name ||
