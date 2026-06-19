@@ -12,6 +12,7 @@ const { startInternetUsageSync} = require("./services/internetUsageSync");
 
 
 
+
 // MIDDLEWARE
 app.use(cors());
 app.use(express.json());
