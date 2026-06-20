@@ -712,11 +712,21 @@ const account =
 
 if (
 
-  !profile.isUnlimited &&
+  account.plan !== "Home/Business Unlimited" &&
 
-  Number(profile.remainingBytes || 0) <= 0
+  Number(account.remainingBytes || 0) <= 0
 
 ) {
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:"No remaining data"
+
+  });
+
+} {
 
   return res.status(400).json({
 
@@ -1016,6 +1026,8 @@ maxDevices:
         remainingBytes:
   pending.plan === "Home/Business Unlimited"
     ? -1
+    : pending.plan === "Phone Unlimited"
+    ? 6442450944
     : pending.dataLimit,
 
         status:"active",
@@ -1045,12 +1057,14 @@ await profileRef.set({
   isUnlimited:
   pending.plan === "Phone Unlimited" ||
   pending.plan === "Home/Business Unlimited",
-  
 
-  remainingBytes:
-    pending.plan === "Home/Business Unlimited"
-      ? -1
-      : pending.dataLimit,
+
+remainingBytes:
+  pending.plan === "Home Unlimited"
+    ? -1
+    : pending.plan === "Phone Unlimited"
+    ? 6442450944
+    : pending.dataLimit,
 
   totalUsedBytes:0,
 
