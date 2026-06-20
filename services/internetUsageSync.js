@@ -176,12 +176,22 @@ const totalUsedBytes =
     usageOffsetBytes
   );
 
-const remainingBytes =
-  Math.max(
-    0,
-    Number(account.dataLimit || 0)
-    - totalUsedBytes
-  );
+let remainingBytes;
+
+if(account.isUnlimited){
+
+  remainingBytes = -1;
+
+}else{
+
+  remainingBytes =
+    Math.max(
+      0,
+      Number(account.dataLimit || 0)
+      - totalUsedBytes
+    );
+
+}
 
 console.log(
   `⬇️ Download: ${totalDownloadBytes}`
@@ -234,7 +244,32 @@ console.log(
 );
 
 
+if(
+
+  account.expiryDate &&
+
+  new Date(account.expiryDate)
+  < new Date()
+
+){
+
+  await accountDoc.ref.update({
+
+    status:"expired"
+
+  });
+
+  continue;
+
+}
+
+
+
+
+
 if (
+
+  !account.isUnlimited &&
 
   account.status !== "expired" &&
 
@@ -379,9 +414,13 @@ await profileRef.update({
   remainingBytes,
 
 status:
-  remainingBytes <= 0
-    ? "expired"
-    : "active",
+  account.isUnlimited
+    ? "active"
+    : (
+        remainingBytes <= 0
+          ? "expired"
+          : "active"
+      ),
 
   lastConnectedIp:
     record.ip || "",
