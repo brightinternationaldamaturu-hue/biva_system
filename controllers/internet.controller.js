@@ -975,11 +975,31 @@ for(
         dataLimit:
           pending.dataLimit,
 
+          isUnlimited:
+  pending.plan === "Phone Unlimited" ||
+  pending.plan === "Home/Business Unlimited",
+
+dailyLimit:
+  pending.plan === "Phone Unlimited"
+    ? 6442450944
+    : null,
+
+expiryDate:
+  new Date(
+    Date.now() +
+    30 * 24 * 60 * 60 * 1000
+  ),
+
         clientMacs:[
   clientMac
 ],
 
-maxDevices:8,
+maxDevices:
+  pending.plan === "Phone Unlimited"
+    ? 2
+    : pending.plan === "Home/Business Unlimited"
+    ? 8
+    : 1,
 
         totalDownloadBytes:0,
 
