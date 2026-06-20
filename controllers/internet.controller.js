@@ -714,6 +714,8 @@ if (
 
   account.plan !== "Home/Business Unlimited" &&
 
+  account.plan !== "Phone Unlimited" &&
+
   Number(account.remainingBytes || 0) <= 0
 
 ) {
@@ -723,17 +725,6 @@ if (
     success:false,
 
     error:"No remaining data"
-
-  });
-
-} {
-
-  return res.status(400).json({
-
-    success: false,
-
-    error:
-      "No remaining data"
 
   });
 
@@ -1060,7 +1051,7 @@ await profileRef.set({
 
 
 remainingBytes:
-  pending.plan === "Home Unlimited"
+  pending.plan === "Home/Business Unlimited"
     ? -1
     : pending.plan === "Phone Unlimited"
     ? 6442450944
