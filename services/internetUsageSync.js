@@ -108,6 +108,20 @@ const accountRecords =
 const record =
   accountRecords[0];
 
+
+  console.log(
+  "RECORDS FOUND:",
+  accountRecords.map(r => ({
+    mac: r.mac,
+    valid: r.valid,
+    authId: r.id,
+    expireTime: r.expireTime
+  }))
+);
+
+
+
+
 if(
   accountRecords.length
 ){
