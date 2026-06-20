@@ -116,8 +116,15 @@ const voucherPlans = [
 },
 
 {
+  price: 5500,
+  desc: "Phone Unlimited",
+  dataLimit: null,
+  validityDays: 30
+},
+
+{
   price: 30000,
-  desc: "Unlimited",
+  desc: "Home/Business Unlimited",
   dataLimit: null,
   validityDays: 30
 }
