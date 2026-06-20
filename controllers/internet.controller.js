@@ -1010,7 +1010,9 @@ maxDevices:
         usageOffsetBytes:0,
 
         remainingBytes:
-        pending.dataLimit,
+  pending.plan === "Home/Business Unlimited"
+    ? -1
+    : pending.dataLimit,
 
         status:"active",
 
@@ -1036,7 +1038,9 @@ await profileRef.set({
     pending.voucherCode,
 
   remainingBytes:
-    pending.dataLimit,
+    pending.plan === "Home/Business Unlimited"
+      ? -1
+      : pending.dataLimit,
 
   totalUsedBytes:0,
 
