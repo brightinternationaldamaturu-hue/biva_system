@@ -710,20 +710,24 @@ const account =
 
     }
 
-    if (
-      Number(profile.remainingBytes || 0) <= 0
-    ) {
+if (
 
-      return res.status(400).json({
+  !profile.isUnlimited &&
 
-        success: false,
+  Number(profile.remainingBytes || 0) <= 0
 
-        error:
-          "No remaining data"
+) {
 
-      });
+  return res.status(400).json({
 
-    }
+    success: false,
+
+    error:
+      "No remaining data"
+
+  });
+
+}
 
 
     if(
@@ -1036,6 +1040,12 @@ await profileRef.set({
 
   activeVoucherCode:
     pending.voucherCode,
+
+
+  isUnlimited:
+  pending.plan === "Phone Unlimited" ||
+  pending.plan === "Home/Business Unlimited",
+  
 
   remainingBytes:
     pending.plan === "Home/Business Unlimited"
