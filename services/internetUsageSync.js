@@ -8,15 +8,21 @@ function startInternetUsageSync() {
 
     try {
 
-const activeAccounts =
+const activeSnapshot =
   await db
     .collection("internetAccounts")
     .where(
       "status",
-      "==",
-      "active"
+      "in",
+      [
+        "active",
+        "daily_limit_reached"
+      ]
     )
     .get();
+
+const activeAccounts =
+  activeSnapshot;
 
       console.log(
         `📶 Active Internet Accounts: ${activeAccounts.size}`
@@ -37,10 +43,20 @@ console.log(
   `📡 Omada Records: ${records.length}`
 );
 
+
+
+
 for (const accountDoc of activeAccounts.docs) {
 
   const account =
     accountDoc.data();
+
+
+  const today =
+  new Date().toDateString();
+
+const lastResetDate =
+  account.lastResetDate || "";
 
 
 if(
@@ -135,6 +151,44 @@ const rawUsedBytes =
   totalDownloadBytes +
   totalUploadBytes;
 
+
+
+if(
+
+  account.plan === "Phone Unlimited" &&
+
+  lastResetDate !== today
+
+){
+
+  await accountDoc.ref.update({
+
+    usageOffsetBytes:
+      rawUsedBytes,
+
+    totalUsedBytes: 0,
+
+    remainingBytes:
+      account.dailyLimit,
+
+    lastResetDate:
+      today,
+
+    status:"active",
+
+    omadaValid:true
+
+  });
+
+  console.log(
+    `🔄 Daily reset for ${account.voucherCode}`
+  );
+
+  continue;
+
+}
+
+
   const usageOffsetBytes =
   Number(
     account.usageOffsetBytes || 0
@@ -153,7 +207,15 @@ if(
 
     totalUploadBytes: 0,
 
-    totalUsedBytes: 0
+    totalUsedBytes: 0,
+
+    remainingBytes:
+      account.plan === "Phone Unlimited"
+        ? account.dailyLimit
+        : account.dataLimit,
+
+    lastResetDate:
+      today
 
   });
 
@@ -178,9 +240,18 @@ const totalUsedBytes =
 
 let remainingBytes;
 
-if(account.isUnlimited){
+if(account.plan === "Home/Business Unlimited"){
 
   remainingBytes = -1;
+
+}else if(account.plan === "Phone Unlimited"){
+
+  remainingBytes =
+    Math.max(
+      0,
+      Number(account.dailyLimit || 0)
+      - totalUsedBytes
+    );
 
 }else{
 
@@ -217,13 +288,18 @@ console.log(
 
 await accountDoc.ref.update({
 
-  totalDownloadBytes:
-    totalUsedBytes <= 0
-      ? 0
-      : totalDownloadBytes -
-        usageOffsetBytes,
+totalDownloadBytes:
+  Math.max(
+    0,
+    totalDownloadBytes -
+    usageOffsetBytes
+  ),
 
-  totalUploadBytes,
+  totalUploadBytes:
+  Math.max(
+    0,
+    totalUploadBytes
+  ),
 
   totalUsedBytes,
 
@@ -269,7 +345,7 @@ if(
 
 if (
 
-  !account.isUnlimited &&
+  account.plan !== "Home/Business Unlimited" &&
 
   account.status !== "expired" &&
 
@@ -328,52 +404,17 @@ for(
 
 
 
-  await accountDoc.ref.update({
+await accountDoc.ref.update({
 
-    status: "expired",
+  status: "daily_limit_reached",
 
-    omadaValid: false
+  omadaValid: false
 
-  });
+});
 
 console.log(
   `🚫 Device ${clientMac} expired`
 );
-
-
-
-  await db
-  .collection("subscriptions")
-  .where(
-    "userId",
-    "==",
-    account.userId
-  )
-  .where(
-    "status",
-    "==",
-    "active"
-  )
-  .get()
-  .then(async(snapshot)=>{
-
-    const batch =
-      db.batch();
-
-    snapshot.docs.forEach(doc=>{
-
-      batch.update(
-        doc.ref,
-        {
-          status:"expired"
-        }
-      );
-
-    });
-
-    await batch.commit();
-
-  });
 
 }
 
@@ -414,13 +455,25 @@ await profileRef.update({
   remainingBytes,
 
 status:
-  account.isUnlimited
+  account.plan ===
+  "Home/Business Unlimited"
+
     ? "active"
-    : (
-        remainingBytes <= 0
-          ? "expired"
-          : "active"
-      ),
+
+    : account.plan ===
+      "Phone Unlimited"
+
+      ? (
+          remainingBytes <= 0
+            ? "daily_limit_reached"
+            : "active"
+        )
+
+      : (
+          remainingBytes <= 0
+            ? "expired"
+            : "active"
+        ),
 
   lastConnectedIp:
     record.ip || "",
