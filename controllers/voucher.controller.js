@@ -443,19 +443,114 @@ const activeAccountSnap =
 
 
 
+  const isUnlimitedPlan =
+
+  desc === "Phone Unlimited" ||
+
+  desc === "Home/Business Unlimited";
+
+
+
   if(
-  !activeAccountSnap.empty &&
-  !isUnlimitedPlan
+  !activeAccountSnap.empty
 ){
 
   const accountDoc =
     activeAccountSnap.docs[0];
 
-    const isUnlimitedPlan =
 
-  desc === "Phone Unlimited" ||
+  const account =
+  accountDoc.data();
 
-  desc === "Home/Business Unlimited";
+
+
+  if(isUnlimitedPlan){
+
+  await accountDoc.ref.update({
+
+    plan: desc,
+
+    isUnlimited: true,
+
+    dailyLimit:
+      desc === "Phone Unlimited"
+        ? 6442450944
+        : null,
+
+    dataLimit: null,
+
+    remainingBytes:
+      desc === "Phone Unlimited"
+        ? 6442450944
+        : -1,
+
+    maxDevices:
+      desc === "Phone Unlimited"
+        ? 2
+        : 8,
+
+    totalUsedBytes: 0,
+
+    totalDownloadBytes: 0,
+
+    totalUploadBytes: 0,
+
+    usageOffsetBytes: 0,
+
+    expiryDate:
+      new Date(
+        Date.now() +
+        30 * 24 * 60 * 60 * 1000
+      ),
+
+    status: "active",
+
+    omadaValid: true
+
+  });
+
+await profileRef.update({
+
+  isUnlimited: true,
+
+  activeVoucherCode:
+    voucherCode,
+
+  remainingBytes:
+    desc === "Phone Unlimited"
+      ? 6442450944
+      : -1,
+
+  totalUsedBytes: 0,
+
+  expiryDate:
+    new Date(
+      Date.now() +
+      30 * 24 * 60 * 60 * 1000
+    ),
+
+  status: "active",
+
+  updatedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+  return res.json({
+
+    success:true,
+
+    purchaseType:"replacement",
+
+    message:
+      "Unlimited plan activated"
+
+  });
+
+}
+    
 
 await accountDoc.ref.update({
 
@@ -507,8 +602,7 @@ await accountDoc.ref.update({
 
 
 
-  const account =
-  accountDoc.data();
+  
 
 if(
   account.clientMacs &&
