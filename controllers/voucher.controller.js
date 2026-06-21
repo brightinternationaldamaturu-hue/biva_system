@@ -443,10 +443,19 @@ const activeAccountSnap =
 
 
 
-  if(!activeAccountSnap.empty){
+  if(
+  !activeAccountSnap.empty &&
+  !isUnlimitedPlan
+){
 
   const accountDoc =
     activeAccountSnap.docs[0];
+
+    const isUnlimitedPlan =
+
+  desc === "Phone Unlimited" ||
+
+  desc === "Home/Business Unlimited";
 
 await accountDoc.ref.update({
 
