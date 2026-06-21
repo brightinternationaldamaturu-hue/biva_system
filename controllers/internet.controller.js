@@ -152,10 +152,14 @@ const accountSnap =
 }
 
 
+console.log("PLAN NAME:", plan.name);
+console.log("IS UNLIMITED:", isUnlimitedPlan);
+
 
 
 if(isUnlimitedPlan){
 
+  
   await accountDoc.ref.update({
 
     plan: plan.name,
@@ -215,6 +219,7 @@ if(isUnlimitedPlan){
     status: "active"
 
   });
+  console.log("🔥 UNLIMITED REPLACEMENT RUNNING");
 
   return res.json({
 
