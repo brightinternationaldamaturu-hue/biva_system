@@ -466,48 +466,60 @@ const activeAccountSnap =
 
   if(isUnlimitedPlan){
 
-  await accountDoc.ref.update({
+await accountDoc.ref.update({
 
-    plan: desc,
+  voucherCode:
+    voucherCode,
 
-    isUnlimited: true,
+  plan:
+    desc,
 
-    dailyLimit:
-      desc === "Phone Unlimited"
-        ? 6442450944
-        : null,
+  amount:
+    amountToCharge,
 
-    dataLimit: null,
+  isUnlimited:true,
 
-    remainingBytes:
-      desc === "Phone Unlimited"
-        ? 6442450944
-        : -1,
+  dailyLimit:
+    desc === "Phone Unlimited"
+      ? 6442450944
+      : null,
 
-    maxDevices:
-      desc === "Phone Unlimited"
-        ? 2
-        : 8,
+  dataLimit:null,
 
-    totalUsedBytes: 0,
+  remainingBytes:
+    desc === "Phone Unlimited"
+      ? 6442450944
+      : -1,
 
-    totalDownloadBytes: 0,
+  maxDevices:
+    desc === "Phone Unlimited"
+      ? 2
+      : 8,
 
-    totalUploadBytes: 0,
+  totalUsedBytes:0,
 
-    usageOffsetBytes: 0,
+  totalDownloadBytes:0,
 
-    expiryDate:
-      new Date(
-        Date.now() +
-        30 * 24 * 60 * 60 * 1000
-      ),
+  totalUploadBytes:0,
 
-    status: "active",
+  usageOffsetBytes:0,
 
-    omadaValid: true
+  expiryDate:
+    new Date(
+      Date.now() +
+      30 * 24 * 60 * 60 * 1000
+    ),
 
-  });
+  status:"active",
+
+  omadaValid:true,
+
+  updatedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
 
 await profileRef.update({
 
@@ -538,16 +550,92 @@ await profileRef.update({
 
 });
 
-  return res.json({
+await transactionRef.update({
 
-    success:true,
+  status:"success",
 
-    purchaseType:"replacement",
+  response:{
+    voucher:voucherCode
+  },
 
-    message:
-      "Unlimited plan activated"
+  completedAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
 
-  });
+});
+
+
+await userRef.update({
+
+  cashbackBalance:
+    admin.firestore
+    .FieldValue
+    .increment(cashback)
+
+});
+
+
+
+await db.collection(
+  "transactions"
+).add({
+
+  userId,
+
+  email:
+    userData.email,
+
+  type:"cashback",
+
+  category:"cashback",
+
+  title:"Voucher Cashback",
+
+  amount:cashback,
+
+  status:"success",
+
+  description:
+    `10% cashback from ${desc} purchase`,
+
+  createdAt:
+    admin.firestore
+    .FieldValue
+    .serverTimestamp()
+
+});
+
+
+return res.json({
+
+  success:true,
+
+  purchaseType:"replacement",
+
+  status:"success",
+
+  service:"voucher",
+
+  provider:"BIVA",
+
+  voucher:voucherCode,
+
+  cashback,
+
+  plan:desc,
+
+  amount:amountToCharge,
+
+  reference:request_id,
+
+  balanceBefore,
+
+  balanceAfter,
+
+  message:"Unlimited plan activated"
+
+});
 
 }
     
