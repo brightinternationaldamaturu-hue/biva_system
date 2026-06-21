@@ -121,6 +121,116 @@ const accountSnap =
       const account =
   accountDoc.data();
 
+
+
+  const isUnlimitedPlan =
+
+  plan.name === "Phone Unlimited" ||
+
+  plan.name === "Home/Business Unlimited";
+
+
+
+
+  if (
+
+  account.isUnlimited &&
+
+  !isUnlimitedPlan
+
+) {
+
+  return res.status(400).json({
+
+    success:false,
+
+    error:
+      "You already have an active unlimited plan"
+
+  });
+
+}
+
+
+
+
+if(isUnlimitedPlan){
+
+  await accountDoc.ref.update({
+
+    plan: plan.name,
+
+    amount: Number(plan.price),
+
+    isUnlimited: true,
+
+    dailyLimit:
+      plan.name === "Phone Unlimited"
+        ? 6442450944
+        : null,
+
+    dataLimit: null,
+
+    remainingBytes:
+      plan.name === "Phone Unlimited"
+        ? 6442450944
+        : -1,
+
+    maxDevices:
+      plan.name === "Phone Unlimited"
+        ? 2
+        : 8,
+
+    totalUsedBytes: 0,
+
+    totalDownloadBytes: 0,
+
+    totalUploadBytes: 0,
+
+    usageOffsetBytes: 0,
+
+    expiryDate:
+      new Date(
+        Date.now() +
+        30 * 24 * 60 * 60 * 1000
+      ),
+
+    status: "active",
+
+    omadaValid: true
+
+  });
+
+  await profileRef.update({
+
+    isUnlimited: true,
+
+    remainingBytes:
+      plan.name === "Phone Unlimited"
+        ? 6442450944
+        : -1,
+
+    totalUsedBytes: 0,
+
+    status: "active"
+
+  });
+
+  return res.json({
+
+    success:true,
+
+    replaced:true,
+
+    message:
+      "Plan upgraded successfully"
+
+  });
+
+}
+
+  
+
     await accountDoc.ref.update({
 
       dataLimit:
