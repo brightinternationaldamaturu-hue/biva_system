@@ -334,20 +334,6 @@ if (account.omadaValid !== (record.valid === true)) {
   updates.omadaValid = record.valid === true;
 }
 
-if (Object.keys(updates).length > 0) {
-
-  updates.updatedAt = new Date();
-
-  await accountDoc.ref.update(updates);
-
-  console.log("💾 Internet Account Updated");
-
-} else {
-
-  console.log("⏭ No Internet Account Changes");
-
-}
-
 
 
 console.log(
@@ -487,94 +473,87 @@ else {
   
 
 
-const profileRef =
-  db.collection("internetProfiles")
-    .doc(account.userId);
+if (Object.keys(updates).length > 0) {
 
-const profileSnap =
-  await profileRef.get();
+  updates.updatedAt = new Date();
 
-if (profileSnap.exists) {
+  await accountDoc.ref.update(updates);
 
+  console.log("💾 Internet Account Updated");
 
 
-const profile = profileSnap.data();
 
-const profileUpdates = {};
+  const profileRef =
+    db.collection("internetProfiles")
+      .doc(account.userId);
 
-const profileStatus =
-  account.plan === "Home/Business Unlimited"
+  const profileSnap =
+    await profileRef.get();
 
-    ? "active"
+  if(profileSnap.exists){
 
-    : account.plan === "Phone Unlimited"
+    const profile =
+      profileSnap.data();
 
-      ? (
-          remainingBytes <= 0
-            ? "daily_limit_reached"
-            : "active"
-        )
+    const profileUpdates = {};
 
-      : (
-          remainingBytes <= 0
-            ? "expired"
-            : "active"
-        );
+    const profileStatus =
+      account.plan === "Home/Business Unlimited"
 
-if (profile.totalUsedBytes !== totalUsedBytes) {
-  profileUpdates.totalUsedBytes = totalUsedBytes;
+        ? "active"
+
+        : account.plan === "Phone Unlimited"
+
+          ? (
+              remainingBytes <= 0
+                ? "daily_limit_reached"
+                : "active"
+            )
+
+          : (
+              remainingBytes <= 0
+                ? "expired"
+                : "active"
+            );
+
+    if(profile.totalUsedBytes !== totalUsedBytes){
+      profileUpdates.totalUsedBytes = totalUsedBytes;
+    }
+
+    if(profile.remainingBytes !== remainingBytes){
+      profileUpdates.remainingBytes = remainingBytes;
+    }
+
+    if(profile.status !== profileStatus){
+      profileUpdates.status = profileStatus;
+    }
+
+    if(profile.lastConnectedIp !== (record.ip || "")){
+      profileUpdates.lastConnectedIp = record.ip || "";
+    }
+
+    if(profile.lastConnectedMac !== (record.mac || "")){
+      profileUpdates.lastConnectedMac = record.mac || "";
+    }
+
+    if(Object.keys(profileUpdates).length){
+
+      profileUpdates.updatedAt = new Date();
+
+      await profileRef.update(profileUpdates);
+
+      console.log("👤 Profile Updated");
+
+    }
+
+  }
+
+}else{
+
+  console.log("⏭ No Internet Account Changes");
+
 }
 
-if (profile.remainingBytes !== remainingBytes) {
-  profileUpdates.remainingBytes = remainingBytes;
-}
-
-if (profile.status !== profileStatus) {
-  profileUpdates.status = profileStatus;
-}
-
-if (profile.lastConnectedIp !== (record.ip || "")) {
-  profileUpdates.lastConnectedIp = record.ip || "";
-}
-
-if (profile.lastConnectedMac !== (record.mac || "")) {
-  profileUpdates.lastConnectedMac = record.mac || "";
-}
-
-if (Object.keys(profileUpdates).length > 0) {
-
-  profileUpdates.updatedAt = new Date();
-
-  await profileRef.update(profileUpdates);
-
-  console.log("👤 Profile Updated");
-
-} else {
-
-  console.log("⏭ Profile Not Changed");
-
-}
-
-
-
-  console.log(
-    `👤 Profile Updated ${account.userId}`
-  );
-
-} else {
-
-  console.log(
-    `⚠️ Missing Profile ${account.userId}`
-  );
-
-}
-
-
-
-
-console.log(
-  "💾 Account Updated"
-);
 
 }
   
