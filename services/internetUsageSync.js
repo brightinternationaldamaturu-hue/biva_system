@@ -4,7 +4,7 @@ const { db } = require("../config/firebase");
 
 function startInternetUsageSync() {
 
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("*/4 * * * *", async () => {
 
     try {
 
@@ -300,32 +300,53 @@ console.log(
 
 
 
-await accountDoc.ref.update({
+const updates = {};
 
-totalDownloadBytes:
+const currentDownload =
   Math.max(
     0,
-    totalDownloadBytes -
-    usageOffsetBytes
-  ),
+    totalDownloadBytes - usageOffsetBytes
+  );
 
-  totalUploadBytes:
+const currentUpload =
   Math.max(
     0,
     totalUploadBytes
-  ),
+  );
 
-  totalUsedBytes,
+if (account.totalDownloadBytes !== currentDownload) {
+  updates.totalDownloadBytes = currentDownload;
+}
 
-  remainingBytes,
+if (account.totalUploadBytes !== currentUpload) {
+  updates.totalUploadBytes = currentUpload;
+}
 
-  omadaValid:
-    record.valid === true,
+if (account.totalUsedBytes !== totalUsedBytes) {
+  updates.totalUsedBytes = totalUsedBytes;
+}
 
-  updatedAt:
-    new Date()
+if (account.remainingBytes !== remainingBytes) {
+  updates.remainingBytes = remainingBytes;
+}
 
-});
+if (account.omadaValid !== (record.valid === true)) {
+  updates.omadaValid = record.valid === true;
+}
+
+if (Object.keys(updates).length > 0) {
+
+  updates.updatedAt = new Date();
+
+  await accountDoc.ref.update(updates);
+
+  console.log("💾 Internet Account Updated");
+
+} else {
+
+  console.log("⏭ No Internet Account Changes");
+
+}
 
 
 
@@ -343,11 +364,15 @@ if(
 
 ){
 
+if (account.status !== "expired") {
+
   await accountDoc.ref.update({
 
-    status:"expired"
+    status: "expired"
 
   });
+
+}
 
   continue;
 
@@ -362,6 +387,8 @@ if (
   account.plan !== "Home/Business Unlimited" &&
 
   account.status !== "expired" &&
+
+  account.status !== "daily_limit_reached" &&
 
   remainingBytes <= 0
 
@@ -439,13 +466,20 @@ console.log(
 
 else {
 
-  await accountDoc.ref.update({
+  if (
+    account.status !== "active" ||
+    account.omadaValid !== true
+  ) {
 
-    status: "active",
+    await accountDoc.ref.update({
 
-    omadaValid: true
+      status: "active",
 
-  });
+      omadaValid: true
+
+    });
+
+  }
 
 }
 
@@ -462,20 +496,18 @@ const profileSnap =
 
 if (profileSnap.exists) {
 
-await profileRef.update({
 
-  totalUsedBytes,
 
-  remainingBytes,
+const profile = profileSnap.data();
 
-status:
-  account.plan ===
-  "Home/Business Unlimited"
+const profileUpdates = {};
+
+const profileStatus =
+  account.plan === "Home/Business Unlimited"
 
     ? "active"
 
-    : account.plan ===
-      "Phone Unlimited"
+    : account.plan === "Phone Unlimited"
 
       ? (
           remainingBytes <= 0
@@ -487,18 +519,43 @@ status:
           remainingBytes <= 0
             ? "expired"
             : "active"
-        ),
+        );
 
-  lastConnectedIp:
-    record.ip || "",
+if (profile.totalUsedBytes !== totalUsedBytes) {
+  profileUpdates.totalUsedBytes = totalUsedBytes;
+}
 
-  lastConnectedMac:
-    record.mac || "",
+if (profile.remainingBytes !== remainingBytes) {
+  profileUpdates.remainingBytes = remainingBytes;
+}
 
-  updatedAt:
-    new Date()
+if (profile.status !== profileStatus) {
+  profileUpdates.status = profileStatus;
+}
 
-});
+if (profile.lastConnectedIp !== (record.ip || "")) {
+  profileUpdates.lastConnectedIp = record.ip || "";
+}
+
+if (profile.lastConnectedMac !== (record.mac || "")) {
+  profileUpdates.lastConnectedMac = record.mac || "";
+}
+
+if (Object.keys(profileUpdates).length > 0) {
+
+  profileUpdates.updatedAt = new Date();
+
+  await profileRef.update(profileUpdates);
+
+  console.log("👤 Profile Updated");
+
+} else {
+
+  console.log("⏭ Profile Not Changed");
+
+}
+
+
 
   console.log(
     `👤 Profile Updated ${account.userId}`
