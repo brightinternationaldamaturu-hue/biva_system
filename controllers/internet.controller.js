@@ -1119,7 +1119,7 @@ maxDevices:
     ? 2
     : pending.plan === "Home/Business Unlimited"
     ? 8
-    : 1,
+    : 5,
 
         totalDownloadBytes:0,
 
