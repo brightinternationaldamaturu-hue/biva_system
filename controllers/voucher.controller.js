@@ -68,7 +68,7 @@ const voucherPlans = [
 },
 
 {
-  price: 3000,
+  price: 2000,
   desc: "20GB",
   dataLimit: 21474836480
 },
