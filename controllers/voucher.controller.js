@@ -404,12 +404,12 @@ recipientPhone
 // CASHBACK
 // =========================
 
-// 10% cashback
+// 5% cashback
 
 const cashback =
 
   Math.floor(
-    amountToCharge * 0.10
+    amountToCharge * 0.05
   );
 
 
@@ -493,7 +493,7 @@ await accountDoc.ref.update({
 
   maxDevices:
     desc === "Phone Unlimited"
-      ? 2
+      ? 4
       : 8,
 
   totalUsedBytes:0,
@@ -597,7 +597,7 @@ await db.collection(
   status:"success",
 
   description:
-    `10% cashback from ${desc} purchase`,
+    `5% cashback from ${desc} purchase`,
 
   createdAt:
     admin.firestore
