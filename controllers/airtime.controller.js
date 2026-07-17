@@ -462,7 +462,7 @@ await transactionRef.set({
       const cashback =
 
         Math.floor(
-          amountToCharge * 0.02
+          amountToCharge * 0.01
         );
 
       await userRef.update({
