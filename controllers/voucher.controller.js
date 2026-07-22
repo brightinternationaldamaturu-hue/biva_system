@@ -11,11 +11,6 @@ const { sendSalesNotification } = require( "../js/utils/sendSalesNotification");
 
 const voucherPlans = [
 
-  {
-    price:150,
-    desc:"1GB",
-    dataLimit:1073741824
-  },
 
   {
     price:300,
