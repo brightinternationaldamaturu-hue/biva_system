@@ -62,7 +62,7 @@ const voucherPlans = [
 
 
   { 
-  price: 2250,
+  price: 1500,
   desc: "15GB",
   dataLimit: 16106127360
 },
@@ -74,43 +74,43 @@ const voucherPlans = [
 },
 
 {
-  price: 3750,
+  price: 2500,
   desc: "25GB",
   dataLimit: 26843545600
 },
 
 {
-  price: 5400,
+  price: 3600,
   desc: "36GB",
   dataLimit: 38654705664
 },
 
 {
-  price: 9750,
+  price: 6500,
   desc: "65GB",
   dataLimit: 69793218560
 },
 
 {
-  price: 15000,
+  price: 10000,
   desc: "100GB",
   dataLimit: 107374182400
 },
 
 {
-  price: 16500,
+  price: 11000,
   desc: "120GB",
   dataLimit: 128849018880
 },
 
 {
-  price: 17500,
+  price: 13000,
   desc: "150GB",
   dataLimit: 161061273600
 },
 
 {
-  price: 25000,
+  price: 15000,
   desc: "200GB",
   dataLimit: 214748364800
 },
