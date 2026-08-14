@@ -141,7 +141,7 @@ exports.buyVoucher = async (req, res) => {
     code: "VOUCHER_SALES_MOVED_TO_V2",
 
     error:
-      "Voucher purchases are no longer available on BIVA v1. Please use BIVA v2 for Internet access."
+      "Voucher purchases are no longer available on BIVA v1. Visit playstore and Download the latest Biva app or Contact (08037807558)"
 
   });
 
