@@ -11,13 +11,11 @@ const { sendSalesNotification } = require( "../js/utils/sendSalesNotification");
 
 const voucherPlans = [
 
-  
   {
     price:150,
     desc:"1GB",
     dataLimit:1073741824
   },
-
 
   {
     price:300,
@@ -64,69 +62,62 @@ const voucherPlans = [
 
 
   { 
-  price: 1500,
+  price: 2250,
   desc: "15GB",
   dataLimit: 16106127360
 },
 
 {
-  price: 2000,
+  price: 3000,
   desc: "20GB",
   dataLimit: 21474836480
 },
 
 {
-  price: 2500,
+  price: 3750,
   desc: "25GB",
   dataLimit: 26843545600
 },
 
 {
-  price: 3600,
+  price: 5400,
   desc: "36GB",
   dataLimit: 38654705664
 },
 
 {
-  price: 6500,
+  price: 9750,
   desc: "65GB",
   dataLimit: 69793218560
 },
 
 {
-  price: 10000,
+  price: 15000,
   desc: "100GB",
   dataLimit: 107374182400
 },
 
 {
-  price: 11000,
+  price: 16500,
   desc: "120GB",
   dataLimit: 128849018880
 },
 
 {
-  price: 13000,
+  price: 17500,
   desc: "150GB",
   dataLimit: 161061273600
 },
 
 {
-  price: 15000,
+  price: 25000,
   desc: "200GB",
   dataLimit: 214748364800
 },
 
 {
-  price: 5500,
-  desc: "Phone Unlimited",
-  dataLimit: null,
-  validityDays: 30
-},
-
-{
   price: 30000,
-  desc: "Home/Business Unlimited",
+  desc: "Unlimited",
   dataLimit: null,
   validityDays: 30
 }
@@ -134,11 +125,34 @@ const voucherPlans = [
 ];
 
 
-// ===============================
-// BUY VOUCHER
-// ===============================
+
 
 exports.buyVoucher = async (req, res) => {
+
+  // ==========================================
+  // BIVA V1 VOUCHER SALES DISCONTINUED
+  // Internet purchases have moved to BIVA v2
+  // ==========================================
+
+  return res.status(410).json({
+
+    success: false,
+
+    code: "VOUCHER_SALES_MOVED_TO_V2",
+
+    error:
+      "Voucher purchases are no longer available on BIVA v1. Please use BIVA v2 for Internet access."
+
+  });
+
+
+  /*
+  ============================================
+  LEGACY BIVA V1 VOUCHER PURCHASE SYSTEM
+  ============================================
+
+  Kept temporarily for historical reference
+  and rollback purposes.
 
   let amountToCharge = 0;
 
@@ -148,13 +162,10 @@ exports.buyVoucher = async (req, res) => {
 
   try {
 
-const {
+      userId,
+      desc
 
-  userId,
-  desc,
-  recipientPhone
-
-} = req.body;
+    } = req.body;
 
     // =========================
     // VALIDATION
@@ -188,12 +199,6 @@ const {
         p => p.desc === desc
 
       );
-    
-    const planBytes =
-  Number(
-    selectedPlan.dataLimit || 0
-  );
-  
 
     if (!selectedPlan) {
 
@@ -237,53 +242,6 @@ if (!userSnap.exists) {
 
 const userData =
   userSnap.data();
-
-
-  // =========================
-// BENEFICIARY
-// =========================
-
-let beneficiaryId =
-  userId;
-
-let beneficiaryName =
-  userData.fullName;
-
-if(recipientPhone){
-
-  const recipientQuery =
-    await db
-    .collection("users")
-    .where(
-      "phone",
-      "==",
-      recipientPhone
-    )
-    .limit(1)
-    .get();
-
-  if(recipientQuery.empty){
-
-    return res.status(404).json({
-
-      success:false,
-
-      error:
-        "Recipient not found"
-
-    });
-
-  }
-
-  beneficiaryId =
-    recipientQuery.docs[0].id;
-
-  beneficiaryName =
-    recipientQuery.docs[0]
-    .data()
-    .fullName;
-
-}
 
 // =========================
 // BALANCE SNAPSHOT
@@ -344,26 +302,13 @@ const balanceAfter =
 
       fullName:
         userData.fullName || "",
-      
-        recipientPhone:
-  recipientPhone || "",
-
-recipientName:
-  recipientPhone
-    ? beneficiaryName
-    : "",
 
       type:"voucher",
 
       category:"voucher",
 
       title:
-
-recipientPhone
-
-? `${desc} purchased for ${beneficiaryName}`
-
-: `${desc} Voucher`,
+        `${desc} Voucher`,
 
       amount:
         amountToCharge,
@@ -406,12 +351,12 @@ recipientPhone
 // CASHBACK
 // =========================
 
-// 5% cashback
+// 10% cashback
 
 const cashback =
 
   Math.floor(
-    amountToCharge * 0.05
+    amountToCharge * 0.10
   );
 
 
@@ -420,415 +365,132 @@ const cashback =
     // GENERATE VOUCHER
     // =========================
 
-const voucherCode =
+    const response = await axios.post(
 
-  "BIVA-" +
+      "https://hook.us2.make.com/pm61x9gphx81e59lrvy1q7tmnfsd7ggo",
 
-  Date.now();
+      {
 
-  const profileRef =
-  db.collection("internetProfiles")
-  .doc(beneficiaryId);
+  fullName:
+    userData.fullName || "",
 
-const activeAccountSnap =
-  await db
-  .collection(
-    "internetAccounts"
-  )
-.where(
-  "userId",
-  "==",
-  beneficiaryId
-)
-  .limit(1)
-  .get();
+  email:
+    userData.email || "",
 
+  phone:
+    userData.phone || "",
 
-
-  const isUnlimitedPlan =
-
-  desc === "Phone Unlimited" ||
-
-  desc === "Home/Business Unlimited";
-
-
-
-  if(
-  !activeAccountSnap.empty
-){
-
-  const accountDoc =
-    activeAccountSnap.docs[0];
-
-
-  const account =
-  accountDoc.data();
-
-
-
-  if(isUnlimitedPlan){
-
-await accountDoc.ref.update({
-
-  voucherCode:
-    voucherCode,
+  type:
+    "Voucher Purchase",
 
   plan:
     desc,
 
-  amount:
+  price:
     amountToCharge,
 
-  isUnlimited:true,
-
-  dailyLimit:
-    desc === "Phone Unlimited"
-      ? 6442450944
-      : null,
-
-  dataLimit:null,
-
-  remainingBytes:
-    desc === "Phone Unlimited"
-      ? 6442450944
-      : -1,
-
-  maxDevices:
-    desc === "Phone Unlimited"
-      ? 4
-      : 8,
-
-  totalUsedBytes:0,
-
-  totalDownloadBytes:0,
-
-  totalUploadBytes:0,
-
-  usageOffsetBytes:0,
-
-  expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    ),
-
-  status:"active",
-
-  omadaValid:true,
-
-  updatedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-await profileRef.update({
-
-  isUnlimited: true,
-
-  activeVoucherCode:
-    voucherCode,
-
-  remainingBytes:
-    desc === "Phone Unlimited"
-      ? 6442450944
-      : -1,
-
-  totalUsedBytes: 0,
-
-  expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    ),
-
-  status: "active",
-
-  updatedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-await transactionRef.update({
-
-  status:"success",
-
-  response:{
-    voucher:voucherCode
-  },
-
-  completedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-await userRef.update({
-
-  cashbackBalance:
-    admin.firestore
-    .FieldValue
-    .increment(cashback)
-
-});
-
-
-
-await db.collection(
-  "transactions"
-).add({
-
-  userId,
-
-  email:
-    userData.email,
-
-  type:"cashback",
-
-  category:"cashback",
-
-  title:"Voucher Cashback",
-
-  amount:cashback,
-
-  status:"success",
-
-  description:
-    `5% cashback from ${desc} purchase`,
-
-  createdAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-return res.json({
-
-  success:true,
-
-  purchaseType:"replacement",
-
-  status:"success",
-
-  service:"voucher",
-
-  provider:"BIVA",
-
-  voucher:voucherCode,
-
-  cashback,
-
-  plan:desc,
-
-  amount:amountToCharge,
-
-  reference:request_id,
+  txId:
+    request_id,
 
   balanceBefore,
 
   balanceAfter,
+  
+  cashback,
 
-  message:"Unlimited plan activated"
+      }
 
-});
+    );
 
-}
-    
 
-await accountDoc.ref.update({
+    const result = response.data;
 
-  dataLimit:
-    admin.firestore.FieldValue.increment(
-      planBytes
-    ),
+    console.log(
+      "VOUCHER RESPONSE:",
+      result
+    );
 
-  remainingBytes:
-    admin.firestore.FieldValue.increment(
-      planBytes
-    ),
+    // =========================
+    // CHECK RESPONSE
+    // =========================
 
-  status:"active",
+    if (
 
-  omadaValid:true,
+      !result ||
+      !result.voucher
+
+    ) {
+
+      throw new Error(
+        "Voucher generation failed"
+      );
+
+    }
+
+    const voucherCode =
+      result.voucher;
+
+
+
+
+await db
+.collection("internetAccounts")
+.add({
 
   expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    )
-
-});
-
-  await profileRef.update({
-
-    totalPurchasedBytes:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
-
-    remainingBytes:
-      admin.firestore.FieldValue.increment(
-        planBytes
-      ),
-
-    expiryDate:
-      new Date(
+  selectedPlan.validityDays
+    ? new Date(
         Date.now() +
-        30 * 24 * 60 * 60 * 1000
-      ),
-
-    updatedAt:
-      admin.firestore.FieldValue.serverTimestamp()
-
-  });
-
-
-
-
-  
-
-if(
-  account.clientMacs &&
-  account.clientMacs.length
-){
-
-  for(
-    const mac of
-    account.clientMacs
-  ){
-
-    try{
-
-      await axios.post(
-
-        "https://portal.biva.ng/omada/authorize-client",
-
-        {
-          clientMac: mac
-        }
-
-      );
-
-    }
-
-    catch(err){
-
-      console.log(
-        err.message
-      );
-
-    }
-
-  }
-
-}
-
-
-  await transactionRef.update({
-
-  status:"success",
-
-  completedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
-
-});
-
-
-await userRef.update({
-
-  cashbackBalance:
-    admin.firestore
-    .FieldValue
-    .increment(cashback)
-
-});
-
-
-await db.collection(
-  "transactions"
-).add({
+        selectedPlan.validityDays *
+        24 *
+        60 *
+        60 *
+        1000
+      )
+    : null,
 
   userId,
 
-  email:
-    userData.email,
+  voucherCode,
 
-  type:"cashback",
+  plan: desc,
 
-  category:"cashback",
+  totalDownloadBytes: 0,
+  totalUploadBytes: 0,
 
-  title:"Voucher Cashback",
+  lastTrafficBytes: 0,
+  lastDownloadBytes: 0,
+  lastUploadBytes: 0,
 
-  amount:cashback,
+  amount:
+    amountToCharge,
 
-  status:"success",
+  dataLimit:
+    selectedPlan.dataLimit,
 
-  description:
-    `10% cashback from ${desc} top-up purchase`,
+  usedBytes:0,
+
+  remainingBytes:
+    selectedPlan.dataLimit,
+
+  status:"active",
+
+  activated:false,
 
   createdAt:
     admin.firestore
     .FieldValue
     .serverTimestamp()
+  
 
 });
 
 
 
-  return res.json({
 
-    success:true,
-
-    purchaseType:"topup",
-
-    message:
-      `${desc} Top-up to your Balance`
-
-  });
-
-}
-
-  await db
-  .collection(
-    "pendingInternetAccounts"
-  )
-  .add({
-
-    userId:
-  beneficiaryId,
-
-    voucherCode,
-
-    plan:
-      desc,
-
-    dataLimit:
-      selectedPlan.dataLimit,
-
-    amount:
-      amountToCharge,
-
-    activated:false,
-
-    createdAt:
-      admin.firestore
-      .FieldValue
-      .serverTimestamp()
-
-  });
-
-
-
-
+const profileRef =
+  db.collection("internetProfiles")
+  .doc(userId);
 
 const profileSnap =
   await profileRef.get();
@@ -839,8 +501,7 @@ if (!profileSnap.exists) {
 
 await profileRef.set({
 
-  userId:
-    beneficiaryId,
+  userId,
 
   totalPurchasedBytes:
     selectedPlan.dataLimit || 0,
@@ -853,11 +514,14 @@ await profileRef.set({
   isUnlimited:
     selectedPlan.dataLimit === null,
 
-expiryDate:
-  new Date(
-    Date.now() +
-    30 * 24 * 60 * 60 * 1000
-  ),
+  expiryDate:
+    selectedPlan.validityDays
+      ? new Date(
+          Date.now() +
+          selectedPlan.validityDays *
+          24 * 60 * 60 * 1000
+        )
+      : null,
 
   activeVoucherCode:
     voucherCode,
@@ -880,41 +544,70 @@ expiryDate:
 
 else {
 
+if (selectedPlan.dataLimit === null) {
+
+  const expiryDate = new Date();
+
+  expiryDate.setDate(
+    expiryDate.getDate() + 30
+  );
+
+  await profileRef.update({
+
+    totalPurchasedBytes: 0,
+
+    totalUsedBytes: 0,
+
+    remainingBytes: 0,
+
+    isUnlimited: true,
+
+    activeVoucherCode:
+      voucherCode,
+
+    expiryDate,
+
+    status: "active",
+
+    updatedAt:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  });
+
+} else {
+
+
+
 await profileRef.update({
 
   totalPurchasedBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
+    admin.firestore.FieldValue.increment(
       selectedPlan.dataLimit
     ),
 
   remainingBytes:
-    admin.firestore
-    .FieldValue
-    .increment(
+    admin.firestore.FieldValue.increment(
       selectedPlan.dataLimit
     ),
+
+  isUnlimited: false,
+
+  expiryDate: null,
 
   activeVoucherCode:
     voucherCode,
 
-  expiryDate:
-    new Date(
-      Date.now() +
-      30 * 24 * 60 * 60 * 1000
-    ),
-
-  status:"active",
+  status: "active",
 
   updatedAt:
-    admin.firestore
-    .FieldValue
-    .serverTimestamp()
+    admin.firestore.FieldValue.serverTimestamp()
 
 });
 
 }
+
+}
+
 
 
     // =========================
@@ -941,16 +634,6 @@ await profileRef.update({
       email:
         userData.email,
 
-        beneficiaryId,
-
-recipientPhone:
-  recipientPhone || "",
-
-recipientName:
-  recipientPhone
-    ? beneficiaryName
-    : "",
-
       createdAt:
         admin.firestore
         .FieldValue
@@ -966,8 +649,11 @@ recipientName:
 
       status:"success",
 
-      response:{ voucher: voucherCode },
-      
+      voucher:
+        voucherCode,
+
+      response:
+        result,
 
       completedAt:
         admin.firestore
@@ -1076,17 +762,10 @@ await db.collection(
 
     return res.json({
 
-  success:true,
+      success:true,
 
-  beneficiaryName,
-
-  message:
-
-recipientPhone
-
-? `${desc} successfully purchased for ${beneficiaryName}`
-
-: `Voucher generated successfully. Cashback ₦${cashback} earned 🎉`,
+      message:
+        `Voucher generated successfully. Cashback ₦${cashback} earned 🎉`,
 
       voucher:
         voucherCode,
@@ -1190,5 +869,10 @@ recipientPhone
     });
 
   }
+
+  ============================================
+  END LEGACY BIVA V1 VOUCHER PURCHASE SYSTEM
+  ============================================
+  */
 
 };
